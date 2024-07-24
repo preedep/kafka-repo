@@ -42,6 +42,7 @@ async fn main() -> std::io::Result<()> {
                 web::scope("/api/v1")
                     .route("/apps", web::get().to(apis::get_apps))
                     .route("/apps/{appName}/topics", web::get().to(apis::get_topics))
+                    .route("/consumers", web::get().to(apis::get_consumers))
             )
     }
     ).bind(("0.0.0.0",8888))?.run().await

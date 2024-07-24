@@ -25,7 +25,7 @@ pub async fn get_apps(data: web::Data<Arc<AppState>>) -> APIWebResponse<Vec<Stri
 pub async fn get_topics(data: web::Data<Arc<AppState>>,app_name: web::Path<String>) -> APIWebResponse<Vec<String>> {
     debug!("Getting topic list for app: {}", app_name);
     if let Some(ds) = &data.kafka_inventory {
-        let topics = data_service::get_topics(ds, &app_name)?;
+        let topics = data_service::get_topic_list(ds, &app_name)?;
         return Ok(
             APIResponse {
                 data: topics
@@ -34,5 +34,19 @@ pub async fn get_topics(data: web::Data<Arc<AppState>>,app_name: web::Path<Strin
     }
     Err(
         APIError::new("Failed to get app list")
+    )
+}
+pub async fn get_consumers(data: web::Data<Arc<AppState>>) -> APIWebResponse<Vec<String>> {
+    debug!("Getting consumer list");
+    if let Some(ds) = &data.kafka_consumer {
+        let consumers = data_service::get_consumer_list(ds)?;
+        return Ok(
+            APIResponse {
+                data: consumers
+            }
+        )
+    }
+    Err(
+        APIError::new("Failed to get consumer list")
     )
 }
