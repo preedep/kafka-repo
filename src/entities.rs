@@ -57,8 +57,8 @@ impl From<FlowChartItem> for SearchKafkaResponse {
 pub struct FlowChartItem {
     project_name_owner_alias: String,
     project_name_owner: String,
-    kafka_topic: String,
-    consumer_group: String,
+    pub kafka_topic: String,
+    pub consumer_group: String,
     project_name_consume: String,
     project_name_consume_alias: String,
 }
