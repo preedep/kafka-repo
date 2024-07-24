@@ -6,11 +6,13 @@ use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Display, Formatter};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct KafkaTopic {
+pub struct SearchKafkaRequest {
     #[serde(rename = "app_owner")]
-    pub app_owner: String,
+    pub app_owner: Option<String>,
     #[serde(rename = "topic_name")]
-    pub topic_name: String,
+    pub topic_name: Option<String>,
+    #[serde(rename = "consumer_app")]
+    pub consumer_app: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -52,7 +54,7 @@ impl error::ResponseError for APIError {
 impl<T: Debug + Serialize + Clone> Responder for APIResponse<T> {
     type Body = actix_web::body::BoxBody;
 
-    fn respond_to(self, req: &HttpRequest) -> HttpResponse<Self::Body> {
+    fn respond_to(self, _req: &HttpRequest) -> HttpResponse<Self::Body> {
         // Serialize the struct to a JSON string
         let body = match serde_json::to_string(&self) {
             Ok(json) => json,

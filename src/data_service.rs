@@ -1,15 +1,19 @@
-use crate::entities::APIError;
+use crate::entities::{APIError, SearchKafkaRequest};
 use log::debug;
 use polars::prelude::*;
 
+// Inventory file
 pub const COL_APP_OWNER_INVENTORY_FILE: &str = "Project";
 pub const COL_TOPIC_NAME_INVENTORY_FILE: &str = "Topic_Name_Kafka";
-
-pub const COL_CONSUMER_APP_NAME_CONSUMER_FILE: &str = "Project";
 
 const IDX_COL_APP_OWNER_INVENTORY_FILE: usize = 0;
 const IDX_COL_TOPIC_NAME_INVENTORY_FILE: usize = 1;
 
+// Consumer file
+pub const COL_CONSUMER_APP_NAME_CONSUMER_FILE: &str = "Project";
+pub const COL_CONSUMER_TOPIC_NAME_CONSUMER_FILE: &str = "Consume_Topic";
+pub const COL_CONSUMER_GROUP_NAME_CONSUMER_FILE: &str = "Consumer_Group_Name";
+pub const COL_CONSUMER_APP_NAME_2_CONSUMER_FILE: &str = "Consumer_App";
 const IDX_COL_CONSUMER_APP_NAME_CONSUMER_FILE: usize = 0;
 
 pub fn read_csv(file: &String) -> PolarsResult<DataFrame> {
@@ -93,4 +97,47 @@ fn map_single_result(topic_list: &mut Vec<String>, ds: DataFrame, idx: usize) {
             }
         }
     }
+}
+
+pub fn search(
+    ds_inventory: &DataFrame,
+    ds_consumer: &DataFrame,
+    search_request: &SearchKafkaRequest,
+) -> Result<Vec<String>, APIError> {
+    let mut result: Vec<String> = Vec::new();
+    let mut expr_list = vec![];
+    if let Some(app_owner) = &search_request.app_owner {
+        let expr = col(COL_APP_OWNER_INVENTORY_FILE).eq(lit(app_owner.as_str()));
+        expr_list.push(expr);
+    }
+    if let Some(topic_name) = &search_request.topic_name {}
+    if let Some(consumer_app) = &search_request.consumer_app {}
+
+    let ds_consumer = ds_consumer
+        .clone()
+        .lazy()
+        .with_column(
+            col(COL_CONSUMER_APP_NAME_CONSUMER_FILE).alias(COL_CONSUMER_APP_NAME_2_CONSUMER_FILE),
+        )
+        .collect()
+        .map_err(|e| {
+            debug!("Failed to rename column: {}", e);
+            APIError::new("Failed to rename column")
+        })?;
+
+    let joined = ds_inventory
+        .join(
+            &ds_consumer,
+            [COL_TOPIC_NAME_INVENTORY_FILE],
+            [COL_CONSUMER_TOPIC_NAME_CONSUMER_FILE],
+            JoinArgs::new(JoinType::Left),
+        )
+        .map_err(|e| {
+            debug!("Failed to join dataframes: {}", e);
+            APIError::new("Failed to join dataframes")
+        })?;
+
+    debug!("Joined dataframe: {}", joined);
+
+    Ok(result)
 }
