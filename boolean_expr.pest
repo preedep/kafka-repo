@@ -1,0 +1,17 @@
+// src/boolean_expr.pest
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+ASCII_ALPHANUMERIC_WITH_SPACE = { ASCII_ALPHANUMERIC | WHITESPACE | "_"}
+
+boolean_expr = { expr }
+
+expr = _{ or_expr }
+
+or_expr = { and_expr ~ ("or" ~ and_expr)* }
+and_expr = { primary ~ ("and" ~ primary)* }
+primary = { paren_expr | comparison }
+paren_expr = { "(" ~ expr ~ ")" }
+comparison = { ident ~ "=" ~ value }
+
+
+ident = @{ (ASCII_ALPHANUMERIC | "_")+ }
+value = @{ (ASCII_ALPHANUMERIC_WITH_SPACE )+ }
