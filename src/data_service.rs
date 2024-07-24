@@ -125,6 +125,8 @@ pub fn search(
             APIError::new("Failed to rename column")
         })?;
 
+    debug!("Renamed column: {}", ds_consumer);
+
     let joined = ds_inventory
         .join(
             &ds_consumer,
