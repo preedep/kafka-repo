@@ -2,7 +2,7 @@ use std::io::Write;
 
 use crate::entities::FlowChartItem;
 
-pub fn export_mm_file<T: Into<FlowChartItem>>(dataset: &[T], path: &str) -> std::io::Result<()> {
+pub fn export_mm_file<T: Into<FlowChartItem>>(dataset: &Vec<T>, path: &str) -> std::io::Result<()> {
     let mut file = std::fs::File::create(path)?;
     let content_header = "flowchart LR";
     writeln!(file, "{}", content_header)?;

@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use actix_web::{HttpResponse, Responder, web};
 use log::debug;
-use polars::prelude::IntoLazy;
+
 
 use crate::{data_service, entities};
 use crate::data_state::AppState;
