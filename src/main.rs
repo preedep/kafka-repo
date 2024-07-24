@@ -3,6 +3,8 @@ use std::sync::Arc;
 use actix_web::{App, middleware, web};
 use actix_web::middleware::Logger;
 use actix_web::web::Data;
+use actix_files as fs;
+
 use log::info;
 
 use crate::data_service::read_csv;
@@ -49,6 +51,9 @@ async fn main() -> std::io::Result<()> {
                     .route("/apps/{appName}/topics", web::get().to(apis::get_topics))
                     .route("/consumers", web::get().to(apis::get_consumers))
                     .route("/search", web::post().to(apis::post_search_kafka)),
+            )
+            .service(
+                fs::Files::new("/","./statics").index_file("index.html")
             )
     })
     .bind(("0.0.0.0", 8888))?

@@ -35,6 +35,7 @@ ADD .env /usr/local/bin/.env
 ADD ["Consumer Group E-Kafka list D200124.csv", "/usr/local/bin/Consumer Group E-Kafka list D200124.csv"]
 ADD ["Kafka Topic Inventory D111165.csv", "/usr/local/bin/Kafka Topic Inventory D111165.csv"]
 
+COPY ./statics /usr/local/bin/statics
 
 # Change ownership of the application binary
 RUN chown appuser:appgroup /usr/local/bin/kafka-repo
