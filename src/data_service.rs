@@ -10,7 +10,7 @@ pub const COL_CONSUMER_APP_NAME_CONSUMER_FILE: &str = "Project";
 const IDX_COL_APP_OWNER_INVENTORY_FILE: usize = 0;
 const IDX_COL_TOPIC_NAME_INVENTORY_FILE: usize = 1;
 
-const IDX_COL_CONSUMER_APP_NAME_CONSUMER_FILE: usize = 3;
+const IDX_COL_CONSUMER_APP_NAME_CONSUMER_FILE: usize = 0;
 
 pub fn read_csv(file: &String) -> PolarsResult<DataFrame> {
     // Prefer `from_path` over `new` as it is faster.
@@ -65,6 +65,7 @@ pub fn get_consumer_list(ds: &DataFrame) -> Result<Vec<String>,APIError> {
 }
 
 fn map_single_result(topic_list: &mut Vec<String>, ds: DataFrame,idx: usize) {
+    debug!("Mapping result : {} ",ds);
     for row in 0..ds.height() {
         let row = ds.get(row).unwrap();
         for (i, col) in row.iter().enumerate() {
