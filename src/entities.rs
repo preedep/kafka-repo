@@ -1,34 +1,34 @@
-use std::fmt::{Debug, Display, Formatter};
-use actix_web::{error, HttpRequest, HttpResponse, Responder};
 use actix_web::http::header::ContentType;
 use actix_web::http::StatusCode;
+use actix_web::{error, HttpRequest, HttpResponse, Responder};
 use log::error;
 use serde::{Deserialize, Serialize};
+use std::fmt::{Debug, Display, Formatter};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct KafkaTopic {
     #[serde(rename = "app_owner")]
-    pub app_owner : String,
+    pub app_owner: String,
     #[serde(rename = "topic_name")]
-    pub topic_name : String,
+    pub topic_name: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct APIResponse<T : Debug + Serialize +  Clone> {
+pub struct APIResponse<T: Debug + Serialize + Clone> {
     #[serde(rename = "data")]
-    pub(crate) data: T
+    pub(crate) data: T,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct APIError {
     #[serde(rename = "error")]
-   error: String
+    error: String,
 }
 
 impl APIError {
     pub fn new(error: &str) -> APIError {
         APIError {
-            error: error.to_string()
+            error: error.to_string(),
         }
     }
 }
@@ -40,7 +40,7 @@ impl Display for APIError {
 
 impl error::ResponseError for APIError {
     fn status_code(&self) -> StatusCode {
-       StatusCode::INTERNAL_SERVER_ERROR
+        StatusCode::INTERNAL_SERVER_ERROR
     }
     fn error_response(&self) -> HttpResponse {
         HttpResponse::build(self.status_code())
@@ -49,7 +49,7 @@ impl error::ResponseError for APIError {
     }
 }
 
-impl<T : Debug + Serialize + Clone> Responder for APIResponse<T> {
+impl<T: Debug + Serialize + Clone> Responder for APIResponse<T> {
     type Body = actix_web::body::BoxBody;
 
     fn respond_to(self, req: &HttpRequest) -> HttpResponse<Self::Body> {
@@ -58,8 +58,8 @@ impl<T : Debug + Serialize + Clone> Responder for APIResponse<T> {
             Ok(json) => json,
             Err(e) => {
                 error!("Failed to serialize response: {}", e);
-                return HttpResponse::InternalServerError().finish()
-            },
+                return HttpResponse::InternalServerError().finish();
+            }
         };
 
         // Create an HTTP response with JSON content type
