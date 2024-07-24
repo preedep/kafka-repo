@@ -3,3 +3,5 @@
 Cargo.lock
 .env
 *.csv
+/flowchart.mmd
+/flowchart.mmd.svg

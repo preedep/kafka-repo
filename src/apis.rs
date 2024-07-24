@@ -49,12 +49,12 @@ pub async fn post_search_kafka(
 
         // Export to mermaid file
         let path = "flowchart.mmd";
-        export_mm_file(&result, path).map_err(|e| {
+        export_mm_file(result.clone(), path).map_err(|e| {
             debug!("Failed to export to mermaid file: {}", e);
             APIError::new("Failed to export to mermaid file")
         })?;
 
-        return Ok(APIResponse { data: result.clone() });
+        return Ok(APIResponse { data: result });
     }
     Err(APIError::new("Failed to search kafka"))
 }
