@@ -1,9 +1,10 @@
+use std::fmt::{Debug, Display, Formatter};
+
+use actix_web::{error, HttpRequest, HttpResponse, Responder};
 use actix_web::http::header::ContentType;
 use actix_web::http::StatusCode;
-use actix_web::{error, HttpRequest, HttpResponse, Responder};
 use log::error;
 use serde::{Deserialize, Serialize};
-use std::fmt::{Debug, Display, Formatter};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SearchKafkaRequest {
@@ -26,6 +27,60 @@ pub struct SearchKafkaResponse {
     #[serde(rename = "consumer_app")]
     pub consumer_app : String,
 }
+
+impl Into<FlowChartItem> for SearchKafkaResponse {
+    fn into(self) -> FlowChartItem {
+        FlowChartItem {
+            project_name_owner_alias: self.app_owner.clone().replace(" ", "_").to_lowercase(),
+            project_name_owner: self.app_owner.clone(),
+            kafka_topic: self.topic_name.clone(),
+            consumer_group: self.consumer_group_id.clone(),
+            project_name_consume: self.consumer_app.clone(),
+            project_name_consume_alias: self.consumer_app.clone().replace(" ", "_").to_lowercase(),
+        }
+    }
+}
+
+impl From<FlowChartItem> for SearchKafkaResponse {
+    fn from(item: FlowChartItem) -> Self {
+        SearchKafkaResponse {
+            app_owner: item.project_name_owner.clone(),
+            topic_name: item.kafka_topic.clone(),
+            consumer_group_id: item.consumer_group.clone(),
+            consumer_app: item.project_name_consume.clone(),
+        }
+    }
+}
+
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub struct FlowChartItem {
+    project_name_owner_alias: String,
+    project_name_owner: String,
+    kafka_topic: String,
+    consumer_group: String,
+    project_name_consume: String,
+    project_name_consume_alias: String,
+}
+impl FlowChartItem {
+    pub(crate) fn to_print_string(&self) -> String {
+        format!(
+            "{}[{}] ---> {} ---> {} ---> {}[{}]",
+            self.project_name_owner_alias,
+            self.project_name_owner,
+            self.kafka_topic,
+            self.consumer_group,
+            self.project_name_consume_alias,
+            self.project_name_consume
+        )
+    }
+}
+impl Display for FlowChartItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.to_print_string())
+    }
+}
+
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct APIResponse<T: Debug + Serialize + Clone> {

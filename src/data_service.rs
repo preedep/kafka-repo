@@ -1,6 +1,7 @@
-use crate::entities::{APIError, SearchKafkaRequest, SearchKafkaResponse};
 use log::debug;
 use polars::prelude::*;
+
+use crate::entities::{APIError, SearchKafkaRequest, SearchKafkaResponse};
 
 // Inventory file
 pub const COL_APP_OWNER_INVENTORY_FILE: &str = "Project";
