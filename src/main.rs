@@ -15,8 +15,6 @@ async fn main() -> std::io::Result<()> {
     pretty_env_logger::init();
     dotenv::dotenv().ok();
 
-
-
     let kafka_inventory_file = std::env::var("KAFKA_INVENTORY_FILE").expect("KAFKA_INVENTORY_FILE must be set");
     let kafka_consumer_file = std::env::var("KAFKA_CONSUMER_FILE").expect("KAFKA_CONSUMER must be set");
 
