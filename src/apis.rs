@@ -1,5 +1,5 @@
 use crate::data_state::AppState;
-use crate::entities::{APIError, APIResponse};
+use crate::entities::{APIError, APIResponse, SearchKafkaResponse};
 use crate::{data_service, entities};
 use actix_web::{web, HttpResponse, Responder};
 use log::debug;
@@ -39,11 +39,11 @@ pub async fn get_consumers(data: web::Data<Arc<AppState>>) -> APIWebResponse<Vec
 pub async fn post_search_kafka(
     data: web::Data<Arc<AppState>>,
     search_request: web::Json<entities::SearchKafkaRequest>,
-) -> APIWebResponse<Vec<String>> {
+) -> APIWebResponse<Vec<SearchKafkaResponse>> {
     debug!("Searching kafka with request: {:?}", search_request);
     if let (Some(ds_inventory), Some(ds_consumer)) = (&data.kafka_inventory, &data.kafka_consumer) {
         let result = data_service::search(ds_inventory, ds_consumer, &search_request)?;
-        //return Ok(APIResponse { data: result });
+        return Ok(APIResponse { data: result });
     }
     Err(APIError::new("Failed to search kafka"))
 }

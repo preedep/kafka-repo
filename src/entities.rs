@@ -15,6 +15,18 @@ pub struct SearchKafkaRequest {
     pub consumer_app: Option<String>,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone,Default)]
+pub struct SearchKafkaResponse {
+    #[serde(rename = "app_owner")]
+    pub app_owner : String,
+    #[serde(rename = "topic_name")]
+    pub topic_name : String,
+    #[serde(rename = "consumer_group_id")]
+    pub consumer_group_id : String,
+    #[serde(rename = "consumer_app")]
+    pub consumer_app : String,
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct APIResponse<T: Debug + Serialize + Clone> {
     #[serde(rename = "data")]

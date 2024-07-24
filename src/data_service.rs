@@ -1,4 +1,4 @@
-use crate::entities::{APIError, SearchKafkaRequest};
+use crate::entities::{APIError, SearchKafkaRequest, SearchKafkaResponse};
 use log::debug;
 use polars::prelude::*;
 
@@ -103,13 +103,13 @@ pub fn search(
     ds_inventory: &DataFrame,
     ds_consumer: &DataFrame,
     search_request: &SearchKafkaRequest,
-) -> Result<Vec<String>, APIError> {
-    let mut result: Vec<String> = Vec::new();
+) -> Result<Vec<SearchKafkaResponse>, APIError> {
+    let mut result: Vec<SearchKafkaResponse> = Vec::new();
 
     let mut expr = col(COL_CONSUMER_APP_NAME_2_CONSUMER_FILE).is_not_null();
 
     if let Some(app_owner) = &search_request.app_owner {
-       expr = expr.and(col(COL_APP_OWNER_INVENTORY_FILE).eq(lit(app_owner.as_str())));
+        expr = expr.and(col(COL_APP_OWNER_INVENTORY_FILE).eq(lit(app_owner.as_str())));
     }
     if let Some(topic_name) = &search_request.topic_name {
         expr = expr.and(col(COL_TOPIC_NAME_INVENTORY_FILE).eq(lit(topic_name.as_str())));
@@ -118,6 +118,7 @@ pub fn search(
         expr = expr.and(col(COL_CONSUMER_APP_NAME_2_CONSUMER_FILE).eq(lit(consumer_app.as_str())));
     }
 
+    // Rename column
     let ds_consumer = ds_consumer
         .clone()
         .lazy()
@@ -132,6 +133,7 @@ pub fn search(
 
     debug!("Renamed column: {}", ds_consumer);
 
+    // join dataframes between inventory and consumer
     let joined = ds_inventory
         .join(
             &ds_consumer,
@@ -144,10 +146,29 @@ pub fn search(
             APIError::new("Failed to join dataframes")
         })?;
 
-    let joined = joined.lazy()
-        .filter(expr).collect();
+    let joined = joined.lazy().filter(expr).collect().map_err(|e| {
+        debug!("Failed to filter dataframes: {}", e);
+        APIError::new("Failed to filter dataframes")
+    })?;
 
-    debug!("Joined dataframe: {}", joined.unwrap());
+    debug!("Joined dataframe: {}", joined);
+    // map result
+    for row in 0..joined.height() {
+        let mut search_kafka_response = SearchKafkaResponse::default();
+        let row = joined.get(row).unwrap();
+        for (i, col) in row.iter().enumerate() {
+            if i == 0 {
+                search_kafka_response.app_owner = col.to_string().replace("\"", "");
+            } else if i == 1 {
+                search_kafka_response.topic_name = col.to_string().replace("\"", "");
+            } else if i == 3 {
+                search_kafka_response.consumer_group_id = col.to_string().replace("\"", "");
+            } else if i == 5 {
+                search_kafka_response.consumer_app = col.to_string().replace("\"", "");
+            }
+        }
+        result.push(search_kafka_response);
+    }
 
     Ok(result)
 }
