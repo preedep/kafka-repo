@@ -105,13 +105,18 @@ pub fn search(
     search_request: &SearchKafkaRequest,
 ) -> Result<Vec<String>, APIError> {
     let mut result: Vec<String> = Vec::new();
-    let mut expr_list = vec![];
+
+    let mut expr = col(COL_CONSUMER_APP_NAME_2_CONSUMER_FILE).is_not_null();
+
     if let Some(app_owner) = &search_request.app_owner {
-        let expr = col(COL_APP_OWNER_INVENTORY_FILE).eq(lit(app_owner.as_str()));
-        expr_list.push(expr);
+       expr = expr.and(col(COL_APP_OWNER_INVENTORY_FILE).eq(lit(app_owner.as_str())));
     }
-    if let Some(topic_name) = &search_request.topic_name {}
-    if let Some(consumer_app) = &search_request.consumer_app {}
+    if let Some(topic_name) = &search_request.topic_name {
+        expr = expr.and(col(COL_TOPIC_NAME_INVENTORY_FILE).eq(lit(topic_name.as_str())));
+    }
+    if let Some(consumer_app) = &search_request.consumer_app {
+        expr = expr.and(col(COL_CONSUMER_APP_NAME_2_CONSUMER_FILE).eq(lit(consumer_app.as_str())));
+    }
 
     let ds_consumer = ds_consumer
         .clone()
@@ -139,7 +144,10 @@ pub fn search(
             APIError::new("Failed to join dataframes")
         })?;
 
-    debug!("Joined dataframe: {}", joined);
+    let joined = joined.lazy()
+        .filter(expr).collect();
+
+    debug!("Joined dataframe: {}", joined.unwrap());
 
     Ok(result)
 }
