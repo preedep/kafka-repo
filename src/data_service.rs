@@ -35,3 +35,22 @@ pub fn get_app_list(ds: &DataFrame) -> Result<Vec<String>,APIError> {
     }
     Ok(app_list)
 }
+pub fn get_topics(ds: &DataFrame, app_name: &String) -> Result<Vec<String>,APIError> {
+    let mut topic_list: Vec<String> = Vec::new();
+    let ds = ds.clone();
+    let ds = ds.lazy().filter(col(COL_APP_OWNER_INVENTORY_FILE).eq(lit(app_name.as_str())))
+    .sort([COL_TOPIC_NAME_INVENTORY_FILE], SortMultipleOptions::new().with_order_descending(false));
+    let ds = ds.collect().map_err(|e| {
+        debug!("Failed to filter by topic name: {}", e);
+        APIError::new("Failed to group by topic name")
+    })?;
+    for row in 0..ds.height() {
+        let row = ds.get(row).unwrap();
+        for (i, col) in row.iter().enumerate() {
+            if i == 1 {
+                topic_list.push(col.to_string().replace("\"",""));
+            }
+        }
+    }
+    Ok(topic_list)
+}

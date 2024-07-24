@@ -40,7 +40,8 @@ async fn main() -> std::io::Result<()> {
             .app_data(Data::new(app_state.clone()))
             .service(
                 web::scope("/api/v1")
-                    .route("/apps", web::get().to(apis::get_app_list))
+                    .route("/apps", web::get().to(apis::get_apps))
+                    .route("/apps/{appName}/topics", web::get().to(apis::get_topics))
             )
     }
     ).bind(("0.0.0.0",8888))?.run().await
