@@ -22,7 +22,11 @@ function load_dropdown_topics(app_owner_name) {
         .then(response => response.json())
         .then(data => {
             const dropdown = document.getElementById('dropdown-topic-name');
+
+            dropdown.innerHTML = '<option value="0">Select an Topic Name</option>';
+
             bind_data_for_option(data, dropdown);
+
             console.log(data);
 
         })
@@ -31,15 +35,23 @@ function load_dropdown_topics(app_owner_name) {
 
 function detect_change_owner_of_topics() {
     const dropdown = document.getElementById('dropdown-owner-topic');
+    const dropdownLabel = dropdown.previousElementSibling;
     dropdown.addEventListener('change', function() {
         const app_owner_name = this.value;
         const dropdown_topic = document.getElementById('dropdown-topic-name');
         if (app_owner_name !== '0') {
             dropdown_topic.innerText = '';
+            // Show the dropdown
             dropdown_topic.style.display = 'block';
+            dropdown_topic.style.paddingTop = '10px';
+            // Show the dropdown label
+            dropdownLabel.style.display = 'block';
+            dropdownLabel.style.paddingTop = '10px';
+            // Load the dropdown for the selected owner
             load_dropdown_topics(app_owner_name);
         }else{
             dropdown_topic.style.display = 'none';
+            dropdownLabel.style.display = 'none';
         }
     });
 }
