@@ -1,3 +1,5 @@
+import { initializeMermaid, renderMermaid } from './mermaid-config.js';
+
 function load_dropdown_owner_of_topics() {
     // API endpoint
     const apiEndpoint = '/api/v1/apps';
@@ -138,6 +140,7 @@ function button_render_handler(){
     const button = document.getElementById('renderButton');
     const result = document.getElementById('mermaid_display');
 
+
     button.addEventListener('click', function() {
         // Replace with your API URL
         const apiEndpoint = '/api/v1/render';
@@ -177,8 +180,10 @@ function button_render_handler(){
             .then(response => response.text())
             .then(data => {
                 console.log('Success:', data);
-                result.innerText = ''
+                result.innerText = '';
                 result.innerText = data;
+                initializeMermaid();
+                renderMermaid();
             })
             .catch((error) => {
                 console.error('Error:', error);

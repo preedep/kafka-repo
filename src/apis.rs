@@ -1,13 +1,12 @@
 use std::sync::Arc;
 
-use actix_web::{HttpResponse, Responder, web};
+use actix_web::{web, HttpResponse, Responder};
 use log::debug;
 
-
-use crate::{data_service, entities};
 use crate::data_state::AppState;
 use crate::entities::{APIError, APIResponse, SearchKafkaResponse};
 use crate::export::export_mm_file;
+use crate::{data_service, entities};
 
 type APIWebResponse<T> = Result<APIResponse<T>, APIError>;
 
@@ -54,19 +53,21 @@ pub async fn post_search_kafka(
 pub async fn post_topic_kafka_relation_render(
     data: web::Data<Arc<AppState>>,
     search_request: web::Json<entities::SearchKafkaRequest>,
-) -> Result<impl Responder,APIError> {
+) -> Result<impl Responder, APIError> {
     debug!("Searching kafka with request: {:?}", search_request);
     if let (Some(ds_inventory), Some(ds_consumer)) = (&data.kafka_inventory, &data.kafka_consumer) {
         let result = data_service::search(ds_inventory, ds_consumer, &search_request)?;
         // Export to mermaid file
         let path = "flowchart.mmd";
-        let data_render = export_mm_file(result.clone(), path).map_err(|e| {
+        let mermaid_text = export_mm_file(result.clone(), path).map_err(|e| {
             debug!("Failed to export to mermaid file: {}", e);
             APIError::new("Failed to export to mermaid file")
         })?;
 
-            let r = HttpResponse::Ok().content_type("text/html").body(data_render);
-       return Ok(r)
+        let r = HttpResponse::Ok()
+            .content_type("text/plain")
+            .body(mermaid_text);
+        return Ok(r);
     }
     Err(APIError::new("Failed to search kafka"))
 }
