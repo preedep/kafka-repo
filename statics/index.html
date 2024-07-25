@@ -4,18 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kafka Inventory Tools</title>
+
+    <style>
+        .padded-right {
+            padding-right: 20px; /* Adjust the value as needed */
+        }
+        .padded-left {
+            padding-left: 20px; /* Adjust the value as needed */
+        }
+        .padded-left-top {
+            padding-left: 20px;
+            padding-top: 20px; /* Adjust the value as needed */
+        }
+    </style>
 </head>
 <body>
+<div class="padded-left-top">
     <label for="dropdown-owner-topic">Owner of Topic (Project) : </label>
     <select name="dropdown-owner-topic" id="dropdown-owner-topic">
         <option value="0">Please Select Owner of Topic</option>
     </select>
+
+    <label for="dropdown-topic-name" style="display:none;padding-left: 20px">Choose a Topic Name related with Owner option:</label>
+    <select name="dropdown-topic-name" id="dropdown-topic-name" style="display:none;">
+        <option value="0">Select an Topic Name</option>
+    </select>
+
     <br/><br/>
     <label for="dropdown-consumer-app">App Consumer : </label>
     <select name="dropdown-consumer-app" id="dropdown-consumer-app">
         <option value="0">Please Select App Consumer</option>
     </select>
-
+</div>
     <script src="script.js"></script>
 </body>
 </html>
