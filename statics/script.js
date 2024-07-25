@@ -29,6 +29,19 @@ function load_dropdown_topics(app_owner_name) {
         .catch(error => console.error('Error fetching data:', error));
 }
 
+function detect_change_owner_of_topics() {
+    const dropdown = document.getElementById('dropdown-owner-topic');
+    dropdown.addEventListener('change', function() {
+        const app_owner_name = this.value;
+        const dropdown_topic = document.getElementById('dropdown-topic-name');
+        if (app_owner_name !== '0') {
+            dropdown_topic.style.display = 'block';
+            load_dropdown_topics(app_owner_name);
+        }else{
+            dropdown_topic.style.display = 'none';
+        }
+    });
+}
 // Loop through the data and create option elements
 function bind_data_for_option(data, dropdown) {
     const items = data.data;
@@ -63,4 +76,5 @@ function load_dropdown_app_consumer() {
 document.addEventListener('DOMContentLoaded', function() {
     load_dropdown_owner_of_topics();
     load_dropdown_app_consumer();
+    detect_change_owner_of_topics();
 });
