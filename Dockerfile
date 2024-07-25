@@ -1,5 +1,5 @@
 # Step 1: Build the application
-FROM rust:alpine as builder
+FROM rust:alpine AS builder
 
 RUN apk update && apk add --no-cache \
     openssl \
@@ -32,8 +32,8 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 COPY --from=builder /app/target/release/kafka-repo /usr/local/bin/kafka-repo
 
 ADD .env /usr/local/bin/.env
-ADD ["Consumer Group E-Kafka list D200124.csv", "/usr/local/bin/Consumer Group E-Kafka list D200124.csv"]
-ADD ["Kafka Topic Inventory D111165.csv", "/usr/local/bin/Kafka Topic Inventory D111165.csv"]
+ADD Kafka_Topic_Inventory_D111165.csv /usr/local/bin/Kafka_Topic_Inventory_D111165.csv
+ADD Consumer_Group_E-Kafka_list_D200124.csv /usr/local/bin/Consumer_Group_E-Kafka_list_D200124.csv
 
 COPY ./statics /usr/local/bin/statics
 

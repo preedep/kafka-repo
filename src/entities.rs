@@ -16,16 +16,16 @@ pub struct SearchKafkaRequest {
     pub consumer_app: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone,Default)]
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct SearchKafkaResponse {
     #[serde(rename = "app_owner")]
-    pub app_owner : String,
+    pub app_owner: String,
     #[serde(rename = "topic_name")]
-    pub topic_name : String,
+    pub topic_name: String,
     #[serde(rename = "consumer_group_id")]
-    pub consumer_group_id : String,
+    pub consumer_group_id: String,
     #[serde(rename = "consumer_app")]
-    pub consumer_app : String,
+    pub consumer_app: String,
 }
 
 impl Into<FlowChartItem> for SearchKafkaResponse {
@@ -51,7 +51,6 @@ impl From<FlowChartItem> for SearchKafkaResponse {
         }
     }
 }
-
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct FlowChartItem {
@@ -80,7 +79,6 @@ impl Display for FlowChartItem {
         write!(f, "{}", self.to_print_string())
     }
 }
-
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct APIResponse<T: Debug + Serialize + Clone> {

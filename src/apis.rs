@@ -1,8 +1,7 @@
 use std::sync::Arc;
 
-use actix_web::{web};
+use actix_web::{HttpResponse, Responder, web};
 use log::debug;
-
 
 use crate::{data_service, entities};
 use crate::data_state::AppState;
@@ -46,15 +45,48 @@ pub async fn post_search_kafka(
     debug!("Searching kafka with request: {:?}", search_request);
     if let (Some(ds_inventory), Some(ds_consumer)) = (&data.kafka_inventory, &data.kafka_consumer) {
         let result = data_service::search(ds_inventory, ds_consumer, &search_request)?;
+        return Ok(APIResponse { data: result });
+    }
+    Err(APIError::new("Failed to search kafka"))
+}
 
+pub async fn post_topic_kafka_relation_render(
+    data: web::Data<Arc<AppState>>,
+    search_request: web::Json<entities::SearchKafkaRequest>,
+) -> Result<impl Responder, APIError> {
+    debug!("Searching kafka with request: {:?}", search_request);
+    if let (Some(ds_inventory), Some(ds_consumer)) = (&data.kafka_inventory, &data.kafka_consumer) {
+        let result = data_service::search(ds_inventory, ds_consumer, &search_request)?;
         // Export to mermaid file
         let path = "flowchart.mmd";
-        export_mm_file(result.clone(), path).map_err(|e| {
+        let mermaid_text = export_mm_file(result.clone(), path).map_err(|e| {
             debug!("Failed to export to mermaid file: {}", e);
             APIError::new("Failed to export to mermaid file")
         })?;
 
-        return Ok(APIResponse { data: result });
+        let html = format!(
+            r#"
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Kafka Topic Relation</title>
+                <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+                <script>mermaid.initialize({{startOnLoad:true}});</script>
+            </head>
+            <body>
+                <div class="mermaid">
+                    {}
+                </div>
+            </body>
+            </html>
+            "#,
+            mermaid_text
+        );
+
+        let r = HttpResponse::Ok().content_type("text/html").body(html);
+        return Ok(r);
     }
     Err(APIError::new("Failed to search kafka"))
 }
