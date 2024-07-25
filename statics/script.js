@@ -83,11 +83,21 @@ function load_dropdown_app_consumer() {
         .catch(error => console.error('Error fetching data:', error));
 
 }
+function button_search_handler(){
+    const button = document.getElementById('searchButton');
+    button.addEventListener('click', function() {
+        // Replace with your API URL
+        const apiEndpoint = '/api/v1/search';
 
+
+
+    });
+}
 // Load the dropdown when the DOM is ready
 
 document.addEventListener('DOMContentLoaded', function() {
     load_dropdown_owner_of_topics();
     load_dropdown_app_consumer();
     detect_change_owner_of_topics();
+    button_search_handler();
 });
