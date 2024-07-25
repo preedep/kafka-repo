@@ -180,7 +180,18 @@ function button_render_handler(){
             .then(data => {
                 console.log('Success:', data);
                 console.log("renderMermaid with data");
-                renderMermaid(data);
+                //renderMermaid(data);
+
+                // Open a new window
+                const newWindow = window.open('',
+                    '_blank',
+                    'width=600,height=400');
+
+                // Write the HTML content to the new window's document
+                newWindow.document.open();
+                newWindow.document.write(data);
+                newWindow.document.close();
+
             })
             .catch((error) => {
                 console.error('Error:', error);
