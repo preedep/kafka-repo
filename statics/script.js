@@ -138,7 +138,6 @@ function button_search_handler(){
 
 function button_render_handler(){
     const button = document.getElementById('renderButton');
-    const result = document.getElementById('mermaid_display');
 
 
     button.addEventListener('click', function() {
@@ -180,10 +179,8 @@ function button_render_handler(){
             .then(response => response.text())
             .then(data => {
                 console.log('Success:', data);
-                result.innerText = '';
-                result.innerText = data;
-                initializeMermaid();
-                renderMermaid();
+                console.log("renderMermaid with data");
+                renderMermaid(data);
             })
             .catch((error) => {
                 console.error('Error:', error);
@@ -194,6 +191,9 @@ function button_render_handler(){
 // Load the dropdown when the DOM is ready
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log("initializeMermaid");
+    initializeMermaid();
+
     load_dropdown_owner_of_topics();
     load_dropdown_app_consumer();
     detect_change_owner_of_topics();
