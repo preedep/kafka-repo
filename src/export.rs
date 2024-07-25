@@ -4,6 +4,7 @@ use log::debug;
 
 use crate::entities::FlowChartItem;
 
+/*
 fn escape_html(input: &str) -> String {
     input
         .replace("&", "&amp;")
@@ -14,15 +15,17 @@ fn escape_html(input: &str) -> String {
         .replace("\n", "<br>")
         .replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;") // Replacing tab with four non-breaking spaces
 }
+ */
+
 pub fn export_mm_file<T: Into<FlowChartItem>>(
     dataset: Vec<T>,
     path: &str,
 ) -> std::io::Result<String> {
-    let mut file = std::fs::File::create(path)?;
+    //let mut file = std::fs::File::create(path)?;
     let mut content = String::new();
 
     let content_header = "flowchart LR;";
-    writeln!(file, "{}", content_header)?;
+    //writeln!(file, "{}", content_header)?;
     content.push_str(content_header);
     content.push_str("\n");
 
@@ -39,9 +42,9 @@ pub fn export_mm_file<T: Into<FlowChartItem>>(
             item.consumer_group
         );
 
-        writeln!(file, "\t{}", data)?;
-        writeln!(file, "{}", style_topic)?;
-        writeln!(file, "{}", style_consumer)?;
+        //writeln!(file, "\t{}", data)?;
+        //writeln!(file, "{}", style_topic)?;
+        //writeln!(file, "{}", style_consumer)?;
 
         content.push_str(format!("  {}", &data).as_str());
         content.push_str("\n");
