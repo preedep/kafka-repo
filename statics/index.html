@@ -16,6 +16,18 @@
             padding-left: 20px;
             padding-top: 20px; /* Adjust the value as needed */
         }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
     </style>
 
     <script src="script.js" type="module"></script>
@@ -45,6 +57,19 @@
     <button id="searchButton" style="padding: 10px">Search</button>
 
     <button id="renderButton" style="padding: 10px">Render</button>
+
+
+    <br/><br/>
+    <table id="data-table">
+        <thead>
+        <tr id="table-head">
+            <!-- Table headers will be inserted here -->
+        </tr>
+        </thead>
+        <tbody id="table-body">
+        <!-- Table rows will be inserted here -->
+        </tbody>
+    </table>
 
     <br/>
     <br/>

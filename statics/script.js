@@ -128,6 +128,7 @@ function button_search_handler(){
                 console.log('Success:', data);
                 //const result = document.getElementById('result');
                 //result.innerHTML = JSON.stringify(data, null, 2);
+                renderTable(data.data);
             })
             .catch((error) => {
                 console.error('Error:', error);
@@ -197,6 +198,36 @@ function button_render_handler(){
                 console.error('Error:', error);
             });
 
+    });
+}
+
+function renderTable(data) {
+    const tableHead = document.getElementById('table-head');
+    const tableBody = document.getElementById('table-body');
+
+    // Clear existing table content
+    tableHead.innerHTML = '';
+    tableBody.innerHTML = '';
+
+    // Get the keys from the first object to create the table headers
+    const headers = Object.keys(data[0]);
+
+    // Create table headers
+    headers.forEach(header => {
+        const th = document.createElement('th');
+        th.textContent = header.charAt(0).toUpperCase() + header.slice(1);
+        tableHead.appendChild(th);
+    });
+
+    // Create table rows
+    data.forEach(item => {
+        const tr = document.createElement('tr');
+        headers.forEach(header => {
+            const td = document.createElement('td');
+            td.textContent = item[header];
+            tr.appendChild(td);
+        });
+        tableBody.appendChild(tr);
     });
 }
 // Load the dropdown when the DOM is ready
