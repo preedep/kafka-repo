@@ -28,21 +28,24 @@ RUN apk add --no-cache libgcc libstdc++ openssl ca-certificates
 # Create a user to run the application
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
+# Set the working directory
+WORKDIR /app
+
 # Copy the built application from the builder
-COPY --from=builder /app/target/release/kafka-repo /usr/local/bin/kafka-repo
+COPY --from=builder /app/target/release/kafka-repo kafka-repo
 
-ADD .env /usr/local/bin/.env
-ADD Kafka_Topic_Inventory_D111165.csv /usr/local/bin/Kafka_Topic_Inventory_D111165.csv
-ADD Consumer_Group_E-Kafka_list_D200124.csv /usr/local/bin/Consumer_Group_E-Kafka_list_D200124.csv
+COPY .env .env
+COPY Kafka_Topic_Inventory_D111165.csv Kafka_Topic_Inventory_D111165.csv
+COPY Consumer_Group_E-Kafka_list_D200124.csv Consumer_Group_E-Kafka_list_D200124.csv
 
-COPY ./statics /usr/local/bin/statics
+COPY ./statics ./statics
 
 # Change ownership of the application binary
-RUN chown appuser:appgroup /usr/local/bin/kafka-repo
+RUN chown appuser:appgroup kafka-repo
 
 # Switch to the non-root user
 USER appuser
 
 EXPOSE 8888
 # Run the application
-ENTRYPOINT ["kafka-repo"]
+ENTRYPOINT ["/app/kafka-repo"]
