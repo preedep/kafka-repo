@@ -13,6 +13,22 @@ function load_dropdown_owner_of_topics() {
         })
         .catch(error => console.error('Error fetching data:', error));
 }
+
+function load_dropdown_topics(app_owner_name) {
+    // API endpoint
+    const apiEndpoint = `/api/v1/apps/${app_owner_name}/topics`;
+    // Fetch data from the API
+    fetch(apiEndpoint)
+        .then(response => response.json())
+        .then(data => {
+            const dropdown = document.getElementById('dropdown-topic-name');
+            bind_data_for_option(data, dropdown);
+            console.log(data);
+
+        })
+        .catch(error => console.error('Error fetching data:', error));
+}
+
 // Loop through the data and create option elements
 function bind_data_for_option(data, dropdown) {
     const items = data.data;
