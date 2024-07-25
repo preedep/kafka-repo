@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use actix_web::{HttpResponse, Responder, web};
+use actix_web::{web};
 use log::debug;
 
 

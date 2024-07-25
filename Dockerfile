@@ -32,9 +32,10 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 COPY --from=builder /app/target/release/kafka-repo /usr/local/bin/kafka-repo
 
 ADD .env /usr/local/bin/.env
-ADD Consumer%20Group%20E-Kafka%20list%20D200124.csv /usr/local/bin/Consumer%20Group%20E-Kafka%20list%20D200124.csv
-ADD Kafka%20Topic%20Inventory%20D111165.csv /usr/local/bin/Kafka%20Topic%20Inventory%20D111165.csv
+ADD ["Consumer Group E-Kafka list D200124.csv", "/usr/local/bin/Consumer Group E-Kafka list D200124.csv"]
+ADD ["Kafka Topic Inventory D111165.csv", "/usr/local/bin/Kafka Topic Inventory D111165.csv"]
 
+COPY ./statics /usr/local/bin/statics
 
 # Change ownership of the application binary
 RUN chown appuser:appgroup /usr/local/bin/kafka-repo
