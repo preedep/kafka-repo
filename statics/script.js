@@ -35,6 +35,7 @@ function detect_change_owner_of_topics() {
         const app_owner_name = this.value;
         const dropdown_topic = document.getElementById('dropdown-topic-name');
         if (app_owner_name !== '0') {
+            dropdown_topic.innerText = '';
             dropdown_topic.style.display = 'block';
             load_dropdown_topics(app_owner_name);
         }else{
