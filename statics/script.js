@@ -188,11 +188,15 @@ function button_render_handler(){
                     '_blank',
                     'width=600,height=400');
 
-                // Write the HTML content to the new window's document
-                newWindow.document.open();
-                newWindow.document.write(data);
-                newWindow.document.close();
-
+                if (newWindow === null) {
+                    alert('Please enable popups for this site');
+                }else {
+                    window.focus();
+                    // Write the HTML content to the new window's document
+                    newWindow.document.open();
+                    newWindow.document.write(data);
+                    newWindow.document.close();
+                }
             })
             .catch((error) => {
                 console.error('Error:', error);
