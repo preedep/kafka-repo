@@ -42,7 +42,21 @@
 
     <button id="searchButton" style="padding: 10px">Search</button>
 
+    <button id="renderButton" style="padding: 10px">Render</button>
+
+    <br/>
+    <br/>
+    <!-- Mermaid diagram -->
+    <div id="mermaid_display" class="mermaid">
+        flowchart LR
+    </div>
+
 </div>
     <script src="script.js"></script>
+<!-- Include Mermaid.js from CDN -->
+<script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true });
+</script>
 </body>
 </html>

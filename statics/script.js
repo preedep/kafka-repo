@@ -133,6 +133,59 @@ function button_search_handler(){
 
     });
 }
+
+function button_render_handler(){
+    const button = document.getElementById('renderButton');
+    const result = document.getElementById('mermaid_display');
+
+    button.addEventListener('click', function() {
+        // Replace with your API URL
+        const apiEndpoint = '/api/v1/render';
+
+        const dropdown_owner_topic = document.getElementById('dropdown-owner-topic');
+        const dropdown_topic_name = document.getElementById('dropdown-topic-name');
+        const dropdown_consumer_app = document.getElementById('dropdown-consumer-app');
+
+        const owner_topic = dropdown_owner_topic.value;
+        const topic_name = dropdown_topic_name.value;
+        const consumer_app = dropdown_consumer_app.value;
+
+        console.log("Owner Topic: ", owner_topic);
+        console.log("Topic Name: ", topic_name);
+        console.log("Consumer App: ", consumer_app);
+
+
+        let json_data_req = {
+        };
+        if (owner_topic !== '0') {
+            json_data_req.app_owner = owner_topic;
+        }
+        if (topic_name !== '0') {
+            json_data_req.topic_name = topic_name;
+        }
+        if (consumer_app !== '0') {
+            json_data_req.consumer_app = consumer_app;
+        }
+
+        fetch(apiEndpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(json_data_req),
+        })
+            .then(response => response.text())
+            .then(data => {
+                console.log('Success:', data);
+                result.innerText = ''
+                result.innerText = data;
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+
+    });
+}
 // Load the dropdown when the DOM is ready
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -140,4 +193,5 @@ document.addEventListener('DOMContentLoaded', function() {
     load_dropdown_app_consumer();
     detect_change_owner_of_topics();
     button_search_handler();
+    button_render_handler();
 });

@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use actix_web::{App, middleware, web};
 use actix_web::middleware::Logger;
-use actix_web::web::Data;
+use actix_web::web::{Data, route};
 use actix_files as fs;
 
 use log::info;
@@ -50,7 +50,8 @@ async fn main() -> std::io::Result<()> {
                     .route("/apps", web::get().to(apis::get_apps))
                     .route("/apps/{appName}/topics", web::get().to(apis::get_topics))
                     .route("/consumers", web::get().to(apis::get_consumers))
-                    .route("/search", web::post().to(apis::post_search_kafka)),
+                    .route("/search", web::post().to(apis::post_search_kafka))
+                    .route("/render", web::post().to(apis::post_topic_kafka_relation_render))
             )
             .service(
                 fs::Files::new("/","./statics").index_file("index.html")
