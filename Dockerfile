@@ -1,5 +1,5 @@
 # Step 1: Build the application
-FROM rust:alpine as builder
+FROM rust:alpine AS builder
 
 RUN apk update && apk add --no-cache \
     openssl \

@@ -1,6 +1,8 @@
-use crate::entities::FlowChartItem;
-use log::debug;
 use std::io::Write;
+
+use log::debug;
+
+use crate::entities::FlowChartItem;
 
 fn escape_html(input: &str) -> String {
     input
