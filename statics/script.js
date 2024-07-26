@@ -144,6 +144,17 @@ function button_search_handler(){
                 console.log('Success:', data);
                 //const result = document.getElementById('result');
                 //result.innerHTML = JSON.stringify(data, null, 2);
+                if (data.data.length === 0) {
+                    alert("No data found");
+                    return;
+                }
+
+                let table = document.getElementById('table-container');
+                table.style.display = 'block';
+
+                let mermaid = document.getElementById('mermaid-container');
+                mermaid.style.display = 'none';
+
                 renderTable(data.data);
             })
             .catch((error) => {
@@ -194,12 +205,28 @@ function button_render_handler(){
             body: JSON.stringify(json_data_req),
         })
             .then(response => response.text())
-            .then(data => {
+            .then(async data => {
                 console.log('Success:', data);
                 console.log("renderMermaid with data");
-                //renderMermaid(data);
+
+                if (data.length === 0) {
+                    alert("No data found");
+                    return;
+                }
+
+                let table = document.getElementById('table-container');
+                table.style.display = 'none';
+
+                let mermaid = document.getElementById('mermaid-container');
+                mermaid.style.display = 'block';
+
+
+                initializeMermaid();
+                await renderMermaid(data);
+
 
                 // Open a new window
+                /*
                 const newWindow = window.open('',
                     '_blank',
                     'width=600,height=400');
@@ -212,7 +239,8 @@ function button_render_handler(){
                     newWindow.document.open();
                     newWindow.document.write(data);
                     newWindow.document.close();
-                }
+                }*/
+
             })
             .catch((error) => {
                 console.error('Error:', error);

@@ -65,7 +65,7 @@ pub async fn post_topic_kafka_relation_render(
             debug!("Failed to export to mermaid file: {}", e);
             APIError::new("Failed to export to mermaid file")
         })?;
-
+/*
         let html = format!(
             r#"
             <!DOCTYPE html>
@@ -88,6 +88,8 @@ pub async fn post_topic_kafka_relation_render(
         );
 
         let r = HttpResponse::Ok().content_type("text/html").body(html);
+ */
+        let r = HttpResponse::Ok().content_type("text/plain").body(mermaid_text);
         return Ok(r);
     }
     Err(APIError::new("Failed to search kafka"))

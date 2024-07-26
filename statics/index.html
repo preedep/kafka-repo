@@ -46,7 +46,11 @@
 </head>
 <body>
 
-<p><span style="background-color: red;">** Render required allow popup new windows **</span> </p>
+<p>
+    <span style="background-color: yellow;">E-Kafka Inventory Finder Version 0.1</span><br/>
+    <span style="background-color: red;">** Render required allow popup new windows **</span>
+</p>
+
 <div class="padded-left-top">
 
     <div class="dropdown-container">
@@ -79,6 +83,8 @@
 
 
     <br/><br/>
+
+    <div id = "table-container" style="display: none">
     <table id="data-table">
         <thead>
         <tr id="table-head">
@@ -89,6 +95,8 @@
         <!-- Table rows will be inserted here -->
         </tbody>
     </table>
+    </div>
+
 
     <br/>
     <br/>
@@ -96,8 +104,8 @@
 
 </div>
 <!-- Mermaid diagram -->
-<!--
-<div id="mermaid-container"></div>
--->
+
+<pre id="mermaid-container" class="mermaid" style="display: none"></pre>
+
 </body>
 </html>
