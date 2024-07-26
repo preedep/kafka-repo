@@ -28,23 +28,44 @@
         th {
             background-color: #f2f2f2;
         }
+
+        #dropdown-topic-name {
+            display: none;
+            margin-left: 10px;
+        }
+        #dropdown-owner-topic {
+            padding-right: 10px;
+        }
+        .dropdown-container {
+            display: flex;
+            align-items: center;
+        }
     </style>
 
     <script src="script.js" type="module"></script>
 </head>
 <body>
 
-<p><span style="background-color: red;">** Render required allow popup new windows **</span> </p>
-<div class="padded-left-top">
-    <label for="dropdown-owner-topic">Owner of Topic (Project) : </label>
-    <select name="dropdown-owner-topic" id="dropdown-owner-topic">
-        <option value="0">Please Select Owner of Topic</option>
-    </select>
+<p>
+    <span style="background-color: yellow;">E-Kafka Inventory Finder Version 0.1</span><br/>
+    <span style="background-color: red;">** Render required allow popup new windows **</span>
+</p>
 
-    <label for="dropdown-topic-name" style="display:none;padding-left: 40px">Choose a Topic Name related with Owner option:</label>
-    <select name="dropdown-topic-name" id="dropdown-topic-name" style="display:none;padding-top: 10px">
-        <option value="0">Select an Topic Name</option>
-    </select>
+<div class="padded-left-top">
+
+    <div class="dropdown-container">
+        <label for="dropdown-owner-topic" style="display: block">Owner of Topic (Project) : </label>
+        <select name="dropdown-owner-topic" id="dropdown-owner-topic">
+            <option value="0">Please Select Owner of Topic</option>
+        </select>
+
+
+        <label for="dropdown-topic-name" style="display:none;padding-left: 40px">Choose a Topic Name related with Owner option:</label>
+        <select name="dropdown-topic-name" id="dropdown-topic-name" style="display:none;padding-top: 10px">
+            <option value="0">Select an Topic Name</option>
+        </select>
+
+    </div>
 
     <br/><br/>
     <label for="dropdown-consumer-app">App Consumer : </label>
@@ -62,6 +83,8 @@
 
 
     <br/><br/>
+
+    <div id = "table-container" style="display: none">
     <table id="data-table">
         <thead>
         <tr id="table-head">
@@ -72,6 +95,8 @@
         <!-- Table rows will be inserted here -->
         </tbody>
     </table>
+    </div>
+
 
     <br/>
     <br/>
@@ -79,8 +104,8 @@
 
 </div>
 <!-- Mermaid diagram -->
-<!--
-<div id="mermaid-container"></div>
--->
+
+<pre id="mermaid-container" class="mermaid" style="display: none"></pre>
+
 </body>
 </html>

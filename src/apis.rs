@@ -1,12 +1,12 @@
 use std::sync::Arc;
 
-use actix_web::{HttpResponse, Responder, web};
+use actix_web::{web, HttpResponse, Responder};
 use log::debug;
 
-use crate::{data_service, entities};
 use crate::data_state::AppState;
 use crate::entities::{APIError, APIResponse, SearchKafkaResponse};
 use crate::export::export_mm_file;
+use crate::{data_service, entities};
 
 type APIWebResponse<T> = Result<APIResponse<T>, APIError>;
 
@@ -18,6 +18,7 @@ pub async fn get_apps(data: web::Data<Arc<AppState>>) -> APIWebResponse<Vec<Stri
     }
     Err(APIError::new("Failed to get app list"))
 }
+
 pub async fn get_topics(
     data: web::Data<Arc<AppState>>,
     app_name: web::Path<String>,
@@ -29,6 +30,7 @@ pub async fn get_topics(
     }
     Err(APIError::new("Failed to get app list"))
 }
+
 pub async fn get_consumers(data: web::Data<Arc<AppState>>) -> APIWebResponse<Vec<String>> {
     debug!("Getting consumer list");
     if let Some(ds) = &data.kafka_consumer {
@@ -63,7 +65,7 @@ pub async fn post_topic_kafka_relation_render(
             debug!("Failed to export to mermaid file: {}", e);
             APIError::new("Failed to export to mermaid file")
         })?;
-
+/*
         let html = format!(
             r#"
             <!DOCTYPE html>
@@ -86,6 +88,8 @@ pub async fn post_topic_kafka_relation_render(
         );
 
         let r = HttpResponse::Ok().content_type("text/html").body(html);
+ */
+        let r = HttpResponse::Ok().content_type("text/plain").body(mermaid_text);
         return Ok(r);
     }
     Err(APIError::new("Failed to search kafka"))

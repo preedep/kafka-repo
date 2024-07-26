@@ -36,24 +36,40 @@ function load_dropdown_topics(app_owner_name) {
 }
 
 function detect_change_owner_of_topics() {
+    console.log("detect_change_owner_of_topics");
+
     const dropdown = document.getElementById('dropdown-owner-topic');
     const dropdownLabel = dropdown.previousElementSibling;
+
+    if (!dropdown){
+        console.log("Not found dropdown-owner-topic");
+        return
+    }
+
     dropdown.addEventListener('change', function() {
         const app_owner_name = this.value;
+        console.log("Owner Topic: ", app_owner_name);
+
+
         const dropdown_topic = document.getElementById('dropdown-topic-name');
+
         if (app_owner_name !== '0') {
+            console.log("Select Topic Owner");
+            // Show topic name under Topic owner
             dropdown_topic.innerText = '';
-            // Show the dropdown
-            dropdown_topic.style.display = 'block';
-            dropdown_topic.style.paddingTop = '10px';
             // Show the dropdown label
             dropdownLabel.style.display = 'block';
-            dropdownLabel.style.paddingTop = '10px';
+            //dropdownLabel.style.paddingTop = '10px';
+            // Show the dropdown
+            dropdown_topic.style.display = 'block';
+            //dropdown_topic.style.paddingTop = '10px';
             // Load the dropdown for the selected owner
             load_dropdown_topics(app_owner_name);
         }else{
+            console.log("Not select Topic Owner");
+
             dropdown_topic.style.display = 'none';
-            dropdownLabel.style.display = 'none';
+            //dropdownLabel.style.display = 'none';
         }
     });
 }
@@ -128,6 +144,17 @@ function button_search_handler(){
                 console.log('Success:', data);
                 //const result = document.getElementById('result');
                 //result.innerHTML = JSON.stringify(data, null, 2);
+                if (data.data.length === 0) {
+                    alert("No data found");
+                    return;
+                }
+
+                let table = document.getElementById('table-container');
+                table.style.display = 'block';
+
+                let mermaid = document.getElementById('mermaid-container');
+                mermaid.style.display = 'none';
+
                 renderTable(data.data);
             })
             .catch((error) => {
@@ -178,12 +205,28 @@ function button_render_handler(){
             body: JSON.stringify(json_data_req),
         })
             .then(response => response.text())
-            .then(data => {
+            .then(async data => {
                 console.log('Success:', data);
                 console.log("renderMermaid with data");
-                //renderMermaid(data);
+
+                if (data.length === 0) {
+                    alert("No data found");
+                    return;
+                }
+
+                let table = document.getElementById('table-container');
+                table.style.display = 'none';
+
+                let mermaid = document.getElementById('mermaid-container');
+                mermaid.style.display = 'block';
+
+
+                initializeMermaid();
+                await renderMermaid(data);
+
 
                 // Open a new window
+                /*
                 const newWindow = window.open('',
                     '_blank',
                     'width=600,height=400');
@@ -196,7 +239,8 @@ function button_render_handler(){
                     newWindow.document.open();
                     newWindow.document.write(data);
                     newWindow.document.close();
-                }
+                }*/
+
             })
             .catch((error) => {
                 console.error('Error:', error);
