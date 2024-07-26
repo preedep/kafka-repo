@@ -125,7 +125,7 @@ function button_search_handler(){
         if (owner_topic !== '0') {
             json_data_req.app_owner = owner_topic;
         }
-        if (topic_name !== '0') {
+        if ((topic_name !== '0')&&(dropdown_topic_name.style.display !== 'none')) {
             json_data_req.topic_name = topic_name;
         }
         if (consumer_app !== '0') {
@@ -190,7 +190,7 @@ function button_render_handler(){
         if (owner_topic !== '0') {
             json_data_req.app_owner = owner_topic;
         }
-        if (topic_name !== '0') {
+        if ((topic_name !== '0') && (dropdown_topic_name.style.display !== 'none')) {
             json_data_req.topic_name = topic_name;
         }
         if (consumer_app !== '0') {
@@ -223,23 +223,6 @@ function button_render_handler(){
 
                 initializeMermaid();
                 await renderMermaid(data);
-
-
-                // Open a new window
-                /*
-                const newWindow = window.open('',
-                    '_blank',
-                    'width=600,height=400');
-
-                if (newWindow === null) {
-                    alert('Please enable popups for this site');
-                }else {
-                    window.focus();
-                    // Write the HTML content to the new window's document
-                    newWindow.document.open();
-                    newWindow.document.write(data);
-                    newWindow.document.close();
-                }*/
 
             })
             .catch((error) => {
