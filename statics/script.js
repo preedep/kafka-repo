@@ -194,12 +194,16 @@ function button_render_handler(){
             body: JSON.stringify(json_data_req),
         })
             .then(response => response.text())
-            .then(data => {
+            .then(async data => {
                 console.log('Success:', data);
                 console.log("renderMermaid with data");
-                //renderMermaid(data);
+
+                initializeMermaid();
+                await renderMermaid(data);
+
 
                 // Open a new window
+                /*
                 const newWindow = window.open('',
                     '_blank',
                     'width=600,height=400');
@@ -212,7 +216,8 @@ function button_render_handler(){
                     newWindow.document.open();
                     newWindow.document.write(data);
                     newWindow.document.close();
-                }
+                }*/
+
             })
             .catch((error) => {
                 console.error('Error:', error);
