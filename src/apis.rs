@@ -18,6 +18,7 @@ pub async fn get_apps(data: web::Data<Arc<AppState>>) -> APIWebResponse<Vec<Stri
     }
     Err(APIError::new("Failed to get app list"))
 }
+
 pub async fn get_topics(
     data: web::Data<Arc<AppState>>,
     app_name: web::Path<String>,
@@ -29,6 +30,7 @@ pub async fn get_topics(
     }
     Err(APIError::new("Failed to get app list"))
 }
+
 pub async fn get_consumers(data: web::Data<Arc<AppState>>) -> APIWebResponse<Vec<String>> {
     debug!("Getting consumer list");
     if let Some(ds) = &data.kafka_consumer {

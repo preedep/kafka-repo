@@ -55,9 +55,8 @@ reqwest = { version = "0.11", default-features = false, features = [
 ] }
 
 
-[profile.release]
-opt-level = "z"    # "s" for size optimization, "3" for maximum optimization
-debug = false     # Disable debug symbols
-lto = true        # Enable Link Time Optimization
-codegen-units = 1 # Better optimization with fewer codegen units
-
+#[profile.release]
+#opt-level = "z"    # "s" for size optimization, "3" for maximum optimization
+#debug = false     # Disable debug symbols
+#lto = true        # Enable Link Time Optimization
+#codegen-units = 1 # Better optimization with fewer codegen units
