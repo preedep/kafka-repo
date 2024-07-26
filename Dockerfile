@@ -12,7 +12,7 @@ RUN apk update && apk add --no-cache \
 WORKDIR /app
 
 # Copy the source code into the container
-COPY Cargo.toml ./
+COPY Cargo.toml Cargo.lock ./
 COPY src ./src
 
 

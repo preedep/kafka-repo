@@ -1,5 +1,3 @@
-use std::io::Write;
-
 use log::debug;
 
 use crate::entities::FlowChartItem;
@@ -19,7 +17,7 @@ fn escape_html(input: &str) -> String {
 
 pub fn export_mm_file<T: Into<FlowChartItem>>(
     dataset: Vec<T>,
-    path: &str,
+    _path: &str,
 ) -> std::io::Result<String> {
     //let mut file = std::fs::File::create(path)?;
     let mut content = String::new();

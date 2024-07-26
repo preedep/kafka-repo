@@ -3,7 +3,7 @@ use std::sync::Arc;
 use actix_files as fs;
 use actix_web::{App, middleware, web};
 use actix_web::middleware::Logger;
-use actix_web::web::{Data, route};
+use actix_web::web::{Data};
 use log::info;
 
 use crate::data_service::read_csv;
