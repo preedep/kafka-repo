@@ -36,24 +36,40 @@ function load_dropdown_topics(app_owner_name) {
 }
 
 function detect_change_owner_of_topics() {
+    console.log("detect_change_owner_of_topics");
+
     const dropdown = document.getElementById('dropdown-owner-topic');
     const dropdownLabel = dropdown.previousElementSibling;
+
+    if (!dropdown){
+        console.log("Not found dropdown-owner-topic");
+        return
+    }
+
     dropdown.addEventListener('change', function() {
         const app_owner_name = this.value;
+        console.log("Owner Topic: ", app_owner_name);
+
+
         const dropdown_topic = document.getElementById('dropdown-topic-name');
+
         if (app_owner_name !== '0') {
+            console.log("Select Topic Owner");
+            // Show topic name under Topic owner
             dropdown_topic.innerText = '';
-            // Show the dropdown
-            dropdown_topic.style.display = 'block';
-            dropdown_topic.style.paddingTop = '10px';
             // Show the dropdown label
             dropdownLabel.style.display = 'block';
-            dropdownLabel.style.paddingTop = '10px';
+            //dropdownLabel.style.paddingTop = '10px';
+            // Show the dropdown
+            dropdown_topic.style.display = 'block';
+            //dropdown_topic.style.paddingTop = '10px';
             // Load the dropdown for the selected owner
             load_dropdown_topics(app_owner_name);
         }else{
+            console.log("Not select Topic Owner");
+
             dropdown_topic.style.display = 'none';
-            dropdownLabel.style.display = 'none';
+            //dropdownLabel.style.display = 'none';
         }
     });
 }

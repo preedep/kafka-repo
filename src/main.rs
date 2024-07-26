@@ -1,9 +1,10 @@
 use std::sync::Arc;
 
 use actix_files as fs;
-use actix_web::{App, middleware, web};
+use actix_files::NamedFile;
 use actix_web::middleware::Logger;
-use actix_web::web::{Data};
+use actix_web::web::Data;
+use actix_web::{middleware, web, App};
 use log::info;
 
 use crate::data_service::read_csv;
@@ -55,7 +56,11 @@ async fn main() -> std::io::Result<()> {
                         web::post().to(apis::post_topic_kafka_relation_render),
                     ),
             )
-            .service(fs::Files::new("/", "./statics").index_file("index.html"))
+            .service(
+                fs::Files::new("/", "./statics")
+                    .index_file("index.html")
+                    .use_last_modified(true),
+            )
     })
     .bind(("0.0.0.0", 8888))?
     .run()
