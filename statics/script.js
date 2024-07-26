@@ -144,6 +144,13 @@ function button_search_handler(){
                 console.log('Success:', data);
                 //const result = document.getElementById('result');
                 //result.innerHTML = JSON.stringify(data, null, 2);
+
+                let table = document.getElementById('table-container');
+                table.style.display = 'block';
+
+                let mermaid = document.getElementById('mermaid-container');
+                mermaid.style.display = 'none';
+
                 renderTable(data.data);
             })
             .catch((error) => {
@@ -197,6 +204,13 @@ function button_render_handler(){
             .then(async data => {
                 console.log('Success:', data);
                 console.log("renderMermaid with data");
+
+                let table = document.getElementById('table-container');
+                table.style.display = 'none';
+
+                let mermaid = document.getElementById('mermaid-container');
+                mermaid.style.display = 'block';
+
 
                 initializeMermaid();
                 await renderMermaid(data);
