@@ -35,6 +35,12 @@ function downloadCSV() {
     link.click();
     document.body.removeChild(link);
 }
+function button_download_svg_handler(){
+    const button = document.getElementById('downloadSvgButton');
+    button.addEventListener('click', function() {
+        downloadSVG();
+    });
+}
 function button_download_csv_handler(){
     const button = document.getElementById('downloadCsvButton');
     button.addEventListener('click', function() {
@@ -317,4 +323,5 @@ document.addEventListener('DOMContentLoaded', function() {
     button_search_handler();
     button_render_handler();
     button_download_csv_handler();
+    button_download_svg_handler();
 });
