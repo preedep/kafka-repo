@@ -1,5 +1,31 @@
 import { initializeMermaid, renderMermaid } from './mermaid-config.js';
 
+function downloadCSV() {
+    const headers = Array.from(document.querySelectorAll('#table-head th')).map(th => th.innerText);
+    const rows = Array.from(document.querySelectorAll('#table-body tr')).map(tr =>
+        Array.from(tr.querySelectorAll('td')).map(td => td.innerText)
+    );
+
+    let csvContent = 'data:text/csv;charset=utf-8,';
+    csvContent += headers.join(',') + '\n';
+    rows.forEach(row => {
+        csvContent += row.join(',') + '\n';
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', 'data.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+function button_download_csv_handler(){
+    const button = document.getElementById('downloadCsvButton');
+    button.addEventListener('click', function() {
+        downloadCSV();
+    });
+}
 function load_dropdown_owner_of_topics() {
     // API endpoint
     const apiEndpoint = '/api/v1/apps';
@@ -261,6 +287,9 @@ function renderTable(data) {
         tableBody.appendChild(tr);
     });
 }
+
+
+
 // Load the dropdown when the DOM is ready
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -272,4 +301,5 @@ document.addEventListener('DOMContentLoaded', function() {
     detect_change_owner_of_topics();
     button_search_handler();
     button_render_handler();
+    button_download_csv_handler();
 });
