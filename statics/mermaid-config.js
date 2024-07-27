@@ -15,7 +15,7 @@ export async function renderMermaid(diagramText) {
 
     // Example of using the render function
     const drawDiagram = async function () {
-        const element = document.getElementById('mermaid-container');
+        const element = document.getElementById('mermaid-container-display');
         const {svg} = await mermaid.render('graphDiv', diagramText);
         element.innerHTML = svg;
     };

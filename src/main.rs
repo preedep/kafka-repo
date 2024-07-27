@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use actix_files as fs;
-use actix_files::NamedFile;
 use actix_web::middleware::Logger;
 use actix_web::web::Data;
 use actix_web::{middleware, web, App};
