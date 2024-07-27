@@ -1,5 +1,20 @@
 import { initializeMermaid, renderMermaid } from './mermaid-config.js';
 
+function downloadSVG() {
+    const svg = document.getElementById('mermaid-container');
+    const serializer = new XMLSerializer();
+    const svgString = serializer.serializeToString(svg);
+
+    const blob = new Blob([svgString], {type: 'image/svg+xml'});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'image.svg';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);  // Clean up after download
+}
 function downloadCSV() {
     const headers = Array.from(document.querySelectorAll('#table-head th')).map(th => th.innerText);
     const rows = Array.from(document.querySelectorAll('#table-body tr')).map(tr =>
@@ -19,6 +34,12 @@ function downloadCSV() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+}
+function button_download_svg_handler(){
+    const button = document.getElementById('downloadSvgButton');
+    button.addEventListener('click', function() {
+        downloadSVG();
+    });
 }
 function button_download_csv_handler(){
     const button = document.getElementById('downloadCsvButton');
@@ -302,4 +323,5 @@ document.addEventListener('DOMContentLoaded', function() {
     button_search_handler();
     button_render_handler();
     button_download_csv_handler();
+    button_download_svg_handler();
 });
