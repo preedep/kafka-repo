@@ -1,5 +1,5 @@
 import { initializeMermaid, renderMermaid } from './mermaid-config.js';
-import { sortTable , renderTable} from './table.js';
+import {  renderTable} from './table.js';
 
 function downloadSVG() {
     const svg = document.getElementById('mermaid-container');
