@@ -40,7 +40,7 @@ export function renderTable(data) {
     headers.forEach((header, index) => {
         const th = document.createElement('th');
         th.textContent = header.charAt(0).toUpperCase() + header.slice(1);
-        th.setAttribute('onclick', `sortTable(${index})`);
+        th.addEventListener('click', () => sortTable(index));
         tableHead.appendChild(th);
     });
 
