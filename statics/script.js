@@ -1,4 +1,5 @@
 import { initializeMermaid, renderMermaid } from './mermaid-config.js';
+import { sortTable , renderTable} from './table.js';
 
 function downloadSVG() {
     const svg = document.getElementById('mermaid-container');
@@ -211,6 +212,7 @@ function button_search_handler(){
     });
 }
 
+
 function button_render_handler(){
     const button = document.getElementById('renderButton');
 
@@ -279,35 +281,8 @@ function button_render_handler(){
     });
 }
 
-function renderTable(data) {
-    const tableHead = document.getElementById('table-head');
-    const tableBody = document.getElementById('table-body');
 
-    // Clear existing table content
-    tableHead.innerHTML = '';
-    tableBody.innerHTML = '';
 
-    // Get the keys from the first object to create the table headers
-    const headers = Object.keys(data[0]);
-
-    // Create table headers
-    headers.forEach(header => {
-        const th = document.createElement('th');
-        th.textContent = header.charAt(0).toUpperCase() + header.slice(1);
-        tableHead.appendChild(th);
-    });
-
-    // Create table rows
-    data.forEach(item => {
-        const tr = document.createElement('tr');
-        headers.forEach(header => {
-            const td = document.createElement('td');
-            td.textContent = item[header];
-            tr.appendChild(td);
-        });
-        tableBody.appendChild(tr);
-    });
-}
 
 
 
