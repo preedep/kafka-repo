@@ -27,9 +27,9 @@ function filterFunction() {
 }
 
 function highlightMatch(text, filter) {
-    var startIndex = text.toUpperCase().indexOf(filter);
+    const startIndex = text.toUpperCase().indexOf(filter);
     if (startIndex >= 0) {
-        var endIndex = startIndex + filter.length;
+        const endIndex = startIndex + filter.length;
         return text.substring(0, startIndex) +
             "<span class='highlight'>" + text.substring(startIndex, endIndex) + "</span>" +
             text.substring(endIndex);
@@ -38,26 +38,26 @@ function highlightMatch(text, filter) {
 }
 
 function selectItem(element) {
-    var input = document.getElementById("dropdownInput");
+    const input = document.getElementById("dropdownInput");
     input.value = element.textContent || element.innerText;
     closeDropdown();
     updateSelectElement(input.value);
 }
 
 function showDropdown() {
-    var div = document.getElementById("dropdown");
+    const div = document.getElementById("dropdown");
     div.classList.add("show");
 }
 
 function closeDropdown() {
-    var div = document.getElementById("dropdown");
+    const div = document.getElementById("dropdown");
     div.classList.remove("show");
     currentFocus = -1; // Reset current focus
 }
 
 function handleKeyDown(event) {
-    var div = document.getElementById("dropdown");
-    var items = Array.from(div.getElementsByTagName("div")).filter(item => item.style.display !== "none");
+    const div = document.getElementById("dropdown");
+    const items = Array.from(div.getElementsByTagName("div")).filter(item => item.style.display !== "none");
 
     if (event.keyCode === 40) { // Down arrow key
         currentFocus++;
