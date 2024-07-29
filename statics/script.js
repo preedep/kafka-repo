@@ -111,16 +111,15 @@ function detect_change_owner_of_topics() {
         const app_owner_name = this.value;
         console.log("Owner Topic: ", app_owner_name);
 
-
         const dropdown_topic = document.getElementById('dropdown-topic-name');
+
         const search_dropdown_topic = document.getElementById('dropdown-topic-name-input');
+        search_dropdown_topic.innerText = ''; // clear search input
 
         if (app_owner_name !== '0') {
             console.log("Select Topic Owner");
             // Show topic name under Topic owner
             dropdown_topic.innerText = '';
-            search_dropdown_topic.innerText = '';
-
             // Show the dropdown label
             dropdownLabel.style.display = 'block';
             //dropdownLabel.style.paddingTop = '10px';
