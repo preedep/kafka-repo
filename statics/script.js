@@ -1,5 +1,6 @@
 import { initializeMermaid, renderMermaid } from './mermaid-config.js';
 import {  renderTable} from './table.js';
+import { filterFunction, handleKeyDown } from './searchable-dropdown.js';
 
 function downloadSVG() {
     const svg = document.getElementById('mermaid-container');
@@ -100,12 +101,14 @@ function detect_change_owner_of_topics() {
 
 
         const dropdown_topic = document.getElementById('dropdown-topic-name');
-        const search_dropdown_topic = document.getElementById('dropdownInput');
+        const search_dropdown_topic = document.getElementById('dropdown-topic-name-input');
 
         if (app_owner_name !== '0') {
             console.log("Select Topic Owner");
             // Show topic name under Topic owner
             dropdown_topic.innerText = '';
+            search_dropdown_topic.innerText = '';
+
             // Show the dropdown label
             dropdownLabel.style.display = 'block';
             //dropdownLabel.style.paddingTop = '10px';
@@ -293,6 +296,11 @@ function button_render_handler(){
 
 // Load the dropdown when the DOM is ready
 
+function search_able_dropdown_topic_name_handler() {
+    document.getElementById("dropdownInput").addEventListener("input", filterFunction);
+    document.getElementById("dropdownInput").addEventListener("keydown", handleKeyDown);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     console.log("initializeMermaid");
     initializeMermaid();
@@ -304,4 +312,6 @@ document.addEventListener('DOMContentLoaded', function() {
     button_render_handler();
     button_download_csv_handler();
     button_download_svg_handler();
+
+    search_able_dropdown_topic_name_handler()
 });

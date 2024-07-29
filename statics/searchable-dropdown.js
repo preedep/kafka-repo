@@ -1,11 +1,10 @@
 let currentFocus = -1;
 
-document.getElementById("dropdownInput").addEventListener("input", filterFunction);
-document.getElementById("dropdownInput").addEventListener("keydown", handleKeyDown);
 
-function filterFunction() {
+
+export function filterFunction() {
     let input, filter, div, items, i, txtValue;
-    input = document.getElementById("dropdownInput");
+    input = document.getElementById("dropdown-topic-name-input");
     filter = input.value.toUpperCase();
     div = document.getElementById("dropdown");
     items = div.getElementsByTagName("div");
@@ -41,7 +40,7 @@ function highlightMatch(text, filter) {
 }
 
 function selectItem(element) {
-    const input = document.getElementById("dropdownInput");
+    const input = document.getElementById("dropdown-topic-name-input");
     input.value = element.textContent || element.innerText;
     closeDropdown();
     updateSelectElement(input.value);
@@ -58,7 +57,7 @@ function closeDropdown() {
     currentFocus = -1; // Reset current focus
 }
 
-function handleKeyDown(event) {
+export function handleKeyDown(event) {
     const div = document.getElementById("dropdown");
     const items = Array.from(div.getElementsByTagName("div")).filter(item => item.style.display !== "none");
 
