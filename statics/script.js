@@ -114,7 +114,7 @@ function detect_change_owner_of_topics() {
         const dropdown_topic = document.getElementById('dropdown-topic-name');
 
         const search_dropdown_topic = document.getElementById('dropdown-topic-name-input');
-        search_dropdown_topic.innerText = ''; // clear search input
+        search_dropdown_topic.innerText = ''// clear search input
 
         if (app_owner_name !== '0') {
             console.log("Select Topic Owner");
