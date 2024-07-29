@@ -100,6 +100,7 @@ function detect_change_owner_of_topics() {
 
 
         const dropdown_topic = document.getElementById('dropdown-topic-name');
+        const search_dropdown_topic = document.getElementById('dropdownInput');
 
         if (app_owner_name !== '0') {
             console.log("Select Topic Owner");
@@ -110,6 +111,8 @@ function detect_change_owner_of_topics() {
             //dropdownLabel.style.paddingTop = '10px';
             // Show the dropdown
             dropdown_topic.style.display = 'block';
+
+            search_dropdown_topic.style.display = 'block';
             //dropdown_topic.style.paddingTop = '10px';
             // Load the dropdown for the selected owner
             load_dropdown_topics(app_owner_name);
@@ -117,6 +120,8 @@ function detect_change_owner_of_topics() {
             console.log("Not select Topic Owner");
 
             dropdown_topic.style.display = 'none';
+
+            search_dropdown_topic.style.display = 'none';
             //dropdownLabel.style.display = 'none';
         }
     });

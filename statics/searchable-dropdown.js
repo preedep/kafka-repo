@@ -1,5 +1,8 @@
 let currentFocus = -1;
 
+document.getElementById("dropdownInput").addEventListener("input", filterFunction);
+document.getElementById("dropdownInput").addEventListener("keydown", handleKeyDown);
+
 function filterFunction() {
     let input, filter, div, items, i, txtValue;
     input = document.getElementById("dropdownInput");
