@@ -1,6 +1,6 @@
 import { initializeMermaid, renderMermaid } from './mermaid-config.js';
 import {  renderTable} from './table.js';
-import { filterFunction, handleKeyDown } from './searchable-dropdown.js';
+import { filterFunction, handleKeyDown , selectItem} from './searchable-dropdown.js';
 
 function downloadSVG() {
     const svg = document.getElementById('mermaid-container');
@@ -73,10 +73,22 @@ function load_dropdown_topics(app_owner_name) {
         .then(response => response.json())
         .then(data => {
             const dropdown = document.getElementById('dropdown-topic-name');
-
             dropdown.innerHTML = '<option value="0">Select an Topic Name</option>';
-
             bind_data_for_option(data, dropdown);
+
+            // Searchable dropdown
+            const searchable_dropdown = document.getElementById('dropdown');
+            searchable_dropdown.innerHTML = ''
+            for (let i = 0; i < data.data.length; i++) {
+                const item = data.data[i];
+                const div = document.createElement('div');
+                div.textContent = item;
+                div.addEventListener('click', function() {
+                    selectItem(this);
+                });
+                searchable_dropdown.appendChild(div);
+            }
+            /////
 
             console.log(data);
 
@@ -297,8 +309,8 @@ function button_render_handler(){
 // Load the dropdown when the DOM is ready
 
 function search_able_dropdown_topic_name_handler() {
-    document.getElementById("dropdownInput").addEventListener("input", filterFunction);
-    document.getElementById("dropdownInput").addEventListener("keydown", handleKeyDown);
+    document.getElementById("dropdown-topic-name-input").addEventListener("input", filterFunction);
+    document.getElementById("dropdown-topic-name-input").addEventListener("keydown", handleKeyDown);
 }
 
 document.addEventListener('DOMContentLoaded', function() {

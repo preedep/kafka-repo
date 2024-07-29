@@ -1,7 +1,6 @@
 let currentFocus = -1;
 
 
-
 export function filterFunction() {
     let input, filter, div, items, i, txtValue;
     input = document.getElementById("dropdown-topic-name-input");
@@ -39,7 +38,7 @@ function highlightMatch(text, filter) {
     return text;
 }
 
-function selectItem(element) {
+export function selectItem(element) {
     const input = document.getElementById("dropdown-topic-name-input");
     input.value = element.textContent || element.innerText;
     closeDropdown();
