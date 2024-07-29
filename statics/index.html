@@ -37,10 +37,19 @@
         #dropdown-owner-topic {
             padding-right: 10px;
         }
+
         .dropdown-container {
             display: flex;
             align-items: center;
         }
+
+        /*
+        .dropdown-container-search-able {
+            position: relative;
+            display: inline-block;
+            width: 300px;
+        }
+        */
 
         /* Dropdown Button */
         .dropdown-input {
@@ -103,16 +112,14 @@
             <option value="0">Please Select Owner of Topic</option>
         </select>
 
-
         <label for="dropdown-topic-name" style="display:none;padding-left: 40px">Choose a Topic Name related with Owner option:</label>
         <label for="dropdown-topic-name-input"></label><input type="text" id="dropdown-topic-name-input" placeholder="Search topics..." class="dropdown-input" style="display:none;">
-        <div id="dropdown" class="dropdown-items">
+        <div id="dropdown" class="dropdown-items show">
             <!-- Filtered options will be displayed here -->
         </div>
         <select name="dropdown-topic-name" id="dropdown-topic-name" style="display:none;padding-top: 10px">
             <option value="0">Select an Topic Name</option>
         </select>
-
     </div>
 
     <br/><br/>
