@@ -37,17 +37,18 @@
         #dropdown-owner-topic {
             padding-right: 10px;
         }
-        .dropdown-topic-owner-container {
+
+        .dropdown-gp-owner-topic-container {
             display: flex;
             align-items: center;
         }
-        /*
-        .dropdown-container-search-able {
+
+        .dropdown-topic-owner-container {
             position: relative;
             display: inline-block;
             width: 300px;
         }
-        */
+
         /* Dropdown Button */
         .dropdown-input {
             width: 400px;
@@ -55,12 +56,13 @@
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            margin-left: 10px;
         }
         .dropdown-items {
             display: none;
             position: absolute;
             background-color: #f1f1f1;
-            width: 100%;
+            width: 500px;
             border: 1px solid #ddd;
             border-top: none;
             z-index: 1;
@@ -102,32 +104,30 @@
     </select>
     <br/>
     <br/>
-    <div class="dropdown-topic-owner-container">
 
+
+    <div class="dropdown-gp-owner-topic-container">
         <label for="dropdown-owner-topic" style="display: block">Owner of Topic (Project) : </label>
         <select name="dropdown-owner-topic" id="dropdown-owner-topic">
             <option value="0">Please Select Owner of Topic</option>
         </select>
 
-        <!--
-        <label for="dropdown-topic-name" style="display:none;padding-left: 40px">Choose a Topic Name related with Owner option:</label>
-        -->
-        <label for="dropdown-topic-name"></label>
-        <select name="dropdown-topic-name" id="dropdown-topic-name" style="display:none;padding-top: 10px">
-            <option value="0">Select an Topic Name</option>
-        </select>
-
-        <label for="dropdown-topic-name-input"></label>
-        <input type="text"
-               id="dropdown-topic-name-input"
-               placeholder="Help Search topics..."
-               class="dropdown-input" style="display:none;">
-        <div id="dropdown" class="dropdown-items show">
+        <div class="dropdown-topic-owner-container">
+            <label for="dropdown-topic-name"></label>
+            <select name="dropdown-topic-name" id="dropdown-topic-name" style="display:none;padding-top: 10px">
+                    <option value="0">Select an Topic Name</option>
+            </select>
+            <label for="dropdown-topic-name-input"></label>
+            <input type="text"
+                   id="dropdown-topic-name-input"
+                placeholder="Help Search topics..."
+                class="dropdown-input" style="display:none;">
+            <div id="dropdown" class="dropdown-items show">
             <!-- Filtered options will be displayed here -->
+            </div>
         </div>
 
     </div>
-
 
 
     <br/>
