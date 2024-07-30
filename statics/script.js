@@ -1,5 +1,6 @@
 import { initializeMermaid, renderMermaid } from './mermaid-config.js';
 import {  renderTable} from './table.js';
+import { filterFunction, handleKeyDown , selectItem} from './searchable-dropdown.js';
 
 function downloadSVG() {
     const svg = document.getElementById('mermaid-container');
@@ -72,15 +73,37 @@ function load_dropdown_topics(app_owner_name) {
         .then(response => response.json())
         .then(data => {
             const dropdown = document.getElementById('dropdown-topic-name');
-
             dropdown.innerHTML = '<option value="0">Select an Topic Name</option>';
-
             bind_data_for_option(data, dropdown);
+
+            // Searchable dropdown
+            const searchable_dropdown = document.getElementById('dropdown');
+            searchable_dropdown.innerHTML = ''
+            for (let i = 0; i < data.data.length; i++) {
+                const item = data.data[i];
+                const div = document.createElement('div');
+                div.textContent = item;
+                div.addEventListener('click', function() {
+                    selectItem(this);
+                });
+                searchable_dropdown.appendChild(div);
+            }
+            /////
 
             console.log(data);
 
         })
         .catch(error => console.error('Error fetching data:', error));
+}
+function detect_change_topic_name() {
+    console.log("detect_change_topic_name");
+    const dropdown = document.getElementById('dropdown-topic-name');
+    dropdown.addEventListener('change', function() {
+       if (this.value === '0') {
+           const search_dropdown_topic = document.getElementById('dropdown-topic-name-input');
+           search_dropdown_topic.value = ''// clear search input
+       }
+    });
 }
 
 function detect_change_owner_of_topics() {
@@ -98,8 +121,10 @@ function detect_change_owner_of_topics() {
         const app_owner_name = this.value;
         console.log("Owner Topic: ", app_owner_name);
 
-
         const dropdown_topic = document.getElementById('dropdown-topic-name');
+
+        const search_dropdown_topic = document.getElementById('dropdown-topic-name-input');
+        search_dropdown_topic.value = ''// clear search input
 
         if (app_owner_name !== '0') {
             console.log("Select Topic Owner");
@@ -110,6 +135,8 @@ function detect_change_owner_of_topics() {
             //dropdownLabel.style.paddingTop = '10px';
             // Show the dropdown
             dropdown_topic.style.display = 'block';
+
+            search_dropdown_topic.style.display = 'block';
             //dropdown_topic.style.paddingTop = '10px';
             // Load the dropdown for the selected owner
             load_dropdown_topics(app_owner_name);
@@ -117,6 +144,8 @@ function detect_change_owner_of_topics() {
             console.log("Not select Topic Owner");
 
             dropdown_topic.style.display = 'none';
+
+            search_dropdown_topic.style.display = 'none';
             //dropdownLabel.style.display = 'none';
         }
     });
@@ -194,6 +223,10 @@ function button_search_handler(){
                 //result.innerHTML = JSON.stringify(data, null, 2);
                 if (data.data.length === 0) {
                     alert("No data found");
+
+                    let table = document.getElementById('table-container');
+                    table.style.display = 'none';
+
                     return;
                 }
 
@@ -260,6 +293,10 @@ function button_render_handler(){
 
                 if (data.length === 0) {
                     alert("No data found");
+
+                    let mermaid = document.getElementById('mermaid-container');
+                    mermaid.style.display = 'none';
+
                     return;
                 }
 
@@ -288,6 +325,11 @@ function button_render_handler(){
 
 // Load the dropdown when the DOM is ready
 
+function search_able_dropdown_topic_name_handler() {
+    document.getElementById("dropdown-topic-name-input").addEventListener("input", filterFunction);
+    document.getElementById("dropdown-topic-name-input").addEventListener("keydown", handleKeyDown);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     console.log("initializeMermaid");
     initializeMermaid();
@@ -295,8 +337,11 @@ document.addEventListener('DOMContentLoaded', function() {
     load_dropdown_owner_of_topics();
     load_dropdown_app_consumer();
     detect_change_owner_of_topics();
+    detect_change_topic_name();
     button_search_handler();
     button_render_handler();
     button_download_csv_handler();
     button_download_svg_handler();
+
+    search_able_dropdown_topic_name_handler()
 });
