@@ -223,6 +223,10 @@ function button_search_handler(){
                 //result.innerHTML = JSON.stringify(data, null, 2);
                 if (data.data.length === 0) {
                     alert("No data found");
+
+                    let table = document.getElementById('table-container');
+                    table.style.display = 'none';
+
                     return;
                 }
 
@@ -289,6 +293,10 @@ function button_render_handler(){
 
                 if (data.length === 0) {
                     alert("No data found");
+
+                    let mermaid = document.getElementById('mermaid-container');
+                    mermaid.style.display = 'none';
+
                     return;
                 }
 
