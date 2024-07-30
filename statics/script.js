@@ -95,6 +95,16 @@ function load_dropdown_topics(app_owner_name) {
         })
         .catch(error => console.error('Error fetching data:', error));
 }
+function detect_change_topic_name() {
+    console.log("detect_change_topic_name");
+    const dropdown = document.getElementById('dropdown-topic-name');
+    dropdown.addEventListener('change', function() {
+       if (this.value === '0') {
+           const search_dropdown_topic = document.getElementById('dropdown-topic-name-input');
+           search_dropdown_topic.value = ''// clear search input
+       }
+    });
+}
 
 function detect_change_owner_of_topics() {
     console.log("detect_change_owner_of_topics");
@@ -319,6 +329,7 @@ document.addEventListener('DOMContentLoaded', function() {
     load_dropdown_owner_of_topics();
     load_dropdown_app_consumer();
     detect_change_owner_of_topics();
+    detect_change_topic_name();
     button_search_handler();
     button_render_handler();
     button_download_csv_handler();
