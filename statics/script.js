@@ -9,14 +9,10 @@ function downloadSVG() {
 
     const blob = new Blob([svgString], {type: 'image/svg+xml'});
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'image.svg';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);  // Clean up after download
+
+    downloadFile(url, 'image.svg');
 }
+
 function downloadCSV() {
     const headers = Array.from(document.querySelectorAll('#table-head th')).map(th => th.innerText);
     const rows = Array.from(document.querySelectorAll('#table-body tr')).map(tr =>
@@ -30,13 +26,19 @@ function downloadCSV() {
     });
 
     const encodedUri = encodeURI(csvContent);
+
+    downloadFile(encodedUri, 'data.csv');
+}
+
+function downloadFile(blobType, fileName) {
     const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', 'data.csv');
+    link.setAttribute('href', blobType);
+    link.setAttribute('download', fileName);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 }
+
 function button_download_svg_handler(){
     const button = document.getElementById('downloadSvgButton');
     button.addEventListener('click', function() {
