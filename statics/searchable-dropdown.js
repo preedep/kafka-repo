@@ -106,7 +106,7 @@ function updateSelectElement(value) {
 
 // Hide dropdown if clicked outside
 document.addEventListener('click', function (event) {
-    const isClickInside = document.querySelector('.dropdown-container').contains(event.target);
+    const isClickInside = document.querySelector('.dropdown-topic-owner-container').contains(event.target);
 
     if (!isClickInside) {
         closeDropdown();
