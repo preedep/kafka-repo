@@ -1,6 +1,9 @@
+use std::fmt::format;
+use std::io::Cursor;
+
+use actix_web::web::Data;
 use log::debug;
 use polars::prelude::*;
-use std::io::Cursor;
 
 use crate::entities::{APIError, SearchKafkaRequest, SearchKafkaResponse};
 
@@ -36,6 +39,21 @@ pub fn read_csv_from_string(data: &String) -> PolarsResult<DataFrame> {
 
     // Read the CSV string
     CsvReader::new(cursor).finish()
+}
+pub fn post_login(ds: &DataFrame, user_name: &String, password: &String) -> Result<bool, APIError> {
+    debug!("Post login");
+
+    let ds = ds.clone();
+    let user_id = col("User_ID").eq(lit(user_name.as_str()));
+    let password = col("Password").eq(lit(password.as_str()));
+
+    let ds = ds
+        .lazy().filter(user_id.and(password)).collect()
+        .map_err(|e|{
+            let message = format!("Failed to filter by username and password : [{:?}]",e.to_string());
+            APIError::new(message.as_str())
+        })?;
+    Ok(ds.height() > 0)
 }
 pub fn get_app_list(ds: &DataFrame) -> Result<Vec<String>, APIError> {
     let mut app_list: Vec<String> = Vec::new();
