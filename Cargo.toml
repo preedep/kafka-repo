@@ -54,6 +54,12 @@ reqwest = { version = "0.11", default-features = false, features = [
     "stream",
 ] }
 
+azure_identity = { version = "0.20" ,default-features = false, features = ["enable_reqwest_rustls"] }
+azure_storage = { version = "0.20",default-features = false, features = ["enable_reqwest_rustls"] }
+azure_storage_blobs = { version = "0.20",default-features = false, features = ["enable_reqwest_rustls"] }
+azure_core = {version = "0.20",default-features = false,features = ["enable_reqwest_rustls"]}
+
+futures = "0.3"
 
 #[profile.release]
 #opt-level = "z"    # "s" for size optimization, "3" for maximum optimization

@@ -65,31 +65,33 @@ pub async fn post_topic_kafka_relation_render(
             debug!("Failed to export to mermaid file: {}", e);
             APIError::new("Failed to export to mermaid file")
         })?;
-/*
-        let html = format!(
-            r#"
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Kafka Topic Relation</title>
-                <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
-                <script>mermaid.initialize({{startOnLoad:true}});</script>
-            </head>
-            <body>
-                <div class="mermaid">
-                    {}
-                </div>
-            </body>
-            </html>
-            "#,
-            mermaid_text
-        );
+        /*
+               let html = format!(
+                   r#"
+                   <!DOCTYPE html>
+                   <html lang="en">
+                   <head>
+                       <meta charset="UTF-8">
+                       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                       <title>Kafka Topic Relation</title>
+                       <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+                       <script>mermaid.initialize({{startOnLoad:true}});</script>
+                   </head>
+                   <body>
+                       <div class="mermaid">
+                           {}
+                       </div>
+                   </body>
+                   </html>
+                   "#,
+                   mermaid_text
+               );
 
-        let r = HttpResponse::Ok().content_type("text/html").body(html);
- */
-        let r = HttpResponse::Ok().content_type("text/plain").body(mermaid_text);
+               let r = HttpResponse::Ok().content_type("text/html").body(html);
+        */
+        let r = HttpResponse::Ok()
+            .content_type("text/plain")
+            .body(mermaid_text);
         return Ok(r);
     }
     Err(APIError::new("Failed to search kafka"))

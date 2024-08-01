@@ -35,9 +35,6 @@ WORKDIR /app
 COPY --from=builder /app/target/release/kafka-repo kafka-repo
 
 COPY .env .env
-COPY Kafka_Topic_Inventory_D111165.csv Kafka_Topic_Inventory_D111165.csv
-COPY Consumer_Group_E-Kafka_list_D200124.csv Consumer_Group_E-Kafka_list_D200124.csv
-
 COPY ./statics ./statics
 
 # Change ownership of the application binary
