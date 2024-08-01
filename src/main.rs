@@ -40,6 +40,9 @@ async fn main() -> std::io::Result<()> {
     let azure_blob_container_name =
         std::env::var("STORAGE_CONTAINER").expect("AZURE_BLOB_CONTAINER_NAME must be set");
 
+     let jwt_secret_key = std::env::var("JWT_SECRET_KEY").expect("JWT_SECRET must be set");
+
+
     debug!("Reading kafka inventory file: {}", kafka_inventory_file);
     debug!("Reading kafka consumer file: {}", kafka_consumer_file);
     debug!("Azure Blob Storage account: {}", azure_blob_account_name);
@@ -52,6 +55,7 @@ async fn main() -> std::io::Result<()> {
         kafka_inventory: None,
         kafka_consumer: None,
         user_authentication: None,
+        jwt_secret: jwt_secret_key,
     };
 
     // Fetch the dataset from Azure Blob Storage

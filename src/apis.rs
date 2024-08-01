@@ -15,7 +15,7 @@ use crate::export::export_mm_file;
 type APIWebResponse<T> = Result<APIResponse<T>, APIError>;
 
 
-pub const SECRET_KEY: &str = "qRhALauPBvxnNWnWcPtM4VEr7t8QPfi9X6lQIzZpi3U=";
+
 
 
 pub async fn login(
@@ -45,7 +45,7 @@ pub async fn login(
                 let jwt_token = jsonwebtoken::encode(
                         &jsonwebtoken::Header::default(),
                         &claims,
-                        &EncodingKey::from_secret(SECRET_KEY.as_ref())
+                        &EncodingKey::from_secret(data.jwt_secret.as_ref())
                 ).map_err(|e| {
                     debug!("Failed to encode jwt token: {}", e);
                     APIError::new("Failed to encode jwt token")
