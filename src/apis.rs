@@ -2,16 +2,21 @@ use std::sync::Arc;
 
 use actix_web::web::Json;
 use actix_web::{web, HttpResponse, Responder};
+use jsonwebtoken::EncodingKey;
 use log::debug;
 use polars::prelude::IntoLazy;
 
 use crate::data_service::post_login;
 use crate::data_state::AppState;
-use crate::entities::{APIError, APIResponse, JwtResponse, SearchKafkaResponse, UserLogin};
+use crate::entities::{APIError, APIResponse, Claims, JwtResponse, SearchKafkaResponse, UserLogin};
 use crate::export::export_mm_file;
 use crate::{data_service, entities};
 
 type APIWebResponse<T> = Result<APIResponse<T>, APIError>;
+
+
+const SECRET_KEY: &str = "qRhALauPBvxnNWnWcPtM4VEr7t8QPfi9X6lQIzZpi3U=";
+
 
 pub async fn login(
     data: web::Data<Arc<AppState>>,
@@ -21,10 +26,38 @@ pub async fn login(
     debug!("User: {}", user_login.username);
 
     if let Some(ds) = &data.user_authentication {
-        // let user = data_service::login(ds, &user_login)?;
-        // return Ok(APIResponse { data: user });
-        //ds.lazy().filter()
-        let r = post_login(ds, &user_login.username, &user_login.password);
+        let result = post_login(ds, &user_login.username, &user_login.password);
+
+        if let Ok(b) = result {
+            return if b {
+                let expiration = chrono::Utc::now()
+                    .checked_add_signed(chrono::Duration::seconds(3600))
+                    .expect("valid timestamp")
+                    .timestamp();
+
+                let claims = Claims::new(user_login.username.clone(), expiration as usize, "issuer".to_string(), "audience".to_string());
+                let jwt_token = jsonwebtoken::encode(
+                        &jsonwebtoken::Header::default(),
+                        &claims,
+                        &EncodingKey::from_secret(SECRET_KEY.as_ref())
+                ).map_err(|e| {
+                    debug!("Failed to encode jwt token: {}", e);
+                    APIError::new("Failed to encode jwt token")
+                })?;
+
+                let response = JwtResponse {
+                    token: jwt_token,
+                    token_type: "Bearer".to_string(),
+                    expires_in: 3600,
+                };
+
+                Ok(APIResponse {
+                    data: response
+                })
+            } else {
+                Err(APIError::new("Invalid username or password"))
+            }
+        }
     }
     Err(APIError::new("Failed to login"))
 }

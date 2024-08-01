@@ -60,7 +60,8 @@ azure_storage_blobs = { version = "0.20",default-features = false, features = ["
 azure_core = {version = "0.20",default-features = false,features = ["enable_reqwest_rustls"]}
 
 futures = "0.3"
-
+chrono = { version = "0.4" , features = ["serde"] }
+jsonwebtoken = "9.3"
 #[profile.release]
 #opt-level = "z"    # "s" for size optimization, "3" for maximum optimization
 #debug = false     # Disable debug symbols

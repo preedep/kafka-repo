@@ -40,7 +40,15 @@ pub fn read_csv_from_string(data: &String) -> PolarsResult<DataFrame> {
     CsvReader::new(cursor).finish()
 }
 pub fn post_login(ds: &DataFrame, user_name: &String, password: &String) -> Result<bool, APIError> {
-    Ok(true)
+    let ds = ds.clone();
+    let ds = ds
+        .lazy()
+        .filter(col("username").eq(lit(user_name.as_str())))
+        .filter(col("password").eq(lit(password.as_str()))).collect()
+        .map_err(|e|{
+            APIError::new("Failed to filter by username and password")
+        })?;
+    Ok((ds.height() > 0))
 }
 pub fn get_app_list(ds: &DataFrame) -> Result<Vec<String>, APIError> {
     let mut app_list: Vec<String> = Vec::new();

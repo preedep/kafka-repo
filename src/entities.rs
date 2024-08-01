@@ -23,6 +23,28 @@ pub struct JwtResponse {
     pub expires_in: usize,
 }
 
+#[derive(Debug, Serialize, Deserialize,Clone)]
+pub struct Claims {
+    #[serde(rename = "sub")]
+    sub: String,        // Subject (typically the user ID)
+    #[serde(rename = "exp")]
+    exp: usize,         // Expiration time (as a Unix timestamp)
+    #[serde(rename = "iat")]
+    iat: usize,         // Issued at time (as a Unix timestamp)
+    #[serde(rename = "iss")]
+    iss: String,        // Issuer
+    #[serde(rename = "aud")]
+    aud: String,        // Audience
+}
+
+impl Claims {
+    pub fn new(sub: String, exp: usize, iss: String, aud: String) -> Self {
+        let iat = chrono::Utc::now().timestamp() as usize;
+        Claims { sub, exp, iat, iss, aud }
+    }
+}
+
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SearchKafkaRequest {
     #[serde(rename = "app_owner")]
