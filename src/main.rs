@@ -1,18 +1,16 @@
 use std::sync::Arc;
 
 use actix_files as fs;
-use actix_web::{App, Error, HttpMessage, HttpResponse, middleware, web};
+use actix_web::{App, middleware, web};
 use actix_web::dev::Service;
 use actix_web::http::header;
 use actix_web::middleware::Logger;
 use actix_web::web::Data;
-use jsonwebtoken::{decode, DecodingKey, Validation};
 use log::{debug, error, info};
 
-use crate::apis::SECRET_KEY;
 use crate::data_service::read_csv;
 use crate::data_utils::fetch_dataset_az_blob;
-use crate::entities::{APIError, Claims};
+
 
 mod apis;
 mod data_service;
@@ -40,6 +38,8 @@ async fn main() -> std::io::Result<()> {
     let azure_blob_container_name =
         std::env::var("STORAGE_CONTAINER").expect("AZURE_BLOB_CONTAINER_NAME must be set");
 
+    let jwt_secret_key = std::env::var("JWT_SECRET_KEY").expect("JWT_SECRET must be set");
+
     debug!("Reading kafka inventory file: {}", kafka_inventory_file);
     debug!("Reading kafka consumer file: {}", kafka_consumer_file);
     debug!("Azure Blob Storage account: {}", azure_blob_account_name);
@@ -52,6 +52,7 @@ async fn main() -> std::io::Result<()> {
         kafka_inventory: None,
         kafka_consumer: None,
         user_authentication: None,
+        jwt_secret: jwt_secret_key.clone(),
     };
 
     // Fetch the dataset from Azure Blob Storage
@@ -148,7 +149,7 @@ async fn main() -> std::io::Result<()> {
                     Ok(res)
                 }
             })
-            .wrap(jwt_middleware::JwtMiddleware::new(SECRET_KEY.to_string()))
+            .wrap(jwt_middleware::JwtMiddleware::new(jwt_secret_key.clone()))
             .service(
                 web::scope("/api/v1")
                     .route("/apps", web::get().to(apis::get_apps))
@@ -161,8 +162,7 @@ async fn main() -> std::io::Result<()> {
                     ),
             )
             .service(
-                web::scope("/api/authenticate/v1")
-                    .route("/login", web::post().to(apis::login))
+                web::scope("/api/authenticate/v1").route("/login", web::post().to(apis::login)),
             )
             .service(
                 fs::Files::new("/", "./statics")

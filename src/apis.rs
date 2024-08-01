@@ -4,7 +4,7 @@ use actix_web::{HttpResponse, Responder, web};
 use actix_web::web::Json;
 use jsonwebtoken::EncodingKey;
 use log::debug;
-use polars::prelude::IntoLazy;
+
 
 use crate::{data_service, entities};
 use crate::data_service::post_login;
@@ -13,10 +13,6 @@ use crate::entities::{APIError, APIResponse, Claims, JwtResponse, SearchKafkaRes
 use crate::export::export_mm_file;
 
 type APIWebResponse<T> = Result<APIResponse<T>, APIError>;
-
-
-pub const SECRET_KEY: &str = "qRhALauPBvxnNWnWcPtM4VEr7t8QPfi9X6lQIzZpi3U=";
-
 
 pub async fn login(
     data: web::Data<Arc<AppState>>,
@@ -37,16 +33,19 @@ pub async fn login(
                     .expect("valid timestamp")
                     .timestamp();
 
-                let claims = Claims::new(user_login.username.clone(),
-                                         expiration as usize,
-                                         "kafka-repo-iss".to_string(),
-                                         "kafka-repo-service-aud".to_string());
+                let claims = Claims::new(
+                    user_login.username.clone(),
+                    expiration as usize,
+                    "kafka-repo-iss".to_string(),
+                    "kafka-repo-service-aud".to_string(),
+                );
 
                 let jwt_token = jsonwebtoken::encode(
-                        &jsonwebtoken::Header::default(),
-                        &claims,
-                        &EncodingKey::from_secret(SECRET_KEY.as_ref())
-                ).map_err(|e| {
+                    &jsonwebtoken::Header::default(),
+                    &claims,
+                    &EncodingKey::from_secret(data.jwt_secret.as_ref()),
+                )
+                .map_err(|e| {
                     debug!("Failed to encode jwt token: {}", e);
                     APIError::new("Failed to encode jwt token")
                 })?;
@@ -57,13 +56,11 @@ pub async fn login(
                     expires_in: 3600,
                 };
 
-                Ok(APIResponse {
-                    data: response
-                })
+                Ok(APIResponse { data: response })
             } else {
                 Err(APIError::new("Invalid username or password"))
-            }
-        }else{
+            };
+        } else {
             let err = result.err().unwrap();
             return Err(err);
         }

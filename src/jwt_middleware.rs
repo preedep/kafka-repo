@@ -88,18 +88,18 @@ where
                                     svc.call(req).await
                                 }
                                 Err(e) => {
-                                    error!("Failed to decode token : {} ",e);
+                                    error!("Failed to decode token : {} ", e);
                                     Err(AuthError::Unauthorized.into())
-                                },
-                            }
+                                }
+                            };
                         }
                     }
                 }
                 Err(AuthError::Unauthorized.into())
             } else {
                 svc.call(req).await
-            }
+            };
         }
-            .boxed_local()
+        .boxed_local()
     }
 }
