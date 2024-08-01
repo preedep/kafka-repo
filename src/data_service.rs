@@ -1,7 +1,6 @@
-use std::fmt::format;
+
 use std::io::Cursor;
 
-use actix_web::web::Data;
 use log::debug;
 use polars::prelude::*;
 
@@ -48,9 +47,14 @@ pub fn post_login(ds: &DataFrame, user_name: &String, password: &String) -> Resu
     let password = col("Password").eq(lit(password.as_str()));
 
     let ds = ds
-        .lazy().filter(user_id.and(password)).collect()
-        .map_err(|e|{
-            let message = format!("Failed to filter by username and password : [{:?}]",e.to_string());
+        .lazy()
+        .filter(user_id.and(password))
+        .collect()
+        .map_err(|e| {
+            let message = format!(
+                "Failed to filter by username and password : [{:?}]",
+                e.to_string()
+            );
             APIError::new(message.as_str())
         })?;
     Ok(ds.height() > 0)
