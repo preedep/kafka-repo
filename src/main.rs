@@ -6,13 +6,14 @@ use actix_web::web::Data;
 use actix_web::{middleware, web, App};
 use log::info;
 
+use crate::data_service::read_csv;
 use actix_web::dev::Service;
 use actix_web::http::header;
-use crate::data_service::read_csv;
 
 mod apis;
 mod data_service;
 mod data_state;
+mod data_utils;
 mod entities;
 mod export;
 
@@ -50,9 +51,16 @@ async fn main() -> std::io::Result<()> {
                 let fut = srv.call(req);
                 async {
                     let mut res = fut.await?;
-                    res.headers_mut().insert(header::CACHE_CONTROL, "no-store,no-cache,must-revalidate,proxy-validate,max-age=0".parse().unwrap());
-                    res.headers_mut().insert(header::EXPIRES, "0".parse().unwrap());
-                    res.headers_mut().insert(header::PRAGMA, "no-cache".parse().unwrap());
+                    res.headers_mut().insert(
+                        header::CACHE_CONTROL,
+                        "no-store,no-cache,must-revalidate,proxy-validate,max-age=0"
+                            .parse()
+                            .unwrap(),
+                    );
+                    res.headers_mut()
+                        .insert(header::EXPIRES, "0".parse().unwrap());
+                    res.headers_mut()
+                        .insert(header::PRAGMA, "no-cache".parse().unwrap());
                     Ok(res)
                 }
             })
@@ -71,8 +79,7 @@ async fn main() -> std::io::Result<()> {
                 fs::Files::new("/", "./statics")
                     .index_file("index.html")
                     .use_last_modified(true)
-                    .use_etag(true)
-                ,
+                    .use_etag(true),
             )
     })
     .bind(("0.0.0.0", 8888))?

@@ -1,5 +1,6 @@
 use log::debug;
 use polars::prelude::*;
+use std::io::Cursor;
 
 use crate::entities::{APIError, SearchKafkaRequest, SearchKafkaResponse};
 
@@ -24,6 +25,17 @@ pub fn read_csv(file: &String) -> PolarsResult<DataFrame> {
         .with_infer_schema_length(None)
         .try_into_reader_with_file_path(Some(file.into()))?
         .finish()
+}
+pub fn read_csv_from_string(data: &String) -> PolarsResult<DataFrame> {
+    // Prefer `from_path` over `new` as it is faster.
+    // Create a cursor from the CSV string
+    let cursor = Cursor::new(data);
+    let option = CsvReadOptions::default()
+        .with_has_header(true)
+        .with_infer_schema_length(None);
+
+    // Read the CSV string
+    CsvReader::new(cursor).finish()
 }
 pub fn get_app_list(ds: &DataFrame) -> Result<Vec<String>, APIError> {
     let mut app_list: Vec<String> = Vec::new();
