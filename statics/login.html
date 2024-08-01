@@ -65,7 +65,23 @@
     </form>
 </div>
 <script>
-    import {checkTokenValidity} from "./token-handler";
+
+    function checkTokenValidity() {
+        const token = localStorage.getItem('token');
+        const expirationTime = localStorage.getItem('expirationTime');
+
+        if (!token || !expirationTime) {
+            return false;
+        }
+
+        if (new Date().getTime() > expirationTime) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('expirationTime');
+            return false;
+        }
+
+        return true;
+    }
 
     async function generateSHA256Hash(input) {
         const encoder = new TextEncoder();
@@ -77,6 +93,7 @@
     }
 
     // Check if token is valid
+
     document.addEventListener('DOMContentLoaded', () => {
         if (checkTokenValidity()) {
             window.location.href = 'index.html'; // Redirect to login if token is invalid or expired

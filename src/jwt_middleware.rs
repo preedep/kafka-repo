@@ -1,12 +1,14 @@
-use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, HttpMessage, Result};
-use actix_web::dev::{Transform, Service};
-use futures_util::future::{ok, Ready};
-use futures_util::future::{LocalBoxFuture, FutureExt};
-use jsonwebtoken::{decode, DecodingKey, Validation};
-use std::rc::Rc;
 use std::cell::RefCell;
+use std::rc::Rc;
 use std::task::{Context, Poll};
+
+use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, HttpMessage, Result};
+use actix_web::dev::{Service, Transform};
+use futures_util::future::{ok, Ready};
+use futures_util::future::{FutureExt, LocalBoxFuture};
+use jsonwebtoken::{decode, DecodingKey, Validation};
 use log::{debug, error};
+
 use crate::entities::{AuthError, Claims};
 
 pub struct JwtMiddleware {
