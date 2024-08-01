@@ -37,7 +37,11 @@ pub async fn login(
                     .expect("valid timestamp")
                     .timestamp();
 
-                let claims = Claims::new(user_login.username.clone(), expiration as usize, "issuer".to_string(), "audience".to_string());
+                let claims = Claims::new(user_login.username.clone(),
+                                         expiration as usize,
+                                         "kafka-repo-iss".to_string(),
+                                         "kafka-repo-service-aud".to_string());
+
                 let jwt_token = jsonwebtoken::encode(
                         &jsonwebtoken::Header::default(),
                         &claims,

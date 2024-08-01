@@ -6,7 +6,7 @@ use jsonwebtoken::{decode, DecodingKey, Validation};
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::task::{Context, Poll};
-use log::debug;
+use log::{debug, error};
 use crate::entities::{AuthError, Claims};
 
 pub struct JwtMiddleware {
@@ -66,10 +66,13 @@ where
             return if req.path().starts_with("/api/v1") {
                 debug!("Checking JWT token");
                 if let Some(authen_header) = req.headers().get("Authorization") {
+                    debug!("Authorization");
                     if let Ok(authen_str) = authen_header.to_str() {
                         if authen_str.starts_with("Bearer ") {
                             let token = &authen_str[7..];
-                            let validation = Validation::default();
+                            debug!("Token: {}", token);
+                            let mut validation = Validation::default();
+                            validation.set_audience(&["kafka-repo-service-aud"]);
                             let token_data = decode::<Claims>(
                                 token,
                                 &DecodingKey::from_secret(secret.as_ref()),
@@ -78,15 +81,18 @@ where
 
                             return match token_data {
                                 Ok(data) => {
+                                    debug!("Token data: {:?}", data);
                                     req.extensions_mut().insert(data.claims);
                                     svc.call(req).await
                                 }
-                                Err(_) => Err(AuthError::Unauthorized.into()),
+                                Err(e) => {
+                                    error!("Failed to decode token : {} ",e);
+                                    Err(AuthError::Unauthorized.into())
+                                },
                             }
                         }
                     }
                 }
-
                 Err(AuthError::Unauthorized.into())
             } else {
                 svc.call(req).await
