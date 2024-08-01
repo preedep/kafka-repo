@@ -3,19 +3,27 @@ use std::sync::Arc;
 use actix_web::{web, HttpResponse, Responder};
 use actix_web::web::Json;
 use log::debug;
-
+use polars::prelude::IntoLazy;
 use crate::data_state::AppState;
-use crate::entities::{APIError, APIResponse, SearchKafkaResponse, UserLogin};
+use crate::entities::{APIError, APIResponse, JwtResponse, SearchKafkaResponse, UserLogin};
 use crate::export::export_mm_file;
 use crate::{data_service, entities};
+use crate::data_service::post_login;
 
 type APIWebResponse<T> = Result<APIResponse<T>, APIError>;
 
 
-pub async fn post_login(data: web::Data<Arc<AppState>>,user_login: Json<UserLogin>) -> APIWebResponse<String> {
+pub async fn login(data: web::Data<Arc<AppState>>,user_login: Json<UserLogin>) -> APIWebResponse<JwtResponse> {
     debug!("Logging in");
     debug!("User: {}", user_login.username);
 
+    if let Some(ds) = &data.user_authentication {
+       // let user = data_service::login(ds, &user_login)?;
+       // return Ok(APIResponse { data: user });
+        //ds.lazy().filter()
+        let r = post_login(ds, &user_login.username, &user_login.password);
+
+    }
     Err(APIError::new("Failed to login"))
 }
 

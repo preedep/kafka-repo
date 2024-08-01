@@ -64,7 +64,7 @@ async fn main() -> std::io::Result<()> {
         &kafka_consumer_file,
     ).await;
 
-    let ds_user_authen = fetch_dataset_az_blob(
+    let ds_user_authentication = fetch_dataset_az_blob(
         &azure_blob_account_name,
         &azure_blob_container_name,
         &user_authentication_file,
@@ -97,7 +97,7 @@ async fn main() -> std::io::Result<()> {
         }
     }
 
-    match ds_user_authen {
+    match ds_user_authentication {
         Ok(ds) => {
             data_state.user_authentication = Some(ds);
         }
@@ -133,7 +133,7 @@ async fn main() -> std::io::Result<()> {
             })
             .service(
                 web::scope("/api/v1")
-                    .route("/login", web::post().to(apis::post_login))
+                    .route("/login", web::post().to(apis::login))
                     .route("/apps", web::get().to(apis::get_apps))
                     .route("/apps/{appName}/topics", web::get().to(apis::get_topics))
                     .route("/consumers", web::get().to(apis::get_consumers))

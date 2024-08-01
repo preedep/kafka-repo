@@ -14,6 +14,15 @@ pub struct UserLogin {
     #[serde(rename = "password")]
     pub password: String,
 }
+#[derive(Serialize, Deserialize,Clone,Debug)]
+pub struct JwtResponse {
+    #[serde(rename = "token")]
+    pub token: String,
+    #[serde(rename = "token_type")]
+    pub token_type: String,
+    #[serde(rename = "expires_in")]
+    pub expires_in: usize,
+}
 
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
