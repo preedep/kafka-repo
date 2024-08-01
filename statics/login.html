@@ -65,6 +65,8 @@
     </form>
 </div>
 <script>
+    import {checkTokenValidity} from "./token-handler";
+
     async function generateSHA256Hash(input) {
         const encoder = new TextEncoder();
         const data = encoder.encode(input);
@@ -73,6 +75,14 @@
         const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
         return hashHex;
     }
+
+    // Check if token is valid
+    document.addEventListener('DOMContentLoaded', () => {
+        if (checkTokenValidity()) {
+            window.location.href = 'index.html'; // Redirect to login if token is invalid or expired
+        }
+    });
+
 
     document.getElementById('login-form').addEventListener('submit', async (event) => {
         event.preventDefault();

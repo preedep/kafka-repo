@@ -1,7 +1,7 @@
 import { initializeMermaid, renderMermaid } from './mermaid-config.js';
 import {  renderTable} from './table.js';
 import { filterFunction, handleKeyDown , selectItem} from './searchable-dropdown.js';
-
+import { checkTokenValidity } from './token-handler.js';
 function downloadSVG() {
     const svg = document.getElementById('mermaid-container');
     const serializer = new XMLSerializer();
@@ -368,22 +368,7 @@ function search_able_dropdown_topic_name_handler() {
     document.getElementById("dropdown-topic-name-input").addEventListener("keydown", handleKeyDown);
 }
 
-function checkTokenValidity() {
-    const token = localStorage.getItem('token');
-    const expirationTime = localStorage.getItem('expirationTime');
 
-    if (!token || !expirationTime) {
-        return false;
-    }
-
-    if (new Date().getTime() > expirationTime) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('expirationTime');
-        return false;
-    }
-
-    return true;
-}
 
 document.addEventListener('DOMContentLoaded', function() {
     if (!checkTokenValidity()) {
