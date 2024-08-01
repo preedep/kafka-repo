@@ -368,7 +368,28 @@ function search_able_dropdown_topic_name_handler() {
     document.getElementById("dropdown-topic-name-input").addEventListener("keydown", handleKeyDown);
 }
 
+function checkTokenValidity() {
+    const token = localStorage.getItem('token');
+    const expirationTime = localStorage.getItem('expirationTime');
+
+    if (!token || !expirationTime) {
+        return false;
+    }
+
+    if (new Date().getTime() > expirationTime) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('expirationTime');
+        return false;
+    }
+
+    return true;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    if (!checkTokenValidity()) {
+        window.location.href = 'login.html'; // Redirect to login if token is invalid or expired
+    }
+
     console.log("initializeMermaid");
     initializeMermaid();
 

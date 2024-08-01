@@ -98,6 +98,9 @@
         if (response.ok) {
             response.json().then(data => {
                 localStorage.setItem('token', data.data.token);
+                const expires_in = data.data.expires_in;
+                const expirationTime = new Date().getTime() + expires_in * 1000; // Calculate expiration time
+                localStorage.setItem('expirationTime', expirationTime);
                 window.location.href = 'index.html';
             });
         }else{
