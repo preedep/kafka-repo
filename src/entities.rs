@@ -6,6 +6,16 @@ use actix_web::{error, HttpRequest, HttpResponse, Responder};
 use log::error;
 use serde::{Deserialize, Serialize};
 
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct UserLogin {
+    #[serde(rename = "username")]
+    pub username: String,
+    #[serde(rename = "password")]
+    pub password: String,
+}
+
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SearchKafkaRequest {
     #[serde(rename = "app_owner")]

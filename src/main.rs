@@ -28,6 +28,10 @@ async fn main() -> std::io::Result<()> {
     let kafka_consumer_file =
         std::env::var("KAFKA_CONSUMER_FILE").expect("KAFKA_CONSUMER must be set");
 
+    let user_authentication_file = std::env::var("USER_AUTHENTICATION_FILE").expect("USER_AUTHENTICATION_FILE must be set");
+
+
+
     let azure_blob_account_name =
         std::env::var("STORAGE_ACCOUNT").expect("AZURE_BLOB_ACCOUNT_NAME must be set");
     let azure_blob_container_name
@@ -43,6 +47,7 @@ async fn main() -> std::io::Result<()> {
     let mut data_state = data_state::AppState {
         kafka_inventory: None,
         kafka_consumer: None,
+        user_authentication: None,
     };
 
     // Fetch the dataset from Azure Blob Storage
@@ -57,6 +62,12 @@ async fn main() -> std::io::Result<()> {
         &azure_blob_account_name,
         &azure_blob_container_name,
         &kafka_consumer_file,
+    ).await;
+
+    let ds_user_authen = fetch_dataset_az_blob(
+        &azure_blob_account_name,
+        &azure_blob_container_name,
+        &user_authentication_file,
     ).await;
 
     // Check if the dataset was fetched successfully
@@ -86,6 +97,16 @@ async fn main() -> std::io::Result<()> {
         }
     }
 
+    match ds_user_authen {
+        Ok(ds) => {
+            data_state.user_authentication = Some(ds);
+        }
+        Err(e) => {
+            //panic!("Failed to fetch kafka consumer from Azure Blob Storage: {}", e);
+            panic!("Failed to fetch user authentication from Azure Blob Storage: {}", e);
+        }
+    }
+
     let app_state = Arc::new(data_state);
     info!("Starting server...");
     actix_web::HttpServer::new(move || {
@@ -112,6 +133,7 @@ async fn main() -> std::io::Result<()> {
             })
             .service(
                 web::scope("/api/v1")
+                    .route("/login", web::post().to(apis::post_login))
                     .route("/apps", web::get().to(apis::get_apps))
                     .route("/apps/{appName}/topics", web::get().to(apis::get_topics))
                     .route("/consumers", web::get().to(apis::get_consumers))
@@ -123,7 +145,7 @@ async fn main() -> std::io::Result<()> {
             )
             .service(
                 fs::Files::new("/", "./statics")
-                    .index_file("index.html")
+                    .index_file("login.html")
                     .use_last_modified(true)
                     .use_etag(true),
             )

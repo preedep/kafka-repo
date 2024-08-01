@@ -1,14 +1,23 @@
 use std::sync::Arc;
 
 use actix_web::{web, HttpResponse, Responder};
+use actix_web::web::Json;
 use log::debug;
 
 use crate::data_state::AppState;
-use crate::entities::{APIError, APIResponse, SearchKafkaResponse};
+use crate::entities::{APIError, APIResponse, SearchKafkaResponse, UserLogin};
 use crate::export::export_mm_file;
 use crate::{data_service, entities};
 
 type APIWebResponse<T> = Result<APIResponse<T>, APIError>;
+
+
+pub async fn post_login(data: web::Data<Arc<AppState>>,user_login: Json<UserLogin>) -> APIWebResponse<String> {
+    debug!("Logging in");
+    debug!("User: {}", user_login.username);
+
+    Err(APIError::new("Failed to login"))
+}
 
 pub async fn get_apps(data: web::Data<Arc<AppState>>) -> APIWebResponse<Vec<String>> {
     debug!("Getting app list");
