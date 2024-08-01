@@ -1,1 +1,0 @@
-curl -v -H 'Content-Type: application/json' -X POST -d '{"consumer_app":"Connect"}' http://localhost:8888/api/v1/search

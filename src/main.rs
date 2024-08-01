@@ -148,7 +148,6 @@ async fn main() -> std::io::Result<()> {
                 }
             })
             .wrap(jwt_middleware::JwtMiddleware::new(SECRET_KEY.to_string()))
-            .service(web::scope("/api").route("/login", web::post().to(apis::login)))
             .service(
                 web::scope("/api/v1")
                     .route("/apps", web::get().to(apis::get_apps))
@@ -159,6 +158,10 @@ async fn main() -> std::io::Result<()> {
                         "/render",
                         web::post().to(apis::post_topic_kafka_relation_render),
                     ),
+            )
+            .service(
+                web::scope("/api/authenticate/v1")
+                    .route("/login", web::post().to(apis::login))
             )
             .service(
                 fs::Files::new("/", "./statics")
