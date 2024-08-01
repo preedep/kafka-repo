@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .container h1 {
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .container input[type="text"],
+        .container input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .container button {
+            width: 100%;
+            padding: 10px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .container button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Login</h1>
+    <form id="login-form" autocomplete="off" novalidate>
+        <label for="username">User Name</label><input type="text" id="username" name="username" placeholder="Username" required autocomplete="off" novalidate>
+        <label for="password">Password</label><input type="password" id="password" name="password" placeholder="Password" required autocomplete="off" novalidate>
+        <button type="submit">Login</button>
+    </form>
+</div>
+<script>
+
+    function checkTokenValidity() {
+        const token = localStorage.getItem('token');
+        const expirationTime = localStorage.getItem('expirationTime');
+
+        if (!token || !expirationTime) {
+            return false;
+        }
+
+        if (new Date().getTime() > expirationTime) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('expirationTime');
+            return false;
+        }
+
+        return true;
+    }
+
+    async function generateSHA256Hash(input) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(input);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+        return hashHex;
+    }
+
+    // Check if token is valid
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (checkTokenValidity()) {
+            window.location.href = 'index.html'; // Redirect to login if token is invalid or expired
+        }
+    });
+
+
+    document.getElementById('login-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        const passwordHash = await generateSHA256Hash(password);
+        let data = {
+            username: username,
+            password: passwordHash
+        };
+
+        console.log(data);
+
+        const response = await fetch('/api/authenticate/v1/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(
+                data
+            )
+        });
+
+        if (response.ok) {
+            response.json().then(data => {
+                localStorage.setItem('token', data.data.token);
+                const expires_in = data.data.expires_in;
+                const expirationTime = new Date().getTime() + expires_in * 1000; // Calculate expiration time
+                localStorage.setItem('expirationTime', expirationTime);
+                window.location.href = 'index.html';
+            });
+        }else{
+            response.text().then(data => {
+                console.log(data);
+                alert(data);
+            });
+        }
+    });
+</script>
+</body>
+</html>
