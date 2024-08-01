@@ -79,15 +79,19 @@
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
 
+        const passwordHash = await generateSHA256Hash(password);
+        let data = {
+            username: username,
+            password: passwordHash
+        };
+
+        console.log(data);
 
         const response = await fetch('/api/v1/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(
-                {
-                    username: username,
-                    password: generateSHA256Hash(password)
-                }
+                data
             )
         });
 
