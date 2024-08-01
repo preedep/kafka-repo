@@ -95,14 +95,23 @@
             )
         });
 
-        const result = await response.json();
+        await response.json()
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        /*
         if (response.ok) {
             alert('Login successful: ' + result);
             // Save the token in local storage or a cookie
             localStorage.setItem('token', result);
         } else {
             alert('Login failed: ' + result);
-        }
+        }*/
+
     });
 
 

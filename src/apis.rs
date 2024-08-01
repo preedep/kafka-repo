@@ -26,6 +26,8 @@ pub async fn login(
     debug!("User: {}", user_login.username);
 
     if let Some(ds) = &data.user_authentication {
+        debug!("User authentication dataset: {:?}", ds);
+
         let result = post_login(ds, &user_login.username, &user_login.password);
 
         if let Ok(b) = result {
@@ -57,6 +59,9 @@ pub async fn login(
             } else {
                 Err(APIError::new("Invalid username or password"))
             }
+        }else{
+            let err = result.err().unwrap();
+            return Err(err);
         }
     }
     Err(APIError::new("Failed to login"))

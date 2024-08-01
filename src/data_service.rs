@@ -1,3 +1,4 @@
+use std::fmt::format;
 use std::io::Cursor;
 
 use actix_web::web::Data;
@@ -40,13 +41,17 @@ pub fn read_csv_from_string(data: &String) -> PolarsResult<DataFrame> {
     CsvReader::new(cursor).finish()
 }
 pub fn post_login(ds: &DataFrame, user_name: &String, password: &String) -> Result<bool, APIError> {
+    debug!("Post login");
+
     let ds = ds.clone();
+    let user_id = col("User_ID").eq(lit(user_name.as_str()));
+    let password = col("Password").eq(lit(password.as_str()));
+
     let ds = ds
-        .lazy()
-        .filter(col("username").eq(lit(user_name.as_str())))
-        .filter(col("password").eq(lit(password.as_str()))).collect()
+        .lazy().filter(user_id.and(password)).collect()
         .map_err(|e|{
-            APIError::new("Failed to filter by username and password")
+            let message = format!("Failed to filter by username and password : [{:?}]",e.to_string());
+            APIError::new(message.as_str())
         })?;
     Ok((ds.height() > 0))
 }
