@@ -85,7 +85,6 @@ async fn main() -> std::io::Result<()> {
             data_state.kafka_consumer = Some(ds_kafka_consumer);
         }
     }
-
     /*
     let ds_kafka_inventory =
         read_csv(&kafka_inventory_file).expect("Failed to read kafka inventory file");
