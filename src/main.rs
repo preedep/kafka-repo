@@ -85,18 +85,7 @@ async fn main() -> std::io::Result<()> {
             data_state.kafka_consumer = Some(ds_kafka_consumer);
         }
     }
-    /*
-    let ds_kafka_inventory =
-        read_csv(&kafka_inventory_file).expect("Failed to read kafka inventory file");
-    let ds_kafka_consumer =
-        read_csv(&kafka_consumer_file).expect("Failed to read kafka consumer file");
 
-
-    let app_state = Arc::new(data_state::AppState {
-        kafka_inventory: Some(ds_kafka_inventory),
-        kafka_consumer: Some(ds_kafka_consumer),
-    });
-     */
     let app_state = Arc::new(data_state);
     info!("Starting server...");
     actix_web::HttpServer::new(move || {
