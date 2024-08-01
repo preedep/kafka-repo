@@ -1,7 +1,9 @@
+use std::io::Cursor;
+
+use actix_web::web::Data;
 use log::debug;
 use polars::prelude::*;
-use std::io::Cursor;
-use actix_web::web::Data;
+
 use crate::entities::{APIError, SearchKafkaRequest, SearchKafkaResponse};
 
 // Inventory file
@@ -38,7 +40,7 @@ pub fn read_csv_from_string(data: &String) -> PolarsResult<DataFrame> {
     CsvReader::new(cursor).finish()
 }
 pub fn post_login(ds: &DataFrame, user_name: &String, password: &String) -> Result<bool, APIError> {
-   Ok(true)
+    Ok(true)
 }
 pub fn get_app_list(ds: &DataFrame) -> Result<Vec<String>, APIError> {
     let mut app_list: Vec<String> = Vec::new();

@@ -1,5 +1,3 @@
-use crate::data_service::read_csv_from_string;
-use crate::entities::APIError;
 use azure_core::auth::TokenCredential;
 use azure_identity::{DefaultAzureCredential, TokenCredentialOptions};
 use azure_storage::StorageCredentials;
@@ -7,6 +5,9 @@ use azure_storage_blobs::prelude::*;
 use futures::StreamExt;
 use log::debug;
 use polars::frame::DataFrame;
+
+use crate::data_service::read_csv_from_string;
+use crate::entities::APIError;
 
 pub async fn fetch_dataset_az_blob(
     account_name: &str,
@@ -31,15 +32,14 @@ pub async fn fetch_dataset_az_blob(
         StorageCredentials::bearer_token(access_token.token.secret().to_string());
 
     // Create a blob service client using the StorageCredentials
-    let blob_service_client =
-        BlobServiceClient::new(account_name, storage_credentials);
+    let blob_service_client = BlobServiceClient::new(account_name, storage_credentials);
     let container_client = blob_service_client.container_client(container_name);
 
     // Get a blob client
     let blob_client = container_client.blob_client(blob_name);
 
     // Read the blob in chunks
-    let mut stream = blob_client.get().into_stream();// Read in 1 MB chunks
+    let mut stream = blob_client.get().into_stream(); // Read in 1 MB chunks
     let mut buffer = Vec::new();
 
     while let Some(value) = stream.next().await {

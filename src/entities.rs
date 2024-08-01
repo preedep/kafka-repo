@@ -6,7 +6,6 @@ use actix_web::{error, HttpRequest, HttpResponse, Responder};
 use log::error;
 use serde::{Deserialize, Serialize};
 
-
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserLogin {
     #[serde(rename = "username")]
@@ -14,7 +13,7 @@ pub struct UserLogin {
     #[serde(rename = "password")]
     pub password: String,
 }
-#[derive(Serialize, Deserialize,Clone,Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct JwtResponse {
     #[serde(rename = "token")]
     pub token: String,
@@ -23,7 +22,6 @@ pub struct JwtResponse {
     #[serde(rename = "expires_in")]
     pub expires_in: usize,
 }
-
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SearchKafkaRequest {

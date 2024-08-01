@@ -1,14 +1,14 @@
 use std::sync::Arc;
 
 use actix_files as fs;
+use actix_web::dev::Service;
+use actix_web::http::header;
 use actix_web::middleware::Logger;
 use actix_web::web::Data;
 use actix_web::{middleware, web, App};
 use log::{debug, error, info};
 
 use crate::data_service::read_csv;
-use actix_web::dev::Service;
-use actix_web::http::header;
 use crate::data_utils::fetch_dataset_az_blob;
 
 mod apis;
@@ -28,21 +28,21 @@ async fn main() -> std::io::Result<()> {
     let kafka_consumer_file =
         std::env::var("KAFKA_CONSUMER_FILE").expect("KAFKA_CONSUMER must be set");
 
-    let user_authentication_file = std::env::var("USER_AUTHENTICATION_FILE").expect("USER_AUTHENTICATION_FILE must be set");
-
-
+    let user_authentication_file =
+        std::env::var("USER_AUTHENTICATION_FILE").expect("USER_AUTHENTICATION_FILE must be set");
 
     let azure_blob_account_name =
         std::env::var("STORAGE_ACCOUNT").expect("AZURE_BLOB_ACCOUNT_NAME must be set");
-    let azure_blob_container_name
-        = std::env::var("STORAGE_CONTAINER").expect("AZURE_BLOB_CONTAINER_NAME must be set");
-
+    let azure_blob_container_name =
+        std::env::var("STORAGE_CONTAINER").expect("AZURE_BLOB_CONTAINER_NAME must be set");
 
     debug!("Reading kafka inventory file: {}", kafka_inventory_file);
     debug!("Reading kafka consumer file: {}", kafka_consumer_file);
     debug!("Azure Blob Storage account: {}", azure_blob_account_name);
-    debug!("Azure Blob Storage container: {}", azure_blob_container_name);
-
+    debug!(
+        "Azure Blob Storage container: {}",
+        azure_blob_container_name
+    );
 
     let mut data_state = data_state::AppState {
         kafka_inventory: None,
@@ -55,20 +55,23 @@ async fn main() -> std::io::Result<()> {
         &azure_blob_account_name,
         &azure_blob_container_name,
         &kafka_inventory_file,
-    ).await;
+    )
+    .await;
 
     // Fetch the dataset from Azure Blob Storage
     let ds_consumer = fetch_dataset_az_blob(
         &azure_blob_account_name,
         &azure_blob_container_name,
         &kafka_consumer_file,
-    ).await;
+    )
+    .await;
 
     let ds_user_authentication = fetch_dataset_az_blob(
         &azure_blob_account_name,
         &azure_blob_container_name,
         &user_authentication_file,
-    ).await;
+    )
+    .await;
 
     // Check if the dataset was fetched successfully
     match ds_inventory {
@@ -77,7 +80,10 @@ async fn main() -> std::io::Result<()> {
         }
         Err(e) => {
             //panic!("Failed to fetch kafka inventory from Azure Blob Storage: {}", e);
-            error!("Failed to fetch kafka inventory from Azure Blob Storage: {}", e);
+            error!(
+                "Failed to fetch kafka inventory from Azure Blob Storage: {}",
+                e
+            );
             let ds_kafka_inventory =
                 read_csv(&kafka_inventory_file).expect("Failed to read kafka inventory file");
             data_state.kafka_inventory = Some(ds_kafka_inventory);
@@ -90,7 +96,10 @@ async fn main() -> std::io::Result<()> {
         }
         Err(e) => {
             //panic!("Failed to fetch kafka consumer from Azure Blob Storage: {}", e);
-            error!("Failed to fetch kafka consumer from Azure Blob Storage: {}", e);
+            error!(
+                "Failed to fetch kafka consumer from Azure Blob Storage: {}",
+                e
+            );
             let ds_kafka_consumer =
                 read_csv(&kafka_consumer_file).expect("Failed to read kafka consumer file");
             data_state.kafka_consumer = Some(ds_kafka_consumer);
@@ -103,7 +112,10 @@ async fn main() -> std::io::Result<()> {
         }
         Err(e) => {
             //panic!("Failed to fetch kafka consumer from Azure Blob Storage: {}", e);
-            panic!("Failed to fetch user authentication from Azure Blob Storage: {}", e);
+            panic!(
+                "Failed to fetch user authentication from Azure Blob Storage: {}",
+                e
+            );
         }
     }
 
