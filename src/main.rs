@@ -5,11 +5,13 @@ use actix_web::dev::Service;
 use actix_web::http::header;
 use actix_web::middleware::Logger;
 use actix_web::web::Data;
-use actix_web::{middleware, web, App};
+use actix_web::{middleware, web, App, HttpMessage, Error, HttpResponse};
+use jsonwebtoken::{decode, DecodingKey, Validation};
 use log::{debug, error, info};
-
+use crate::apis::SECRET_KEY;
 use crate::data_service::read_csv;
 use crate::data_utils::fetch_dataset_az_blob;
+use crate::entities::{APIError, Claims};
 
 mod apis;
 mod data_service;
@@ -17,6 +19,7 @@ mod data_state;
 mod data_utils;
 mod entities;
 mod export;
+mod jwt_middleware;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -140,12 +143,14 @@ async fn main() -> std::io::Result<()> {
                         .insert(header::EXPIRES, "0".parse().unwrap());
                     res.headers_mut()
                         .insert(header::PRAGMA, "no-cache".parse().unwrap());
+
                     Ok(res)
                 }
             })
+            .wrap(jwt_middleware::JwtMiddleware::new(SECRET_KEY.to_string()))
+            .service(web::scope("/api").route("/login", web::post().to(apis::login)))
             .service(
                 web::scope("/api/v1")
-                    .route("/login", web::post().to(apis::login))
                     .route("/apps", web::get().to(apis::get_apps))
                     .route("/apps/{appName}/topics", web::get().to(apis::get_topics))
                     .route("/consumers", web::get().to(apis::get_consumers))

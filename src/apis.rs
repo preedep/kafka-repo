@@ -15,7 +15,7 @@ use crate::{data_service, entities};
 type APIWebResponse<T> = Result<APIResponse<T>, APIError>;
 
 
-const SECRET_KEY: &str = "qRhALauPBvxnNWnWcPtM4VEr7t8QPfi9X6lQIzZpi3U=";
+pub const SECRET_KEY: &str = "qRhALauPBvxnNWnWcPtM4VEr7t8QPfi9X6lQIzZpi3U=";
 
 
 pub async fn login(

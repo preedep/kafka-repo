@@ -2,7 +2,8 @@ use std::fmt::{Debug, Display, Formatter};
 
 use actix_web::http::header::ContentType;
 use actix_web::http::StatusCode;
-use actix_web::{error, HttpRequest, HttpResponse, Responder};
+use actix_web::{error, HttpRequest, HttpResponse, Responder, ResponseError};
+use derive_more::Display;
 use log::error;
 use serde::{Deserialize, Serialize};
 
@@ -22,6 +23,21 @@ pub struct JwtResponse {
     #[serde(rename = "expires_in")]
     pub expires_in: usize,
 }
+
+#[derive(Debug, Display)]
+pub enum AuthError {
+    #[display(fmt = "Unauthorized")]
+    Unauthorized,
+}
+
+impl ResponseError for AuthError {
+    fn error_response(&self) -> HttpResponse {
+        match self {
+            AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+        }
+    }
+}
+
 
 #[derive(Debug, Serialize, Deserialize,Clone)]
 pub struct Claims {

@@ -62,6 +62,8 @@ azure_core = {version = "0.20",default-features = false,features = ["enable_reqw
 futures = "0.3"
 chrono = { version = "0.4" , features = ["serde"] }
 jsonwebtoken = "9.3"
+futures-util = "0.3"
+derive_more = "0.99"
 #[profile.release]
 #opt-level = "z"    # "s" for size optimization, "3" for maximum optimization
 #debug = false     # Disable debug symbols

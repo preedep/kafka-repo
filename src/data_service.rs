@@ -53,7 +53,7 @@ pub fn post_login(ds: &DataFrame, user_name: &String, password: &String) -> Resu
             let message = format!("Failed to filter by username and password : [{:?}]",e.to_string());
             APIError::new(message.as_str())
         })?;
-    Ok((ds.height() > 0))
+    Ok(ds.height() > 0)
 }
 pub fn get_app_list(ds: &DataFrame) -> Result<Vec<String>, APIError> {
     let mut app_list: Vec<String> = Vec::new();
