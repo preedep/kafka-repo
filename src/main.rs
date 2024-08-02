@@ -12,7 +12,7 @@ use actix_web::http::header;
 use actix_web::middleware::Logger;
 use actix_web::web::Data;
 use log::{debug, error, info};
-use tokio::sync::Mutex;
+use tokio::sync::{Mutex, Notify};
 use crate::data_service::read_csv;
 use crate::data_utils::fetch_dataset_az_blob;
 
@@ -157,12 +157,16 @@ async fn main() -> std::io::Result<()> {
 
 
 
+    // Create a Notify instance to signal shutdown
+    let notify = Arc::new(Notify::new());
 
+    // Clone the notify instance for the server
+    let notify_server = notify.clone();
 
     let app_state = Arc::new(data_state);
     info!("Starting server...");
     actix_web::HttpServer::new(move || {
-        App::new()
+         App::new()
             .wrap(Logger::default())
             .wrap(middleware::DefaultHeaders::new().add(("X-Version", "0.2")))
             .app_data(Data::new(app_state.clone()))
@@ -216,6 +220,6 @@ async fn main() -> std::io::Result<()> {
             )
     })
     .bind(("0.0.0.0", 8888))?
-    .run()
-    .await
+    .run().await
+
 }
