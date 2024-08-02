@@ -19,9 +19,22 @@ function filterTable() {
         let rowContainsFilter = false;
 
         for (let j = 0; j < cells.length; j++) {
-            if (cells[j].innerText.toLowerCase().includes(filter)) {
+            const cell = cells[j];
+            const text = cell.innerText.toLowerCase();
+            const originalText = cell.innerText;
+
+            // Remove existing highlights
+            cell.innerHTML = originalText;
+
+            if (text.includes(filter) && filter !== '') {
                 rowContainsFilter = true;
-                break;
+                const startIndex = text.indexOf(filter);
+                const endIndex = startIndex + filter.length;
+                const highlightedText = originalText.substring(startIndex, endIndex);
+                const highlightedHTML = originalText.substring(0, startIndex) +
+                    '<span class="highlight">' + highlightedText + '</span>' +
+                    originalText.substring(endIndex);
+                cell.innerHTML = highlightedHTML;
             }
         }
 
