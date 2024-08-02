@@ -9,10 +9,10 @@ use actix_rate_limiter::route::RouteBuilder;
 use actix_web::{App, middleware, web};
 use actix_web::dev::Service;
 use actix_web::http::header;
-use actix_web::middleware::Logger;
+use actix_web::middleware::{DefaultHeaders, Logger};
 use actix_web::web::Data;
 use log::{debug, error, info};
-use tokio::sync::Mutex;
+use tokio::sync::{Mutex, Notify};
 use crate::data_service::read_csv;
 use crate::data_utils::fetch_dataset_az_blob;
 
@@ -110,6 +110,7 @@ async fn main() -> std::io::Result<()> {
             data_state.kafka_inventory = Some(ds_kafka_inventory);
         }
     }
+
     // Check if the dataset was fetched successfully
     match ds_consumer {
         Ok(ds) => {
@@ -127,6 +128,7 @@ async fn main() -> std::io::Result<()> {
         }
     }
 
+    // Check if the dataset was fetched successfully
     match ds_user_authentication {
         Ok(ds) => {
             data_state.user_authentication = Some(ds);
@@ -142,15 +144,15 @@ async fn main() -> std::io::Result<()> {
 
     // Rate Limiter
     let limiter = RateLimiterBuilder::new()
-        .add_route(RouteBuilder::new().set_path("/api/v1/search").set_method("POST").build(),LimitBuilder::new().set_ttl(10).set_amount(1).build())
-        .add_route(RouteBuilder::new().set_path("/api/v1/render").set_method("POST").build(),LimitBuilder::new().set_ttl(10).set_amount(1).build())
-        .add_route(RouteBuilder::new().set_path("/api/v1/apps").set_method("GET").build(),LimitBuilder::new().set_ttl(10).set_amount(1).build())
-        .add_route(RouteBuilder::new().set_path("/api/v1/apps/{appName}/topics").set_method("GET").build(),LimitBuilder::new().set_ttl(10).set_amount(1).build())
-        .add_route(RouteBuilder::new().set_path("/api/v1/consumers").set_method("GET").build(),LimitBuilder::new().set_ttl(10).set_amount(1).build()).build();
+        .add_route(RouteBuilder::new().set_path("/api/v1/search").set_method("POST").build(),LimitBuilder::new().set_ttl(10).set_amount(20).build())
+        .add_route(RouteBuilder::new().set_path("/api/v1/render").set_method("POST").build(),LimitBuilder::new().set_ttl(10).set_amount(20).build())
+        .add_route(RouteBuilder::new().set_path("/api/v1/apps").set_method("GET").build(),LimitBuilder::new().set_ttl(10).set_amount(20).build())
+        .add_route(RouteBuilder::new().set_path("/api/v1/apps/{appName}/topics").set_method("GET").build(),LimitBuilder::new().set_ttl(20).set_amount(1).build())
+        .add_route(RouteBuilder::new().set_path("/api/v1/consumers").set_method("GET").build(),LimitBuilder::new().set_ttl(10).set_amount(20).build()).build();
+
     let backend = MemoryBackendProvider::default();
-    let rate_limiter = RateLimiterMiddlewareFactory::new(limiter, Arc::new(Mutex::new(backend)));
-
-
+    let rate_limiter = RateLimiterMiddlewareFactory::new(limiter,
+                                                         Arc::new(Mutex::new(backend)));
 
 
 
@@ -158,7 +160,7 @@ async fn main() -> std::io::Result<()> {
     let app_state = Arc::new(data_state);
     info!("Starting server...");
     actix_web::HttpServer::new(move || {
-        App::new()
+         App::new()
             .wrap(Logger::default())
             .wrap(middleware::DefaultHeaders::new().add(("X-Version", "0.2")))
             .app_data(Data::new(app_state.clone()))
@@ -190,6 +192,13 @@ async fn main() -> std::io::Result<()> {
             )
             .wrap(rate_limiter.clone())
             .wrap(jwt_middleware::JwtMiddleware::new(jwt_secret_key.clone()))
+             .wrap(
+                 DefaultHeaders::new()
+                     .add(("X-Content-Type-Options", "nosniff"))
+                     .add(("X-Frame-Options", "DENY"))
+                     .add(("X-XSS-Protection", "1; mode=block"))
+                     .add(("Strict-Transport-Security", "max-age=31536000; includeSubDomains"))
+             )
             .service(
                 web::scope("/api/v1")
                     .route("/apps", web::get().to(apis::get_apps))
@@ -212,6 +221,6 @@ async fn main() -> std::io::Result<()> {
             )
     })
     .bind(("0.0.0.0", 8888))?
-    .run()
-    .await
+    .run().await
+
 }

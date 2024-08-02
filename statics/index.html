@@ -87,15 +87,56 @@
             font-weight: bold;
             background-color: yellow;
         }
+
+        .header-container {
+            position: relative;
+            text-align: center;
+            background-color: #f0f0f0;
+            padding: 20px 0;
+        }
+        .header-container span {
+            background-color: yellow;
+            font-size: x-large;
+            padding: 5px 10px;
+        }
+        .logout-button {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: red;
+            color: white;
+            font-size: large;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        .logout-button:hover {
+            background-color: darkred;
+        }
     </style>
 
     <script src="script.js" type="module"></script>
+    <script>
+        function logout() {
+
+            // Redirect to login page or perform other actions
+            localStorage.removeItem('expirationTime');
+            localStorage.removeItem('token');
+
+            // Implement your logout logic here
+            alert("Logged out successfully!");
+
+            window.location.href = "login.html";  // Example redirect
+        }
+    </script>
 </head>
 <body>
 
-<p style="text-align: center">
-    <span style="background-color: yellow;font-size: x-large;">E-Kafka Inventory Finder Version 0.9</span><br/>
-</p>
+<div class="header-container">
+    <span>E-Kafka Inventory Finder Version 0.12</span>
+    <button class="logout-button" onclick="logout()">Logout</button>
+</div>
 
 <div class="padded-left-top">
 
@@ -144,7 +185,10 @@
 
     <div id = "table-container" style="display: none">
     <button id="downloadCsvButton" style="padding: 5px">Download CSV</button>
-    <table id="data-table">
+        <label for="table-result-search-input"></label>
+        <input type="text" id="table-result-search-input" placeholder="Search for anything..." style="width: 500px">
+
+        <table id="data-table">
         <thead>
         <tr id="table-head">
             <!-- Table headers will be inserted here -->
