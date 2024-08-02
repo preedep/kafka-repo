@@ -142,11 +142,11 @@ async fn main() -> std::io::Result<()> {
 
     // Rate Limiter
     let limiter = RateLimiterBuilder::new()
-        .add_route(RouteBuilder::new().set_path("/api/v1/search").set_method("POST").build(),LimitBuilder::new().set_ttl(10).set_amount(1).build())
-        .add_route(RouteBuilder::new().set_path("/api/v1/render").set_method("POST").build(),LimitBuilder::new().set_ttl(10).set_amount(1).build())
-        .add_route(RouteBuilder::new().set_path("/api/v1/apps").set_method("GET").build(),LimitBuilder::new().set_ttl(10).set_amount(1).build())
-        .add_route(RouteBuilder::new().set_path("/api/v1/apps/{appName}/topics").set_method("GET").build(),LimitBuilder::new().set_ttl(10).set_amount(1).build())
-        .add_route(RouteBuilder::new().set_path("/api/v1/consumers").set_method("GET").build(),LimitBuilder::new().set_ttl(10).set_amount(1).build()).build();
+        .add_route(RouteBuilder::new().set_path("/api/v1/search").set_method("POST").build(),LimitBuilder::new().set_ttl(10).set_amount(20).build())
+        .add_route(RouteBuilder::new().set_path("/api/v1/render").set_method("POST").build(),LimitBuilder::new().set_ttl(10).set_amount(20).build())
+        .add_route(RouteBuilder::new().set_path("/api/v1/apps").set_method("GET").build(),LimitBuilder::new().set_ttl(10).set_amount(20).build())
+        .add_route(RouteBuilder::new().set_path("/api/v1/apps/{appName}/topics").set_method("GET").build(),LimitBuilder::new().set_ttl(20).set_amount(1).build())
+        .add_route(RouteBuilder::new().set_path("/api/v1/consumers").set_method("GET").build(),LimitBuilder::new().set_ttl(10).set_amount(20).build()).build();
     let backend = MemoryBackendProvider::default();
     let rate_limiter = RateLimiterMiddlewareFactory::new(limiter, Arc::new(Mutex::new(backend)));
 
