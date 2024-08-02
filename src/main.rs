@@ -1,15 +1,21 @@
-use std::sync::Arc;
-
+use std::sync::{Arc};
+use actix_cors::Cors;
 use actix_files as fs;
+use actix_rate_limiter::backend::memory::MemoryBackendProvider;
+use actix_rate_limiter::limit::{Limit, LimitBuilder};
+use actix_rate_limiter::limiter::RateLimiterBuilder;
+use actix_rate_limiter::middleware::RateLimiterMiddlewareFactory;
+use actix_rate_limiter::route::RouteBuilder;
 use actix_web::{App, middleware, web};
 use actix_web::dev::Service;
 use actix_web::http::header;
 use actix_web::middleware::Logger;
 use actix_web::web::Data;
 use log::{debug, error, info};
-
+use tokio::sync::Mutex;
 use crate::data_service::read_csv;
 use crate::data_utils::fetch_dataset_az_blob;
+
 
 
 mod apis;
@@ -20,6 +26,16 @@ mod entities;
 mod export;
 mod jwt_middleware;
 
+
+fn is_allowed_origin(origin: &str) -> bool {
+    // List of allowed origins
+    let allowed_origins = vec![
+        "http://localhost:8888",
+        "https://kafka-repo-dev001.azurewebsites.net",
+    ];
+
+    allowed_origins.contains(&origin)
+}
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     pretty_env_logger::init();
@@ -124,6 +140,21 @@ async fn main() -> std::io::Result<()> {
         }
     }
 
+    // Rate Limiter
+    let limiter = RateLimiterBuilder::new()
+        .add_route(RouteBuilder::new().set_path("/api/v1/search").set_method("POST").build(),LimitBuilder::new().set_ttl(10).set_amount(1).build())
+        .add_route(RouteBuilder::new().set_path("/api/v1/render").set_method("POST").build(),LimitBuilder::new().set_ttl(10).set_amount(1).build())
+        .add_route(RouteBuilder::new().set_path("/api/v1/apps").set_method("GET").build(),LimitBuilder::new().set_ttl(10).set_amount(1).build())
+        .add_route(RouteBuilder::new().set_path("/api/v1/apps/{appName}/topics").set_method("GET").build(),LimitBuilder::new().set_ttl(10).set_amount(1).build())
+        .add_route(RouteBuilder::new().set_path("/api/v1/consumers").set_method("GET").build(),LimitBuilder::new().set_ttl(10).set_amount(1).build()).build();
+    let backend = MemoryBackendProvider::default();
+    let rate_limiter = RateLimiterMiddlewareFactory::new(limiter, Arc::new(Mutex::new(backend)));
+
+
+
+
+
+
     let app_state = Arc::new(data_state);
     info!("Starting server...");
     actix_web::HttpServer::new(move || {
@@ -149,6 +180,15 @@ async fn main() -> std::io::Result<()> {
                     Ok(res)
                 }
             })
+            .wrap(
+                Cors::default()
+                    .allowed_origin_fn(|origin, _req_head| {
+                        debug!("Origin: {:?}", origin);
+                        is_allowed_origin(origin.to_str().unwrap())
+                    })
+                    .allowed_methods(vec!["GET", "POST"])
+            )
+            .wrap(rate_limiter.clone())
             .wrap(jwt_middleware::JwtMiddleware::new(jwt_secret_key.clone()))
             .service(
                 web::scope("/api/v1")
