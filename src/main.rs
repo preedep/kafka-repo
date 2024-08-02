@@ -9,7 +9,7 @@ use actix_rate_limiter::route::RouteBuilder;
 use actix_web::{App, middleware, web};
 use actix_web::dev::Service;
 use actix_web::http::header;
-use actix_web::middleware::Logger;
+use actix_web::middleware::{DefaultHeaders, Logger};
 use actix_web::web::Data;
 use log::{debug, error, info};
 use tokio::sync::{Mutex, Notify};
@@ -157,12 +157,6 @@ async fn main() -> std::io::Result<()> {
 
 
 
-    // Create a Notify instance to signal shutdown
-    let notify = Arc::new(Notify::new());
-
-    // Clone the notify instance for the server
-    let notify_server = notify.clone();
-
     let app_state = Arc::new(data_state);
     info!("Starting server...");
     actix_web::HttpServer::new(move || {
@@ -198,6 +192,13 @@ async fn main() -> std::io::Result<()> {
             )
             .wrap(rate_limiter.clone())
             .wrap(jwt_middleware::JwtMiddleware::new(jwt_secret_key.clone()))
+             .wrap(
+                 DefaultHeaders::new()
+                     .add(("X-Content-Type-Options", "nosniff"))
+                     .add(("X-Frame-Options", "DENY"))
+                     .add(("X-XSS-Protection", "1; mode=block"))
+                     .add(("Strict-Transport-Security", "max-age=31536000; includeSubDomains"))
+             )
             .service(
                 web::scope("/api/v1")
                     .route("/apps", web::get().to(apis::get_apps))
