@@ -110,6 +110,7 @@ async fn main() -> std::io::Result<()> {
             data_state.kafka_inventory = Some(ds_kafka_inventory);
         }
     }
+
     // Check if the dataset was fetched successfully
     match ds_consumer {
         Ok(ds) => {
@@ -127,6 +128,7 @@ async fn main() -> std::io::Result<()> {
         }
     }
 
+    // Check if the dataset was fetched successfully
     match ds_user_authentication {
         Ok(ds) => {
             data_state.user_authentication = Some(ds);
@@ -147,8 +149,10 @@ async fn main() -> std::io::Result<()> {
         .add_route(RouteBuilder::new().set_path("/api/v1/apps").set_method("GET").build(),LimitBuilder::new().set_ttl(10).set_amount(20).build())
         .add_route(RouteBuilder::new().set_path("/api/v1/apps/{appName}/topics").set_method("GET").build(),LimitBuilder::new().set_ttl(20).set_amount(1).build())
         .add_route(RouteBuilder::new().set_path("/api/v1/consumers").set_method("GET").build(),LimitBuilder::new().set_ttl(10).set_amount(20).build()).build();
+
     let backend = MemoryBackendProvider::default();
-    let rate_limiter = RateLimiterMiddlewareFactory::new(limiter, Arc::new(Mutex::new(backend)));
+    let rate_limiter = RateLimiterMiddlewareFactory::new(limiter,
+                                                         Arc::new(Mutex::new(backend)));
 
 
 

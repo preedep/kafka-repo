@@ -1,1 +1,1 @@
-curl -v -H 'Content-Type: application/json' http://localhost:8888/api/v1/consumers
+curl -v -H 'Content-Type: application/json' http://kafka-repo-dev001.azurewebsites.net/api/v1/consumers
