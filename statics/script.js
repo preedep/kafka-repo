@@ -2,6 +2,33 @@ import { initializeMermaid, renderMermaid } from './mermaid-config.js';
 import {  renderTable} from './table.js';
 import { filterFunction, handleKeyDown , selectItem} from './searchable-dropdown.js';
 import { checkTokenValidity } from './token-handler.js';
+
+function load_filter_table() {
+    const input = document.getElementById('table-result-search-input');
+    input.addEventListener('keyup', filterTable);
+}
+function filterTable() {
+    const input = document.getElementById('table-result-search-input');
+    const filter = input.value.toLowerCase();
+    const table = document.getElementById('data-table');
+    const tbody = table.getElementsByTagName('tbody')[0];
+    const rows = tbody.getElementsByTagName('tr');
+
+    for (let i = 0; i < rows.length; i++) {
+        const cells = rows[i].getElementsByTagName('td');
+        let rowContainsFilter = false;
+
+        for (let j = 0; j < cells.length; j++) {
+            if (cells[j].innerText.toLowerCase().includes(filter)) {
+                rowContainsFilter = true;
+                break;
+            }
+        }
+
+        rows[i].style.display = rowContainsFilter ? '' : 'none';
+    }
+}
+
 function downloadSVG() {
     const svg = document.getElementById('mermaid-container');
     const serializer = new XMLSerializer();
@@ -386,6 +413,7 @@ document.addEventListener('DOMContentLoaded', function() {
     button_render_handler();
     button_download_csv_handler();
     button_download_svg_handler();
+    load_filter_table();
 
     search_able_dropdown_topic_name_handler()
 });

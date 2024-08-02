@@ -134,7 +134,7 @@
 <body>
 
 <div class="header-container">
-    <span>E-Kafka Inventory Finder Version 0.10</span>
+    <span>E-Kafka Inventory Finder Version 0.11</span>
     <button class="logout-button" onclick="logout()">Logout</button>
 </div>
 
@@ -185,7 +185,10 @@
 
     <div id = "table-container" style="display: none">
     <button id="downloadCsvButton" style="padding: 5px">Download CSV</button>
-    <table id="data-table">
+        <label for="table-result-search-input"></label>
+        <input type="text" id="table-result-search-input" placeholder="Search for anything..." style="width: 500px">
+
+        <table id="data-table">
         <thead>
         <tr id="table-head">
             <!-- Table headers will be inserted here -->
