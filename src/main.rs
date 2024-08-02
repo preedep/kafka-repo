@@ -1,4 +1,5 @@
-use std::sync::{Arc};
+use crate::data_service::read_csv;
+use crate::data_utils::fetch_dataset_az_blob;
 use actix_cors::Cors;
 use actix_files as fs;
 use actix_rate_limiter::backend::memory::MemoryBackendProvider;
@@ -6,17 +7,14 @@ use actix_rate_limiter::limit::{Limit, LimitBuilder};
 use actix_rate_limiter::limiter::RateLimiterBuilder;
 use actix_rate_limiter::middleware::RateLimiterMiddlewareFactory;
 use actix_rate_limiter::route::RouteBuilder;
-use actix_web::{App, middleware, web};
 use actix_web::dev::Service;
 use actix_web::http::header;
 use actix_web::middleware::{DefaultHeaders, Logger};
 use actix_web::web::Data;
+use actix_web::{middleware, web, App};
 use log::{debug, error, info};
+use std::sync::Arc;
 use tokio::sync::{Mutex, Notify};
-use crate::data_service::read_csv;
-use crate::data_utils::fetch_dataset_az_blob;
-
-
 
 mod apis;
 mod data_service;
@@ -25,7 +23,6 @@ mod data_utils;
 mod entities;
 mod export;
 mod jwt_middleware;
-
 
 fn is_allowed_origin(origin: &str) -> bool {
     // List of allowed origins
@@ -144,23 +141,50 @@ async fn main() -> std::io::Result<()> {
 
     // Rate Limiter
     let limiter = RateLimiterBuilder::new()
-        .add_route(RouteBuilder::new().set_path("/api/v1/search").set_method("POST").build(),LimitBuilder::new().set_ttl(10).set_amount(20).build())
-        .add_route(RouteBuilder::new().set_path("/api/v1/render").set_method("POST").build(),LimitBuilder::new().set_ttl(10).set_amount(20).build())
-        .add_route(RouteBuilder::new().set_path("/api/v1/apps").set_method("GET").build(),LimitBuilder::new().set_ttl(10).set_amount(20).build())
-        .add_route(RouteBuilder::new().set_path("/api/v1/apps/{appName}/topics").set_method("GET").build(),LimitBuilder::new().set_ttl(20).set_amount(1).build())
-        .add_route(RouteBuilder::new().set_path("/api/v1/consumers").set_method("GET").build(),LimitBuilder::new().set_ttl(10).set_amount(20).build()).build();
+        .add_route(
+            RouteBuilder::new()
+                .set_path("/api/v1/search")
+                .set_method("POST")
+                .build(),
+            LimitBuilder::new().set_ttl(10).set_amount(20).build(),
+        )
+        .add_route(
+            RouteBuilder::new()
+                .set_path("/api/v1/render")
+                .set_method("POST")
+                .build(),
+            LimitBuilder::new().set_ttl(10).set_amount(20).build(),
+        )
+        .add_route(
+            RouteBuilder::new()
+                .set_path("/api/v1/apps")
+                .set_method("GET")
+                .build(),
+            LimitBuilder::new().set_ttl(10).set_amount(20).build(),
+        )
+        .add_route(
+            RouteBuilder::new()
+                .set_path("/api/v1/apps/{appName}/topics")
+                .set_method("GET")
+                .build(),
+            LimitBuilder::new().set_ttl(20).set_amount(1).build(),
+        )
+        .add_route(
+            RouteBuilder::new()
+                .set_path("/api/v1/consumers")
+                .set_method("GET")
+                .build(),
+            LimitBuilder::new().set_ttl(10).set_amount(20).build(),
+        )
+        .build();
 
     let backend = MemoryBackendProvider::default();
-    let rate_limiter = RateLimiterMiddlewareFactory::new(limiter,
-                                                         Arc::new(Mutex::new(backend)));
-
-
-
+    let rate_limiter = RateLimiterMiddlewareFactory::new(limiter, Arc::new(Mutex::new(backend)));
 
     let app_state = Arc::new(data_state);
     info!("Starting server...");
     actix_web::HttpServer::new(move || {
-         App::new()
+        App::new()
             .wrap(Logger::default())
             .wrap(middleware::DefaultHeaders::new().add(("X-Version", "0.2")))
             .app_data(Data::new(app_state.clone()))
@@ -188,17 +212,20 @@ async fn main() -> std::io::Result<()> {
                         debug!("Origin: {:?}", origin);
                         is_allowed_origin(origin.to_str().unwrap())
                     })
-                    .allowed_methods(vec!["GET", "POST"])
+                    .allowed_methods(vec!["GET", "POST"]),
             )
             .wrap(rate_limiter.clone())
             .wrap(jwt_middleware::JwtMiddleware::new(jwt_secret_key.clone()))
-             .wrap(
-                 DefaultHeaders::new()
-                     .add(("X-Content-Type-Options", "nosniff"))
-                     .add(("X-Frame-Options", "DENY"))
-                     .add(("X-XSS-Protection", "1; mode=block"))
-                     .add(("Strict-Transport-Security", "max-age=31536000; includeSubDomains"))
-             )
+            .wrap(
+                DefaultHeaders::new()
+                    .add(("X-Content-Type-Options", "nosniff"))
+                    .add(("X-Frame-Options", "DENY"))
+                    .add(("X-XSS-Protection", "1; mode=block"))
+                    .add((
+                        "Strict-Transport-Security",
+                        "max-age=31536000; includeSubDomains",
+                    )),
+            )
             .service(
                 web::scope("/api/v1")
                     .route("/apps", web::get().to(apis::get_apps))
@@ -221,6 +248,6 @@ async fn main() -> std::io::Result<()> {
             )
     })
     .bind(("0.0.0.0", 8888))?
-    .run().await
-
+    .run()
+    .await
 }

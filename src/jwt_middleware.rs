@@ -2,8 +2,8 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::task::{Context, Poll};
 
-use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, HttpMessage, Result};
 use actix_web::dev::{Service, Transform};
+use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, HttpMessage, Result};
 use futures_util::future::{ok, Ready};
 use futures_util::future::{FutureExt, LocalBoxFuture};
 use jsonwebtoken::{decode, DecodingKey, Validation};
