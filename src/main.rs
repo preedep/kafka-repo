@@ -139,6 +139,8 @@ async fn main() -> std::io::Result<()> {
         }
     }
 
+    let limit = LimitBuilder::new().set_ttl(10).set_amount(20).build();
+
     // Rate Limiter
     let limiter = RateLimiterBuilder::new()
         .add_route(
@@ -146,35 +148,35 @@ async fn main() -> std::io::Result<()> {
                 .set_path("/api/v1/search")
                 .set_method("POST")
                 .build(),
-            LimitBuilder::new().set_ttl(10).set_amount(20).build(),
+           limit.clone(),
         )
         .add_route(
             RouteBuilder::new()
                 .set_path("/api/v1/render")
                 .set_method("POST")
                 .build(),
-            LimitBuilder::new().set_ttl(10).set_amount(20).build(),
+           limit.clone(),
         )
         .add_route(
             RouteBuilder::new()
                 .set_path("/api/v1/apps")
                 .set_method("GET")
                 .build(),
-            LimitBuilder::new().set_ttl(10).set_amount(20).build(),
+            limit.clone(),
         )
         .add_route(
             RouteBuilder::new()
                 .set_path("/api/v1/apps/{appName}/topics")
                 .set_method("GET")
                 .build(),
-            LimitBuilder::new().set_ttl(20).set_amount(1).build(),
+            limit.clone(),
         )
         .add_route(
             RouteBuilder::new()
                 .set_path("/api/v1/consumers")
                 .set_method("GET")
                 .build(),
-            LimitBuilder::new().set_ttl(10).set_amount(20).build(),
+            limit.clone(),
         )
         .build();
 
