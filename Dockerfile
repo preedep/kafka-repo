@@ -6,7 +6,11 @@ RUN apk update && apk add --no-cache \
     openssl-dev \
     musl-dev \
     pkgconfig \
-    build-base
+    build-base \
+    clang \
+    clang-dev \
+    llvm \
+    llvm-dev
 
 # Create app directory
 WORKDIR /app
