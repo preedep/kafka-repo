@@ -1,5 +1,5 @@
-use crate::data_service::read_csv;
-use crate::data_utils::fetch_dataset_az_blob;
+use std::sync::Arc;
+
 use actix_cors::Cors;
 use actix_files as fs;
 use actix_rate_limiter::backend::memory::MemoryBackendProvider;
@@ -13,8 +13,10 @@ use actix_web::middleware::{DefaultHeaders, Logger};
 use actix_web::web::Data;
 use actix_web::{middleware, web, App};
 use log::{debug, error, info};
-use std::sync::Arc;
 use tokio::sync::{Mutex, Notify};
+
+use crate::data_service::read_csv;
+use crate::data_utils::fetch_dataset_az_blob;
 
 mod apis;
 mod data_service;

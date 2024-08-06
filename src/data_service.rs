@@ -202,7 +202,7 @@ pub fn search(
             .str()
             .contains(lit(filter_condition.as_str()), false));
 
-        joined = joined.lazy().filter(filter_expr).collect().map_err(|e|{
+        joined = joined.lazy().filter(filter_expr).collect().map_err(|e| {
             error!("Failed to filter dataframes: {}", e);
 
             APIError::new("Failed to filter dataframes")
