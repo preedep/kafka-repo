@@ -22,7 +22,7 @@ serde_json = "1.0"
 
 dotenv = "0.15"
 csv = "1.3"
-polars = { version = "0.41", features = ["lazy", "csv", "serde", "serde-lazy"] }
+polars = { version = "0.41",features = ["lazy", "csv", "serde", "serde-lazy","strings","regex"] }
 pest = { version = "2" }
 pest_derive = { version = "2" }
 

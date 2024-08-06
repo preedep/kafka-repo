@@ -361,7 +361,6 @@ function button_render_handler(){
             console.log("input ",table_input_search.value);
             if (table_input_search.value !== '') {
                 console.log("Search all text: ", table_input_search.value);
-
                 json_data_req.search_all_text = table_input_search.value;
             }
 

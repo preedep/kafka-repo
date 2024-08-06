@@ -1,9 +1,8 @@
 use std::io::Cursor;
 
-use log::debug;
-use polars::prelude::*;
+use log::{debug, error};
 use polars::lazy::prelude::*;
-
+use polars::prelude::*;
 
 use crate::entities::{APIError, SearchKafkaRequest, SearchKafkaResponse};
 
@@ -178,35 +177,40 @@ pub fn search(
             JoinArgs::new(JoinType::Left),
         )
         .map_err(|e| {
-            debug!("Failed to join dataframes: {}", e);
+            error!("Failed to join dataframes: {}", e);
             APIError::new("Failed to join dataframes")
         })?;
 
     let mut joined = joined.lazy().filter(expr).collect().map_err(|e| {
-        debug!("Failed to filter dataframes: {}", e);
+        error!("Failed to filter dataframes: {}", e);
         APIError::new("Failed to filter dataframes")
     })?;
-
 
     // Apply the filter to each column and combine the results
     if let Some(filter_condition) = &search_request.search_all_text {
         debug!("Filtering by search all text: {}", filter_condition);
-        /*
-         let mask = joined
-            .get_columns()
-            .iter()
-            .map(|col| {
-                debug!("{:#?}",col);
-                BooleanChunked::default()
-            })
-            .fold(None, |acc, mask|  {
-                Some(acc.map_or(mask.clone(), |acc: BooleanChunked| acc | mask))
-            });
-         */
+        let mut filter_expr = col(COL_CONSUMER_APP_NAME_CONSUMER_FILE)
+            .str()
+            .contains(lit(filter_condition.as_str()), false);
+        filter_expr = filter_expr.or(col(COL_TOPIC_NAME_INVENTORY_FILE)
+            .str()
+            .contains(lit(filter_condition.as_str()), false));
+        filter_expr = filter_expr.or(col(COL_CONSUMER_GROUP_NAME_CONSUMER_FILE)
+            .str()
+            .contains(lit(filter_condition.as_str()), false));
+        filter_expr = filter_expr.or(col(COL_CONSUMER_APP_NAME_2_CONSUMER_FILE)
+            .str()
+            .contains(lit(filter_condition.as_str()), false));
+
+        joined = joined.lazy().filter(filter_expr).collect().map_err(|e|{
+            error!("Failed to filter dataframes: {}", e);
+
+            APIError::new("Failed to filter dataframes")
+        })?;
+
+        debug!("Filtered by search all text: {}", joined);
     }
     /////
-
-
     // map result
     for row in 0..joined.height() {
         let mut search_kafka_response = SearchKafkaResponse::default();

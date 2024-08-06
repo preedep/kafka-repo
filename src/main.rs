@@ -148,14 +148,14 @@ async fn main() -> std::io::Result<()> {
                 .set_path("/api/v1/search")
                 .set_method("POST")
                 .build(),
-           limit.clone(),
+            limit.clone(),
         )
         .add_route(
             RouteBuilder::new()
                 .set_path("/api/v1/render")
                 .set_method("POST")
                 .build(),
-           limit.clone(),
+            limit.clone(),
         )
         .add_route(
             RouteBuilder::new()
