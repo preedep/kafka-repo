@@ -73,6 +73,8 @@ pub struct SearchKafkaRequest {
     pub topic_name: Option<String>,
     #[serde(rename = "consumer_app")]
     pub consumer_app: Option<String>,
+    #[serde(rename = "search_all_text")]
+    pub search_all_text: Option<String>
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]

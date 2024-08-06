@@ -327,71 +327,81 @@ function button_render_handler(){
 
 
     button.addEventListener('click', function() {
-        // Replace with your API URL
-        const apiEndpoint = '/api/v1/render';
 
-        const dropdown_owner_topic = document.getElementById('dropdown-owner-topic');
-        const dropdown_topic_name = document.getElementById('dropdown-topic-name');
-        const dropdown_consumer_app = document.getElementById('dropdown-consumer-app');
+            // render by api
+            // Replace with your API URL
+            const apiEndpoint = '/api/v1/render';
 
-        const owner_topic = dropdown_owner_topic.value;
-        const topic_name = dropdown_topic_name.value;
-        const consumer_app = dropdown_consumer_app.value;
+            const dropdown_owner_topic = document.getElementById('dropdown-owner-topic');
+            const dropdown_topic_name = document.getElementById('dropdown-topic-name');
+            const dropdown_consumer_app = document.getElementById('dropdown-consumer-app');
 
-        console.log("Owner Topic: ", owner_topic);
-        console.log("Topic Name: ", topic_name);
-        console.log("Consumer App: ", consumer_app);
+            const owner_topic = dropdown_owner_topic.value;
+            const topic_name = dropdown_topic_name.value;
+            const consumer_app = dropdown_consumer_app.value;
+
+            console.log("Owner Topic: ", owner_topic);
+            console.log("Topic Name: ", topic_name);
+            console.log("Consumer App: ", consumer_app);
 
 
-        let json_data_req = {
-        };
-        if (owner_topic !== '0') {
-            json_data_req.app_owner = owner_topic;
-        }
-        if ((topic_name !== '0') && (dropdown_topic_name.style.display !== 'none')) {
-            json_data_req.topic_name = topic_name;
-        }
-        if (consumer_app !== '0') {
-            json_data_req.consumer_app = consumer_app;
-        }
+            let json_data_req = {
+            };
+            if (owner_topic !== '0') {
+                json_data_req.app_owner = owner_topic;
+            }
+            if ((topic_name !== '0') && (dropdown_topic_name.style.display !== 'none')) {
+                json_data_req.topic_name = topic_name;
+            }
+            if (consumer_app !== '0') {
+                json_data_req.consumer_app = consumer_app;
+            }
 
-        let accessToken = localStorage.getItem('token');
-        fetch(apiEndpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`,
-            },
-            body: JSON.stringify(json_data_req),
-        })
-            .then(response => response.text())
-            .then(async data => {
-                console.log('Success:', data);
-                console.log("renderMermaid with data");
+            const table_input_search = document.getElementById('table-result-search-input');
+            console.log("input ",table_input_search.value);
+            if (table_input_search.value !== '') {
+                console.log("Search all text: ", table_input_search.value);
 
-                if (data.length === 0) {
-                    alert("No data found");
+                json_data_req.search_all_text = table_input_search.value;
+            }
+
+            let accessToken = localStorage.getItem('token');
+            fetch(apiEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
+                },
+                body: JSON.stringify(json_data_req),
+            })
+                .then(response => response.text())
+                .then(async data => {
+                    console.log('Success:', data);
+                    console.log("renderMermaid with data");
+
+                    if (data.length === 0) {
+                        alert("No data found");
+
+                        let mermaid = document.getElementById('mermaid-container');
+                        mermaid.style.display = 'none';
+
+                        return;
+                    }
+
+                    let table = document.getElementById('table-container');
+                    table.style.display = 'none';
 
                     let mermaid = document.getElementById('mermaid-container');
-                    mermaid.style.display = 'none';
-
-                    return;
-                }
-
-                let table = document.getElementById('table-container');
-                table.style.display = 'none';
-
-                let mermaid = document.getElementById('mermaid-container');
-                mermaid.style.display = 'block';
+                    mermaid.style.display = 'block';
 
 
-                initializeMermaid();
-                await renderMermaid(data);
+                    initializeMermaid();
+                    await renderMermaid(data);
 
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
 
     });
 }

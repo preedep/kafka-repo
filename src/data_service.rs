@@ -2,6 +2,8 @@ use std::io::Cursor;
 
 use log::debug;
 use polars::prelude::*;
+use polars::lazy::prelude::*;
+
 
 use crate::entities::{APIError, SearchKafkaRequest, SearchKafkaResponse};
 
@@ -180,12 +182,31 @@ pub fn search(
             APIError::new("Failed to join dataframes")
         })?;
 
-    let joined = joined.lazy().filter(expr).collect().map_err(|e| {
+    let mut joined = joined.lazy().filter(expr).collect().map_err(|e| {
         debug!("Failed to filter dataframes: {}", e);
         APIError::new("Failed to filter dataframes")
     })?;
 
-    debug!("Joined dataframe: {}", joined);
+
+    // Apply the filter to each column and combine the results
+    if let Some(filter_condition) = &search_request.search_all_text {
+        debug!("Filtering by search all text: {}", filter_condition);
+        /*
+         let mask = joined
+            .get_columns()
+            .iter()
+            .map(|col| {
+                debug!("{:#?}",col);
+                BooleanChunked::default()
+            })
+            .fold(None, |acc, mask|  {
+                Some(acc.map_or(mask.clone(), |acc: BooleanChunked| acc | mask))
+            });
+         */
+    }
+    /////
+
+
     // map result
     for row in 0..joined.height() {
         let mut search_kafka_response = SearchKafkaResponse::default();
