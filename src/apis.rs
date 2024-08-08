@@ -4,8 +4,8 @@ use actix_web::web::Json;
 use actix_web::{web, HttpResponse, Responder};
 use jsonwebtoken::EncodingKey;
 use log::debug;
-
-use crate::data_service::post_login;
+use log::kv::ToKey;
+use crate::data_service::{post_login, search};
 use crate::data_state::AppState;
 use crate::entities::{AISearchKafkaRequest, APIError, APIResponse, Claims, JwtResponse, SearchKafkaResponse, UserLogin};
 use crate::export::export_mm_file;
@@ -116,15 +116,43 @@ pub async fn post_ai_search(
 ) -> APIWebResponse<OpenAICompletionResult> {
     debug!("Searching Open AI with query: {:?}", query);
 
-    let query_message = query.0.query;
+    let mut final_prompt = String::new();
+
+    let query = query.0.query;
     let result = crate::open_ai_search::ai_search(
-                                                  &query_message,
+                                                  &query,
                                                   &data
                                                 ).await?;
     debug!("Result from AI Search: {:#?}", result);
 
+    if let Some(content) = result.search_answers {
+        let combine_data = content.iter().map(|c|{
+            format!("Answer: {}\nHighlights: {}", c.clone().text.unwrap_or("".to_string()), c.clone().highlights.unwrap_or("".to_string()))
+        }).collect::<Vec<String>>().join("\n");
+
+        final_prompt.push_str(&combine_data);
+        final_prompt.push_str("\n");
+
+        debug!("AI Search Final Prompt: {:#?}", final_prompt);
+    }
+    debug!("Load all csv data");
+    if let (Some(ds_inventory), Some(ds_consumer)) = (&data.kafka_inventory, &data.kafka_consumer) {
+        let search_request = entities::SearchKafkaRequest {
+            app_owner: None,
+            topic_name: None,
+            consumer_app: None,
+            search_all_text: None,
+        };
+        let result = search(ds_inventory, ds_consumer, &search_request)?;
+        let csv_data = result.iter().map(|d|{
+            format!("{} : {} : {} : {} : {}", d.app_owner, d.topic_name,d.consumer_group_id,d.consumer_app,d.description)
+        }).collect::<Vec<String>>().join("\n");
+        final_prompt.push_str(&csv_data);
+    }
+    debug!("Final Prompt: {:?}", final_prompt);
+
     let result = crate::open_ai_search::open_ai_completion(
-                                                           &query_message,
+                                                           &final_prompt,
                                                            &data
                                                          ).await?;
     debug!("Result from Open AI Completion: {:#?}", result);

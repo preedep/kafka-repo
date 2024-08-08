@@ -5,7 +5,9 @@ pub struct AISearchResult {
     #[serde(rename = "@odata.context")]
     pub odata_context: String,
     #[serde(rename = "@search.answers")]
-    pub search_answers: Option<Vec<AISearchResultValue>>,
+    pub search_answers: Option<Vec<AISearchAnswerValue>>,
+    #[serde(rename = "@search.nextPageParameters")]
+    pub search_next_parameters: Option<AISearchNextPageParameters>,
     pub value: Option<Vec<AISearchResultValue>>,
 }
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -15,37 +17,66 @@ pub struct AISearchResultCaption {
     #[serde(rename = "highlights")]
     pub highlights: String,
 }
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct AISearchNextPageParameters {
+    #[serde(rename = "search")]
+    pub search : Option<String>,
+    #[serde(rename = "queryType")]
+    pub query_type : Option<String>,
+    #[serde(rename = "semanticConfiguration")]
+    pub semantic_configuration : Option<String>,
+    #[serde(rename = "captions")]
+    pub captions : Option<String>,
+    #[serde(rename = "answers")]
+    pub answers : Option<String>,
+    #[serde(rename = "queryLanguage")]
+    pub query_language : Option<String>,
+    #[serde(rename = "skip")]
+    pub skip : Option<i64>,
+}
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct AISearchAnswerValue {
+    #[serde(rename = "text")]
+    pub text : Option<String>,
+    #[serde(rename = "key")]
+    pub key: Option<String>,
+    #[serde(rename = "highlights")]
+    pub highlights: Option<String>,
+    #[serde(rename = "score")]
+    pub score : Option<f64>,
+}
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AISearchResultValue {
     #[serde(rename = "@search.score")]
-    pub search_score: f64,
+    pub search_score: Option<f64>,
     #[serde(rename = "@search.rerankerScore")]
-    pub search_reranker_score: f64,
+    pub search_reranker_score: Option<f64>,
     #[serde(rename = "@search.captions")]
-    pub search_captions: Vec<AISearchResultCaption>,
-    pub id: String,
+    pub search_captions: Option<Vec<AISearchResultCaption>>,
+    pub id: Option<String>,
     #[serde(rename = "App_owner")]
-    pub app_owner: String,
+    pub app_owner: Option<String>,
     #[serde(rename = "Topic_name")]
-    pub topic_name: String,
+    pub topic_name: Option<String>,
     #[serde(rename = "Consumer_group_id")]
-    pub consumer_group_id: String,
+    pub consumer_group_id: Option<String>,
     #[serde(rename = "Consumer_app")]
-    pub consumer_app: String,
+    pub consumer_app: Option<String>,
     #[serde(rename = "Description")]
-    pub description: String,
+    pub description: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct OpenAICompletionResult {
-    pub id: String,
-    pub object: String,
-    pub created: i64,
-    pub model: String,
+    pub id: Option<String>,
+    pub object: Option<String>,
+    pub created: Option<i64>,
+    pub model: Option<String>,
     #[serde(rename = "prompt_filter_results")]
-    pub prompt_filter_results: Vec<OpenAIPromptFilterResult>,
-    pub choices: Vec<OpenAIChoice>,
-    pub usage: OpenAIUsage,
+    pub prompt_filter_results: Option<Vec<OpenAIPromptFilterResult>>,
+    pub choices: Option<Vec<OpenAIChoice>>,
+    pub usage: Option<OpenAIUsage>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

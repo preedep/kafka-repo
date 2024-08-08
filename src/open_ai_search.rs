@@ -24,11 +24,11 @@ pub async fn ai_search(query_message: &String, app_state: &AppState) -> Result<A
         ))
         .send()
         .await
-        .map_err(|e| APIError::new(&format!("Failed to send request to OpenAI: {}", e)))?;
+        .map_err(|e| APIError::new(&format!("Failed to send request to AI Search: {}", e)))?;
 
 
     let r = response.json::<AISearchResult>().await.map_err(
-        |e| APIError::new(&format!("Failed to parse response from OpenAI: {}", e)))?;
+        |e| APIError::new(&format!("Failed to parse response from AI Search: {}", e)))?;
 
 
 
@@ -45,12 +45,12 @@ pub async fn open_ai_completion(query_message: &String, app_state: &AppState) ->
         .json(&serde_json::json!(
             {
                 "prompt": query_message,
-                "max_tokens": 150,
+                "max_tokens": 2000,
                 "temperature": 1,
                 "top_p": 0.5,
                 "frequency_penalty": 0.0,
                 "presence_penalty": 0.0,
-                "stop": ["\n"]
+                //"stop": ["\n"]
             }
         )).send().await.map_err(|e| APIError::new(&format!("Failed to send request to OpenAI: {}", e)))?;
 

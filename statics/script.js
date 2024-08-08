@@ -264,7 +264,7 @@ function button_ai_search_handler(){
                 'Authorization': `Bearer ${accessToken}`,
             },
             body: JSON.stringify({
-                "query":"Hello world"
+                "query":"What is the topic name of the app owner 'Connect'?"
             }),
         })
             .then(response => response.json())
