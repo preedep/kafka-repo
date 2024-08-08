@@ -264,7 +264,7 @@ function button_ai_search_handler(){
                 'Authorization': `Bearer ${accessToken}`,
             },
             body: JSON.stringify({
-                "query":"SCB*"
+                "query":"Hello world"
             }),
         })
             .then(response => response.json())

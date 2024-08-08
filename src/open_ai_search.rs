@@ -1,7 +1,8 @@
 use log::debug;
 use serde_json::Value;
 use crate::data_state::AppState;
-use crate::entities::{AISearchResult, APIError, OpenAICompletionResult};
+use crate::entities::APIError;
+use crate::entities_ai::{AISearchResult, OpenAICompletionResult};
 
 pub async fn ai_search(query_message: &String, app_state: &AppState) -> Result<AISearchResult, APIError> {
     let ai_search_key = app_state.clone().azure_ai_search_key.unwrap();
@@ -29,7 +30,7 @@ pub async fn ai_search(query_message: &String, app_state: &AppState) -> Result<A
     let r = response.json::<AISearchResult>().await.map_err(
         |e| APIError::new(&format!("Failed to parse response from OpenAI: {}", e)))?;
 
-    debug!("Response from AI Search : {:?}", r);
+
 
     Ok(r)
 }
@@ -53,9 +54,9 @@ pub async fn open_ai_completion(query_message: &String, app_state: &AppState) ->
             }
         )).send().await.map_err(|e| APIError::new(&format!("Failed to send request to OpenAI: {}", e)))?;
 
+    let r = response.json::<OpenAICompletionResult>().await.map_err(
+        |e| APIError::new(&format!("Failed to parse response from OpenAI: {}", e)))?;
 
 
-    Ok(OpenAICompletionResult{
-
-    })
+    Ok(r)
 }

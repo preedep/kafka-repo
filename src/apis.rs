@@ -10,7 +10,7 @@ use crate::data_state::AppState;
 use crate::entities::{AISearchKafkaRequest, APIError, APIResponse, Claims, JwtResponse, SearchKafkaResponse, UserLogin};
 use crate::export::export_mm_file;
 use crate::{data_service, entities};
-use crate::entities_ai::AISearchResult;
+use crate::entities_ai::{AISearchResult, OpenAICompletionResult};
 
 type APIWebResponse<T> = Result<APIResponse<T>, APIError>;
 
@@ -113,7 +113,7 @@ pub async fn post_search_kafka(
 pub async fn post_ai_search(
     data: web::Data<Arc<AppState>>,
     query: Json<AISearchKafkaRequest>,
-) -> APIWebResponse<AISearchResult> {
+) -> APIWebResponse<OpenAICompletionResult> {
     debug!("Searching Open AI with query: {:?}", query);
 
     let query_message = query.0.query;
@@ -121,6 +121,13 @@ pub async fn post_ai_search(
                                                   &query_message,
                                                   &data
                                                 ).await?;
+    debug!("Result from AI Search: {:#?}", result);
+
+    let result = crate::open_ai_search::open_ai_completion(
+                                                           &query_message,
+                                                           &data
+                                                         ).await?;
+    debug!("Result from Open AI Completion: {:#?}", result);
 
     return Ok(APIResponse { data: result });
 }

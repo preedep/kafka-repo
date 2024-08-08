@@ -5,8 +5,8 @@ pub struct AISearchResult {
     #[serde(rename = "@odata.context")]
     pub odata_context: String,
     #[serde(rename = "@search.answers")]
-    pub search_answers: Vec<AISearchResultValue>,
-    pub value: Vec<AISearchResultValue>,
+    pub search_answers: Option<Vec<AISearchResultValue>>,
+    pub value: Option<Vec<AISearchResultValue>>,
 }
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AISearchResultCaption {
@@ -58,12 +58,12 @@ pub struct OpenAIPromptFilterResult {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct OpenAIContentFilterResults {
-    pub hate: OpenAIHate,
-    pub jailbreak: OpenAIJailbreak,
+    pub hate: Option<OpenAIHate>,
+    pub jailbreak: Option<OpenAIJailbreak>,
     #[serde(rename = "self_harm")]
-    pub self_harm: OpenAISelfHarm,
-    pub sexual: OpenAISexual,
-    pub violence: OpenAIViolence,
+    pub self_harm: Option<OpenAISelfHarm>,
+    pub sexual: Option<OpenAISexual>,
+    pub violence: Option<OpenAIViolence>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

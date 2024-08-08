@@ -56,9 +56,10 @@ async fn main() -> std::io::Result<()> {
         std::env::var("STORAGE_CONTAINER").expect("AZURE_BLOB_CONTAINER_NAME must be set");
 
     let jwt_secret_key = std::env::var("JWT_SECRET_KEY").expect("JWT_SECRET must be set");
-    let openai_api_key =
-        std::env::var("OPEN_AI_SEARCH_KEY").expect("OPEN_AI_SEARCH_KEY must be set");
-
+    let ai_search_api_key =
+        std::env::var("AI_SEARCH_KEY").expect("AI_SEARCH_KEY must be set");
+    let open_api_key =
+        std::env::var("OPEN_AI_KEY").expect("OPENAI_KEY must be set");
 
     debug!("Reading kafka inventory file: {}", kafka_inventory_file);
     debug!("Reading kafka consumer file: {}", kafka_consumer_file);
@@ -71,8 +72,8 @@ async fn main() -> std::io::Result<()> {
         kafka_consumer: None,
         user_authentication: None,
         jwt_secret: jwt_secret_key.clone(),
-        azure_ai_search_key: Some(openai_api_key),
-        azure_open_ai_key: None,
+        azure_ai_search_key: Some(ai_search_api_key),
+        azure_open_ai_key: Some(open_api_key),
     };
 
     // Fetch the dataset from Azure Blob Storage
