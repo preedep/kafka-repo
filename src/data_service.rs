@@ -226,6 +226,17 @@ pub fn search(
                 search_kafka_response.consumer_app = col.to_string().replace("\"", "");
             }
         }
+
+        let mut description = String::new();
+        description.push_str("App Owner or Producer is ");
+        description.push_str(search_kafka_response.app_owner.as_str());
+        description.push_str(" and produce message to E-Kafka with topic name  ");
+        description.push_str(search_kafka_response.topic_name.as_str());
+        description.push_str(" and consumed by ");
+        description.push_str(search_kafka_response.consumer_app.as_str());
+        description.push_str(" with consumer group iD ");
+        description.push_str(search_kafka_response.consumer_group_id.as_str());
+        search_kafka_response.description = description;
         result.push(search_kafka_response);
     }
 

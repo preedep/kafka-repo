@@ -75,6 +75,7 @@ pub struct SearchKafkaRequest {
     pub consumer_app: Option<String>,
     #[serde(rename = "search_all_text")]
     pub search_all_text: Option<String>,
+
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
@@ -87,6 +88,8 @@ pub struct SearchKafkaResponse {
     pub consumer_group_id: String,
     #[serde(rename = "consumer_app")]
     pub consumer_app: String,
+    #[serde(rename = "description")]
+    pub description: String
 }
 
 impl Into<FlowChartItem> for SearchKafkaResponse {
@@ -109,6 +112,7 @@ impl From<FlowChartItem> for SearchKafkaResponse {
             topic_name: item.kafka_topic.clone(),
             consumer_group_id: item.consumer_group.clone(),
             consumer_app: item.project_name_consume.clone(),
+            description: "".to_string()
         }
     }
 }
