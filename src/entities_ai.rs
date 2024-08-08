@@ -21,30 +21,30 @@ pub struct AISearchResultCaption {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AISearchNextPageParameters {
     #[serde(rename = "search")]
-    pub search : Option<String>,
+    pub search: Option<String>,
     #[serde(rename = "queryType")]
-    pub query_type : Option<String>,
+    pub query_type: Option<String>,
     #[serde(rename = "semanticConfiguration")]
-    pub semantic_configuration : Option<String>,
+    pub semantic_configuration: Option<String>,
     #[serde(rename = "captions")]
-    pub captions : Option<String>,
+    pub captions: Option<String>,
     #[serde(rename = "answers")]
-    pub answers : Option<String>,
+    pub answers: Option<String>,
     #[serde(rename = "queryLanguage")]
-    pub query_language : Option<String>,
+    pub query_language: Option<String>,
     #[serde(rename = "skip")]
-    pub skip : Option<i64>,
+    pub skip: Option<i64>,
 }
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AISearchAnswerValue {
     #[serde(rename = "text")]
-    pub text : Option<String>,
+    pub text: Option<String>,
     #[serde(rename = "key")]
     pub key: Option<String>,
     #[serde(rename = "highlights")]
     pub highlights: Option<String>,
     #[serde(rename = "score")]
-    pub score : Option<f64>,
+    pub score: Option<f64>,
 }
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AISearchResultValue {
@@ -161,6 +161,3 @@ pub struct OpenAIUsage {
     #[serde(rename = "total_tokens")]
     pub total_tokens: i64,
 }
-
-
-

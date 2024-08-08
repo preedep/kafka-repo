@@ -5,12 +5,16 @@ use actix_web::{web, HttpResponse, Responder};
 use jsonwebtoken::EncodingKey;
 use log::debug;
 use log::kv::ToKey;
+
 use crate::data_service::{post_login, search};
 use crate::data_state::AppState;
-use crate::entities::{AISearchKafkaRequest, APIError, APIResponse, Claims, JwtResponse, SearchKafkaResponse, UserLogin};
+use crate::entities::{
+    AISearchKafkaRequest, APIError, APIResponse, Claims, JwtResponse, SearchKafkaResponse,
+    UserLogin,
+};
+use crate::entities_ai::{AISearchResult, OpenAICompletionResult};
 use crate::export::export_mm_file;
 use crate::{data_service, entities};
-use crate::entities_ai::{AISearchResult, OpenAICompletionResult};
 
 type APIWebResponse<T> = Result<APIResponse<T>, APIError>;
 
@@ -119,19 +123,23 @@ pub async fn post_ai_search(
     let mut final_prompt = String::new();
 
     let query = query.0.query;
-    let result = crate::open_ai_search::ai_search(
-                                                  &query,
-                                                  &data
-                                                ).await?;
+    let result = crate::open_ai_search::ai_search(&query, &data).await?;
     debug!("Result from AI Search: {:#?}", result);
 
     if let Some(content) = result.search_answers {
-        let combine_data = content.iter().map(|c|{
-            format!("Answer: {}\nHighlights: {}", c.clone().text.unwrap_or("".to_string()), c.clone().highlights.unwrap_or("".to_string()))
-        }).collect::<Vec<String>>().join("\n");
+        let combine_data = content
+            .iter()
+            .map(|c| {
+                format!(
+                    "Answer: {}\nHighlights: {}\n",
+                    c.clone().text.unwrap_or("".to_string()),
+                    c.clone().highlights.unwrap_or("".to_string())
+                )
+            })
+            .collect::<Vec<String>>()
+            .join("\n");
 
         final_prompt.push_str(&combine_data);
-        final_prompt.push_str("\n");
 
         debug!("AI Search Final Prompt: {:#?}", final_prompt);
     }
@@ -144,17 +152,22 @@ pub async fn post_ai_search(
             search_all_text: None,
         };
         let result = search(ds_inventory, ds_consumer, &search_request)?;
-        let csv_data = result.iter().map(|d|{
-            format!("{} : {} : {} : {} : {}", d.app_owner, d.topic_name,d.consumer_group_id,d.consumer_app,d.description)
-        }).collect::<Vec<String>>().join("\n");
+        let csv_data = result
+            .iter()
+            .map(|d| {
+                format!(
+                    "Producer or App Owner :{}\nE-Kafka Topic Name : {}\nConsumer Group Id : {}\nConsumer or Consume App : {}\nDescription : {}\n",
+                    d.app_owner, d.topic_name, d.consumer_group_id, d.consumer_app, d.description
+                )
+            })
+            .collect::<Vec<String>>()
+            .join("\n");
+
         final_prompt.push_str(&csv_data);
     }
     debug!("Final Prompt: {:?}", final_prompt);
 
-    let result = crate::open_ai_search::open_ai_completion(
-                                                           &final_prompt,
-                                                           &data
-                                                         ).await?;
+    let result = crate::open_ai_search::open_ai_completion(&final_prompt, &data).await?;
     debug!("Result from Open AI Completion: {:#?}", result);
 
     return Ok(APIResponse { data: result });

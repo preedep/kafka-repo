@@ -79,7 +79,7 @@ pub struct SearchKafkaRequest {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AISearchKafkaRequest {
     #[serde(rename = "query")]
-    pub query: String
+    pub query: String,
 }
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct SearchKafkaResponse {
@@ -203,4 +203,3 @@ impl<T: Debug + Serialize + Clone> Responder for APIResponse<T> {
             .body(body)
     }
 }
-
