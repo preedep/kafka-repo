@@ -1,9 +1,9 @@
 use log::debug;
 use serde_json::Value;
 use crate::data_state::AppState;
-use crate::entities::APIError;
+use crate::entities::{AISearchResult, APIError};
 
-pub async fn ai_search(query_message: &String, app_state: &AppState) -> Result<String, APIError> {
+pub async fn ai_search(query_message: &String, app_state: &AppState) -> Result<AISearchResult, APIError> {
     let ai_search_key = app_state.clone().azure_ai_search_key.unwrap();
     let client = reqwest::Client::new();
     let url = "https://nick-ai-dev002.search.windows.net/indexes('ekafka-inventory-idx-001')/docs/search?api-version=2024-05-01-preview";
@@ -26,10 +26,10 @@ pub async fn ai_search(query_message: &String, app_state: &AppState) -> Result<S
         .map_err(|e| APIError::new(&format!("Failed to send request to OpenAI: {}", e)))?;
 
 
-    let r = response.json::<Value>().await.map_err(
+    let r = response.json::<AISearchResult>().await.map_err(
         |e| APIError::new(&format!("Failed to parse response from OpenAI: {}", e)))?;
 
     debug!("Response from AI Search : {:?}", r);
 
-    Ok("".to_string())
+    Ok(r)
 }

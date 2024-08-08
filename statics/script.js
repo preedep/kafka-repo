@@ -250,6 +250,32 @@ function load_dropdown_app_consumer() {
         .catch(error => console.error('Error fetching data:', error));
 
 }
+function button_ai_search_handler(){
+    const button = document.getElementById('ai_searchButton');
+    button.addEventListener('click', function() {
+        // Replace with your API URL
+        const apiEndpoint = '/api/v1/ai_search';
+        // Fetch data from the API
+        let accessToken = localStorage.getItem('token');
+        fetch(apiEndpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({
+                "query":"SCB*"
+            }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    });
+}
 function button_search_handler(){
     const button = document.getElementById('searchButton');
     button.addEventListener('click', function() {
@@ -427,15 +453,21 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log("initializeMermaid");
     initializeMermaid();
 
+    // load drop down list
     load_dropdown_owner_of_topics();
     load_dropdown_app_consumer();
+    // detect change dropdown
     detect_change_owner_of_topics();
     detect_change_topic_name();
+    // button handler
     button_search_handler();
     button_render_handler();
+    button_ai_search_handler();
     button_download_csv_handler();
     button_download_svg_handler();
-    load_filter_table();
 
+    // search all text in table search result
+    load_filter_table();
+    //search in dropdown list
     search_able_dropdown_topic_name_handler()
 });

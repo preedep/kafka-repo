@@ -76,7 +76,11 @@ pub struct SearchKafkaRequest {
     #[serde(rename = "search_all_text")]
     pub search_all_text: Option<String>,
 }
-
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct AISearchKafkaRequest {
+    #[serde(rename = "query")]
+    pub query: String
+}
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct SearchKafkaResponse {
     #[serde(rename = "app_owner")]
@@ -198,4 +202,41 @@ impl<T: Debug + Serialize + Clone> Responder for APIResponse<T> {
             .content_type(ContentType::json())
             .body(body)
     }
+}
+
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct AISearchResult {
+    #[serde(rename = "@odata.context")]
+    pub odata_context: String,
+    #[serde(rename = "@search.answers")]
+    pub search_answers: Vec<AISearchResultValue>,
+    pub value: Vec<AISearchResultValue>,
+}
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct AISearchResultCaption {
+    #[serde(rename = "text")]
+    pub text: String,
+    #[serde(rename = "highlights")]
+    pub highlights: String,
+}
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct AISearchResultValue {
+    #[serde(rename = "@search.score")]
+    pub search_score: f64,
+    #[serde(rename = "@search.rerankerScore")]
+    pub search_reranker_score: f64,
+    #[serde(rename = "@search.captions")]
+    pub search_captions: Vec<AISearchResultCaption>,
+    pub id: String,
+    #[serde(rename = "App_owner")]
+    pub app_owner: String,
+    #[serde(rename = "Topic_name")]
+    pub topic_name: String,
+    #[serde(rename = "Consumer_group_id")]
+    pub consumer_group_id: String,
+    #[serde(rename = "Consumer_app")]
+    pub consumer_app: String,
+    #[serde(rename = "Description")]
+    pub description: String,
 }
