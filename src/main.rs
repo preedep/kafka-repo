@@ -55,16 +55,15 @@ async fn main() -> std::io::Result<()> {
         std::env::var("STORAGE_CONTAINER").expect("AZURE_BLOB_CONTAINER_NAME must be set");
 
     let jwt_secret_key = std::env::var("JWT_SECRET_KEY").expect("JWT_SECRET must be set");
-    let openai_api_key = std::env::var("OPEN_AI_SEARCH_KEY").expect("OPEN_AI_SEARCH_KEY must be set");
+    let openai_api_key =
+        std::env::var("OPEN_AI_SEARCH_KEY").expect("OPEN_AI_SEARCH_KEY must be set");
 
 
     debug!("Reading kafka inventory file: {}", kafka_inventory_file);
     debug!("Reading kafka consumer file: {}", kafka_consumer_file);
     debug!("Azure Blob Storage account: {}", azure_blob_account_name);
-    debug!(
-        "Azure Blob Storage container: {}",
-        azure_blob_container_name
-    );
+    debug!("Azure Blob Storage container: {}",azure_blob_container_name);
+
 
     let mut data_state = data_state::AppState {
         kafka_inventory: None,
@@ -188,8 +187,10 @@ async fn main() -> std::io::Result<()> {
         .build();
 
     let backend = MemoryBackendProvider::default();
-    let rate_limiter = RateLimiterMiddlewareFactory::new(limiter,
-                                                         Arc::new(Mutex::new(backend)));
+    let rate_limiter = RateLimiterMiddlewareFactory::new(
+        limiter,
+        Arc::new(Mutex::new(backend))
+    );
 
     let app_state = Arc::new(data_state);
     info!("Starting server...");

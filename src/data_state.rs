@@ -8,5 +8,5 @@ pub struct AppState {
     pub user_authentication: Option<DataFrame>,
     pub jwt_secret: String,
     pub azure_ai_search_key: Option<String>,
-    pub azure_open_ai_key: Option<String>
+    pub azure_open_ai_key: Option<String>,
 }

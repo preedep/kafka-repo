@@ -111,10 +111,14 @@ pub async fn post_search_kafka(
 
 pub async fn post_ai_search(
     data: web::Data<Arc<AppState>>,
-    query: &String) -> APIWebResponse<String>
-{
+    query: web::Json<String>,
+) -> APIWebResponse<String> {
     debug!("Searching Open AI");
-    let result = crate::open_ai_search::ai_search(query, &data).await?;
+    let query_message = query.0;
+    let result = crate::open_ai_search::ai_search(
+                                                  &query_message,
+                                                  &data
+                                                ).await?;
     return Ok(APIResponse { data: result });
 }
 
