@@ -1,3 +1,5 @@
+use log::debug;
+use serde_json::Value;
 use crate::data_state::AppState;
 use crate::entities::APIError;
 
@@ -22,5 +24,11 @@ pub async fn ai_search(query_message: &String, app_state: &AppState) -> Result<S
         .send()
         .await
         .map_err(|e| APIError::new(&format!("Failed to send request to OpenAI: {}", e)))?;
+
+
+    let r = response.json::<Value>().await.map_err(
+        |e| APIError::new(&format!("Failed to parse response from OpenAI: {}", e)))?;
+    debug!("Response from AI Search : {:?}", r);
+
     Ok("".to_string())
 }
