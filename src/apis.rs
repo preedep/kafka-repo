@@ -109,6 +109,15 @@ pub async fn post_search_kafka(
     Err(APIError::new("Failed to search kafka"))
 }
 
+pub async fn post_ai_search(
+    data: web::Data<Arc<AppState>>,
+    query: &String) -> APIWebResponse<String>
+{
+    debug!("Searching Open AI");
+    let result = crate::open_ai_search::ai_search(query, &data).await?;
+    return Ok(APIResponse { data: result });
+}
+
 pub async fn post_topic_kafka_relation_render(
     data: web::Data<Arc<AppState>>,
     search_request: web::Json<entities::SearchKafkaRequest>,

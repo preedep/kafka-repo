@@ -25,6 +25,7 @@ mod data_utils;
 mod entities;
 mod export;
 mod jwt_middleware;
+mod open_ai_search;
 
 fn is_allowed_origin(origin: &str) -> bool {
     // List of allowed origins
@@ -54,6 +55,8 @@ async fn main() -> std::io::Result<()> {
         std::env::var("STORAGE_CONTAINER").expect("AZURE_BLOB_CONTAINER_NAME must be set");
 
     let jwt_secret_key = std::env::var("JWT_SECRET_KEY").expect("JWT_SECRET must be set");
+    let openai_api_key = std::env::var("OPEN_AI_SEARCH_KEY").expect("OPEN_AI_SEARCH_KEY must be set");
+
 
     debug!("Reading kafka inventory file: {}", kafka_inventory_file);
     debug!("Reading kafka consumer file: {}", kafka_consumer_file);
@@ -68,6 +71,8 @@ async fn main() -> std::io::Result<()> {
         kafka_consumer: None,
         user_authentication: None,
         jwt_secret: jwt_secret_key.clone(),
+        azure_ai_search_key: Some(openai_api_key),
+        azure_open_ai_key: None,
     };
 
     // Fetch the dataset from Azure Blob Storage
@@ -183,7 +188,8 @@ async fn main() -> std::io::Result<()> {
         .build();
 
     let backend = MemoryBackendProvider::default();
-    let rate_limiter = RateLimiterMiddlewareFactory::new(limiter, Arc::new(Mutex::new(backend)));
+    let rate_limiter = RateLimiterMiddlewareFactory::new(limiter,
+                                                         Arc::new(Mutex::new(backend)));
 
     let app_state = Arc::new(data_state);
     info!("Starting server...");
@@ -236,6 +242,7 @@ async fn main() -> std::io::Result<()> {
                     .route("/apps/{appName}/topics", web::get().to(apis::get_topics))
                     .route("/consumers", web::get().to(apis::get_consumers))
                     .route("/search", web::post().to(apis::post_search_kafka))
+                    .route("/ai_search", web::post().to(apis::post_ai_search))
                     .route(
                         "/render",
                         web::post().to(apis::post_topic_kafka_relation_render),
