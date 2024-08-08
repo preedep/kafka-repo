@@ -240,3 +240,8 @@ pub struct AISearchResultValue {
     #[serde(rename = "Description")]
     pub description: String,
 }
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct OpenAICompletionResult {
+
+}

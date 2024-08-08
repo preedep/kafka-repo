@@ -120,6 +120,7 @@ pub async fn post_ai_search(
                                                   &query_message,
                                                   &data
                                                 ).await?;
+
     return Ok(APIResponse { data: result });
 }
 
