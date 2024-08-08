@@ -26,6 +26,7 @@ mod entities;
 mod export;
 mod jwt_middleware;
 mod open_ai_search;
+mod entities_ai;
 
 fn is_allowed_origin(origin: &str) -> bool {
     // List of allowed origins

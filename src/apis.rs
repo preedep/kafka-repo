@@ -7,9 +7,10 @@ use log::debug;
 
 use crate::data_service::post_login;
 use crate::data_state::AppState;
-use crate::entities::{AISearchKafkaRequest, AISearchResult, APIError, APIResponse, Claims, JwtResponse, SearchKafkaResponse, UserLogin};
+use crate::entities::{AISearchKafkaRequest, APIError, APIResponse, Claims, JwtResponse, SearchKafkaResponse, UserLogin};
 use crate::export::export_mm_file;
 use crate::{data_service, entities};
+use crate::entities_ai::AISearchResult;
 
 type APIWebResponse<T> = Result<APIResponse<T>, APIError>;
 
