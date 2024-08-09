@@ -9,6 +9,7 @@ use crate::entities_ai::{
 
 pub async fn ai_search(
     index_name:&String,
+    semantics_configuration: &String,
     query_message: &String,
     app_state: &AppState,
 ) -> Result<AISearchResult, APIError> {
@@ -24,7 +25,7 @@ pub async fn ai_search(
             {
                 "search": query_message,
                 "queryType": "semantic",
-                "semanticConfiguration": "ekafka-semantic-dev001",
+                "semanticConfiguration": semantics_configuration,
                 "captions": "extractive",
                 "answers": "extractive|count-3",
                 "queryLanguage": "en-US"
