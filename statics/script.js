@@ -250,12 +250,48 @@ function load_dropdown_app_consumer() {
         .catch(error => console.error('Error fetching data:', error));
 
 }
+
+function get_search_data_req() {
+
+    const ai_search_input = document.getElementById('ai-search-input');
+    const dropdown_owner_topic = document.getElementById('dropdown-owner-topic');
+    const dropdown_topic_name = document.getElementById('dropdown-topic-name');
+    const dropdown_consumer_app = document.getElementById('dropdown-consumer-app');
+
+    const owner_topic = dropdown_owner_topic.value.trim();
+    const topic_name = dropdown_topic_name.value.trim();
+    const consumer_app = dropdown_consumer_app.value.trim();
+    const ai_search_value = ai_search_input.value.trim();
+
+    console.log("Owner Topic: ", owner_topic);
+    console.log("Topic Name: ", topic_name);
+    console.log("Consumer App: ", consumer_app);
+    console.log("AI Search: ", ai_search_value);
+
+    let json_data_req = {};
+    if (owner_topic !== '0') {
+        json_data_req.app_owner = owner_topic;
+    }
+    if ((topic_name !== '0') && (dropdown_topic_name.style.display !== 'none')) {
+        json_data_req.topic_name = topic_name;
+    }
+    if (consumer_app !== '0') {
+        json_data_req.consumer_app = consumer_app;
+    }
+    if (ai_search_input.value.trim() !== '') {
+        json_data_req.ai_search_query = ai_search_value;
+    }
+
+    return json_data_req;
+}
+
 function button_ai_search_handler(){
     const button = document.getElementById('ai_searchButton');
 
 
     button.addEventListener('click', function() {
         const input = document.getElementById('ai-search-input');
+
         if (input.value === '') {
             alert('Please enter a search query');
             return;
@@ -266,31 +302,7 @@ function button_ai_search_handler(){
         const mermaid = document.getElementById('mermaid-container');
         mermaid.style.display = 'none';
 
-
-        const dropdown_owner_topic = document.getElementById('dropdown-owner-topic');
-        const dropdown_topic_name = document.getElementById('dropdown-topic-name');
-        const dropdown_consumer_app = document.getElementById('dropdown-consumer-app');
-
-        const owner_topic = dropdown_owner_topic.value;
-        const topic_name = dropdown_topic_name.value;
-        const consumer_app = dropdown_consumer_app.value;
-
-        console.log("Owner Topic: ", owner_topic);
-        console.log("Topic Name: ", topic_name);
-        console.log("Consumer App: ", consumer_app);
-
-        let json_data_req = {
-        };
-        if (owner_topic !== '0') {
-            json_data_req.app_owner = owner_topic;
-        }
-        if ((topic_name !== '0')&&(dropdown_topic_name.style.display !== 'none')) {
-            json_data_req.topic_name = topic_name;
-        }
-        if (consumer_app !== '0') {
-            json_data_req.consumer_app = consumer_app;
-        }
-        json_data_req.ai_search_query = input.value;
+        let json_data_req = get_search_data_req();
 
         // Show the loading screen
         document.getElementById('ai-search-result-loading').style.display = 'block';
@@ -308,7 +320,13 @@ function button_ai_search_handler(){
             },
             body: JSON.stringify(json_data_req),
         })
-            .then(response => response.json())
+            .then(response => {
+                // Try to extract the error message from the response
+                return response.json().then(errData => {
+                    // Throw an error with the server's error message
+                    throw new Error(errData.error || `HTTP error! status: ${response.status}`);
+                });
+            })
             .then(data => {
                 console.log(data);
                 // Hide the loading screen
@@ -349,30 +367,7 @@ function button_search_handler(){
         // Replace with your API URL
         const apiEndpoint = '/api/v1/search';
 
-        const dropdown_owner_topic = document.getElementById('dropdown-owner-topic');
-        const dropdown_topic_name = document.getElementById('dropdown-topic-name');
-        const dropdown_consumer_app = document.getElementById('dropdown-consumer-app');
-
-        const owner_topic = dropdown_owner_topic.value;
-        const topic_name = dropdown_topic_name.value;
-        const consumer_app = dropdown_consumer_app.value;
-
-        console.log("Owner Topic: ", owner_topic);
-        console.log("Topic Name: ", topic_name);
-        console.log("Consumer App: ", consumer_app);
-
-
-        let json_data_req = {
-        };
-        if (owner_topic !== '0') {
-            json_data_req.app_owner = owner_topic;
-        }
-        if ((topic_name !== '0')&&(dropdown_topic_name.style.display !== 'none')) {
-            json_data_req.topic_name = topic_name;
-        }
-        if (consumer_app !== '0') {
-            json_data_req.consumer_app = consumer_app;
-        }
+        let json_data_req = get_search_data_req();
 
         // Fetch data from the API
         let accessToken = localStorage.getItem('token');
@@ -434,30 +429,7 @@ function button_render_handler(){
             // Replace with your API URL
             const apiEndpoint = '/api/v1/render';
 
-            const dropdown_owner_topic = document.getElementById('dropdown-owner-topic');
-            const dropdown_topic_name = document.getElementById('dropdown-topic-name');
-            const dropdown_consumer_app = document.getElementById('dropdown-consumer-app');
-
-            const owner_topic = dropdown_owner_topic.value;
-            const topic_name = dropdown_topic_name.value;
-            const consumer_app = dropdown_consumer_app.value;
-
-            console.log("Owner Topic: ", owner_topic);
-            console.log("Topic Name: ", topic_name);
-            console.log("Consumer App: ", consumer_app);
-
-
-            let json_data_req = {
-            };
-            if (owner_topic !== '0') {
-                json_data_req.app_owner = owner_topic;
-            }
-            if ((topic_name !== '0') && (dropdown_topic_name.style.display !== 'none')) {
-                json_data_req.topic_name = topic_name;
-            }
-            if (consumer_app !== '0') {
-                json_data_req.consumer_app = consumer_app;
-            }
+            let json_data_req = get_search_data_req();
 
             const table_input_search = document.getElementById('table-result-search-input');
             console.log("input ",table_input_search.value);

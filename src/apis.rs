@@ -142,10 +142,8 @@ pub async fn post_ai_search(
     app_state: web::Data<Arc<AppState>>,
     search_request: Json<SearchKafkaRequest>,
 ) -> APIWebResponse<OpenAICompletionResult> {
-    debug!("Searching Open AI with query: {:?}", search_request);
-
+    debug!("Searching Open AI with query: {:#?}", search_request);
     let mut final_prompt = String::new();
-
     if let Some(query_message) = &search_request.ai_search_query {
         // AI search must specific with query message first
         let result = crate::open_ai_search::ai_search(query_message, &app_state).await?;
@@ -162,10 +160,8 @@ pub async fn post_ai_search(
                 })
                 .collect::<Vec<String>>()
                 .join("\n");
-
             final_prompt.push_str(&combine_data);
         }
-
         // load all data from csv
         debug!("Load all csv data");
         if let (Some(ds_inventory), Some(ds_consumer)) =
