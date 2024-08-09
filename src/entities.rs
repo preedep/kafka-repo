@@ -75,12 +75,10 @@ pub struct SearchKafkaRequest {
     pub consumer_app: Option<String>,
     #[serde(rename = "search_all_text")]
     pub search_all_text: Option<String>,
+    #[serde(rename = "ai_search_query")]
+    pub ai_search_query: Option<String>,
 }
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct AISearchKafkaRequest {
-    #[serde(rename = "query")]
-    pub query: String,
-}
+
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct SearchKafkaResponse {
     #[serde(rename = "app_owner")]

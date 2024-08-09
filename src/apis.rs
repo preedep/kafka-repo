@@ -8,10 +8,7 @@ use log::kv::ToKey;
 
 use crate::data_service::{post_login, search};
 use crate::data_state::AppState;
-use crate::entities::{
-    AISearchKafkaRequest, APIError, APIResponse, Claims, JwtResponse, SearchKafkaResponse,
-    UserLogin,
-};
+use crate::entities::{APIError, APIResponse, Claims, JwtResponse, SearchKafkaRequest, SearchKafkaResponse, UserLogin};
 use crate::entities_ai::{AISearchResult, OpenAICompletionResult};
 use crate::export::export_mm_file;
 use crate::{data_service, entities};
@@ -104,7 +101,7 @@ pub async fn get_consumers(data: web::Data<Arc<AppState>>) -> APIWebResponse<Vec
 
 pub async fn post_search_kafka(
     data: web::Data<Arc<AppState>>,
-    search_request: web::Json<entities::SearchKafkaRequest>,
+    search_request: Json<entities::SearchKafkaRequest>,
 ) -> APIWebResponse<Vec<SearchKafkaResponse>> {
     debug!("Searching kafka with request: {:?}", search_request);
     if let (Some(ds_inventory), Some(ds_consumer)) = (&data.kafka_inventory, &data.kafka_consumer) {
@@ -141,70 +138,69 @@ fn build_prompt(query: &str, context: &str) -> String {
 
 pub async fn post_ai_search(
     app_state: web::Data<Arc<AppState>>,
-    query: Json<AISearchKafkaRequest>,
+    search_request: Json<SearchKafkaRequest>,
 ) -> APIWebResponse<OpenAICompletionResult> {
-    debug!("Searching Open AI with query: {:?}", query);
+    debug!("Searching Open AI with query: {:?}", search_request);
 
     let mut final_prompt = String::new();
 
-    let query = query.0.query;
+    if let Some(query_message) = &search_request.ai_search_query {
+        // AI search must specific with query message first
+        let result = crate::open_ai_search::ai_search(query_message, &app_state).await?;
+        debug!("Result from AI Search: {:#?}", result);
+        if let Some(content) = result.search_answers {
+            let combine_data = content
+                .iter()
+                .map(|c| {
+                    format!(
+                        "Answer: {}\nHighlights: {}\n",
+                        c.clone().text.unwrap_or("".to_string()),
+                        c.clone().highlights.unwrap_or("".to_string())
+                    )
+                })
+                .collect::<Vec<String>>()
+                .join("\n");
 
-    let result = crate::open_ai_search::ai_search(&query, &app_state).await?;
-    debug!("Result from AI Search: {:#?}", result);
+            final_prompt.push_str(&combine_data);
+        }
 
-    if let Some(content) = result.search_answers {
-        let combine_data = content
-            .iter()
-            .map(|c| {
-                format!(
-                    "Answer: {}\nHighlights: {}\n",
-                    c.clone().text.unwrap_or("".to_string()),
-                    c.clone().highlights.unwrap_or("".to_string())
-                )
-            })
-            .collect::<Vec<String>>()
-            .join("\n");
+        // load all data from csv
+        debug!("Load all csv data");
+        if let (Some(ds_inventory), Some(ds_consumer)) =
+            (&app_state.kafka_inventory, &app_state.kafka_consumer)
+        {
 
-        final_prompt.push_str(&combine_data);
+            let result = search(ds_inventory, ds_consumer, &search_request)?;
+            let csv_data = result
+                .iter()
+                .map(|d| {
+                    format!(
+                        "Producer or App Owner: {}\nE-Kafka Topic Name: {}\nConsumer Group Id: {}\nConsumer or Consume App: {}\n",
+                        d.app_owner, d.topic_name, d.consumer_group_id, d.consumer_app
+                    )
+                })
+                .collect::<Vec<String>>()
+                .join("\n");
 
-        //debug!("AI Search Final Prompt: {:#?}", final_prompt);
+            final_prompt.push_str(&csv_data);
+        }
+
+        let final_prompt = build_prompt(query_message,
+                                        &final_prompt);
+
+        //debug!("Final Prompt: \n{}", final_prompt);
+        let result = crate::open_ai_search::open_ai_completion(&final_prompt, &app_state).await?;
+        debug!("Result from Open AI Completion: {:#?}", result);
+        Ok(APIResponse { data: result })
     }
-
-    debug!("Load all csv data");
-    if let (Some(ds_inventory), Some(ds_consumer)) =
-        (&app_state.kafka_inventory, &app_state.kafka_consumer)
-    {
-        let search_request = entities::SearchKafkaRequest {
-            app_owner: None,
-            topic_name: None,
-            consumer_app: None,
-            search_all_text: None,
-        };
-        let result = search(ds_inventory, ds_consumer, &search_request)?;
-        let csv_data = result
-            .iter()
-            .map(|d| {
-                 format!(
-                    "Producer or App Owner: {}\nE-Kafka Topic Name: {}\nConsumer Group Id: {}\nConsumer or Consume App: {}\n",
-                    d.app_owner, d.topic_name, d.consumer_group_id, d.consumer_app
-                )
-            })
-            .collect::<Vec<String>>()
-            .join("\n");
-
-        final_prompt.push_str(&csv_data);
+    else {
+        Err(APIError::new("Failed to search AI , Please provide query message"))
     }
-
-    let final_prompt = build_prompt(&query, &final_prompt);
-    //debug!("Final Prompt: \n{}", final_prompt);
-    let result = crate::open_ai_search::open_ai_completion(&final_prompt, &app_state).await?;
-    debug!("Result from Open AI Completion: {:#?}", result);
-    Ok(APIResponse { data: result })
 }
 
 pub async fn post_topic_kafka_relation_render(
     data: web::Data<Arc<AppState>>,
-    search_request: web::Json<entities::SearchKafkaRequest>,
+    search_request: Json<entities::SearchKafkaRequest>,
 ) -> Result<impl Responder, APIError> {
     debug!("Searching kafka with request: {:?}", search_request);
     if let (Some(ds_inventory), Some(ds_consumer)) = (&data.kafka_inventory, &data.kafka_consumer) {
