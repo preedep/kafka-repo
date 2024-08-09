@@ -297,13 +297,10 @@ function button_ai_search_handler(){
             return;
         }
 
-        const table = document.getElementById('table-container');
-        table.style.display = 'none';
-        const mermaid = document.getElementById('mermaid-container');
-        mermaid.style.display = 'none';
-
         let json_data_req = get_search_data_req();
 
+        document.getElementById('table-container').style.display = 'none';
+        document.getElementById('mermaid-container').style.display = 'none';
         // Show the loading screen
         document.getElementById('ai-search-result-loading').style.display = 'block';
         document.getElementById('ai-search-result-loading').style.display = 'flex';
@@ -344,15 +341,14 @@ function button_ai_search_handler(){
                     all_content = all_content + content;
                 }
                 console.log("All content: ", all_content);
-                const result_container = document.getElementById('ai-search-result-container');
-                result_container.style.display = 'block';
+                document.getElementById('ai-search-result-container').style.display = 'block';
                 // Step 1: Split the string by newlines
                 let lines = all_content.split('\n');
                 // Step 2: Wrap each line in a <p> tag
                 let paragraphs = lines.map(line => `<p>${line}</p>`);
                 // Step 3: Join the array into a single string
                 let htmlText = paragraphs.join('');
-                result_container.innerHTML = htmlText;
+                document.getElementById('ai-search-result-container').innerHTML = htmlText;
 
             })
             .catch((error) => {
@@ -396,28 +392,17 @@ function button_search_handler(){
                 //const result = document.getElementById('result');
                 //result.innerHTML = JSON.stringify(data, null, 2);
                 if (data.data.length === 0) {
+                    document.getElementById('table-container').style.display = 'none';
+                    document.getElementById('ai-search-result-container').style.display = 'none';
+                    document.getElementById('mermaid-container').style.display = 'none';
+
                     alert("No data found");
-
-                    let table = document.getElementById('table-container');
-                    table.style.display = 'none';
-
-                    let ai_search_result = document.getElementById('ai-search-result-container');
-                    ai_search_result.style.display = 'none';
-
-                    let mermaid = document.getElementById('mermaid-container');
-                    mermaid.style.display = 'none';
-
                     return;
                 }
+                document.getElementById('table-container').style.display = 'block';
+                document.getElementById('ai-search-result-container').style.display = 'none';
+                document.getElementById('mermaid-container').style.display = 'none';
 
-                let table = document.getElementById('table-container');
-                table.style.display = 'block';
-
-                let ai_search_result = document.getElementById('ai-search-result-container');
-                ai_search_result.style.display = 'none';
-
-                let mermaid = document.getElementById('mermaid-container');
-                mermaid.style.display = 'none';
 
                 renderTable(data.data);
             })
@@ -463,31 +448,15 @@ function button_render_handler(){
                     console.log("renderMermaid with data");
 
                     if (data.length === 0) {
+                        document.getElementById('mermaid-container').style.display = 'none';
+                        document.getElementById('table-container').style.display = 'none';
+                        document.getElementById('ai-search-result-container').style.display = 'none';
                         alert("No data found");
-
-                        let mermaid = document.getElementById('mermaid-container');
-                        mermaid.style.display = 'none';
-
-                        let table = document.getElementById('table-container');
-                        table.style.display = 'none';
-
-                        let ai_search_result = document.getElementById('ai-search-result-container');
-                        ai_search_result.style.display = 'none';
-
-
                         return;
                     }
-
-                    let table = document.getElementById('table-container');
-                    table.style.display = 'none';
-
-                    let ai_search_result = document.getElementById('ai-search-result-container');
-                    ai_search_result.style.display = 'none';
-
-
-                    let mermaid = document.getElementById('mermaid-container');
-                    mermaid.style.display = 'block';
-
+                    document.getElementById('table-container').style.display = 'none';
+                    document.getElementById('ai-search-result-container').style.display = 'none';
+                    document.getElementById('mermaid-container').style.display = 'block';
 
                     initializeMermaid();
                     await renderMermaid(data);
