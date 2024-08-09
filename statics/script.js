@@ -322,10 +322,13 @@ function button_ai_search_handler(){
         })
             .then(response => {
                 // Try to extract the error message from the response
-                return response.json().then(errData => {
-                    // Throw an error with the server's error message
-                    throw new Error(errData.error || `HTTP error! status: ${response.status}`);
-                });
+                if (!response.ok) {
+                    return response.json().then(errData => {
+                        // Throw an error with the server's error message
+                        throw new Error(errData.error || `HTTP error! status: ${response.status}`);
+                    });
+                }
+                return response.json();
             })
             .then(data => {
                 console.log(data);
