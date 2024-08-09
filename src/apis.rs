@@ -144,24 +144,36 @@ pub async fn post_ai_search(
 ) -> APIWebResponse<OpenAICompletionResult> {
     debug!("Searching Open AI with query: {:#?}", search_request);
     let mut final_prompt = String::new();
+
     if let Some(query_message) = &search_request.ai_search_query {
         // AI search must specific with query message first
-        let result = crate::open_ai_search::ai_search(query_message, &app_state).await?;
-        debug!("Result from AI Search: {:#?}", result);
-        if let Some(content) = result.search_answers {
-            let combine_data = content
-                .iter()
-                .map(|c| {
-                    format!(
-                        "Answer: {}\nHighlights: {}\n",
-                        c.clone().text.unwrap_or("".to_string()),
-                        c.clone().highlights.unwrap_or("".to_string())
-                    )
-                })
-                .collect::<Vec<String>>()
-                .join("\n");
-            final_prompt.push_str(&combine_data);
+        let indexes = vec![
+                                        "ekafka-inventory-idx-001",
+                                        "ekafka-inventory-idx-002-json"
+                                    ];
+
+        for index in indexes {
+            let result = crate::open_ai_search::ai_search(&index.to_string(),
+                                                          query_message,
+                                                          &app_state).await?;
+
+            debug!("Result from AI Search: {:#?}", result);
+            if let Some(content) = result.search_answers {
+                let combine_data = content
+                    .iter()
+                    .map(|c| {
+                        format!(
+                            "Answer: {}\nHighlights: {}\n",
+                            c.clone().text.unwrap_or("".to_string()),
+                            c.clone().highlights.unwrap_or("".to_string())
+                        )
+                    })
+                    .collect::<Vec<String>>()
+                    .join("\n");
+                final_prompt.push_str(&combine_data);
+            }
         }
+
         // load all data from csv
         debug!("Load all csv data");
         if let (Some(ds_inventory), Some(ds_consumer)) =

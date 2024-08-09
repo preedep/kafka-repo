@@ -8,12 +8,14 @@ use crate::entities_ai::{
 };
 
 pub async fn ai_search(
+    index_name:&String,
     query_message: &String,
     app_state: &AppState,
 ) -> Result<AISearchResult, APIError> {
     let ai_search_key = app_state.clone().azure_ai_search_key.unwrap();
     let client = reqwest::Client::new();
-    let url = "https://nick-ai-dev002.search.windows.net/indexes('ekafka-inventory-idx-001')/docs/search?api-version=2024-05-01-preview";
+    let url = format!("https://nick-ai-dev002.search.windows.net/indexes('{}')/docs/search?api-version=2024-05-01-preview", index_name);
+    //let url = "https://nick-ai-dev002.search.windows.net/indexes('ekafka-inventory-idx-001')/docs/search?api-version=2024-05-01-preview";
     let response = client
         .post(url)
         .header("Content-Type", "application/json")
