@@ -308,15 +308,8 @@ function button_ai_search_handler(){
         // Replace with your API URL
         const apiEndpoint = '/api/v1/ai_search';
         // Fetch data from the API
-        let accessToken = localStorage.getItem('token');
-        fetch(apiEndpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`,
-            },
-            body: JSON.stringify(json_data_req),
-        })
+
+        fetchDataWithAccessToken(apiEndpoint,'POST',json_data_req)
             .then(response => {
                 // Try to extract the error message from the response
                 if (!response.ok) {
@@ -358,6 +351,32 @@ function button_ai_search_handler(){
             });
     });
 }
+
+function fetchDataWithAccessToken(apiEndpoint, method, body) {
+    // Fetch data from the API
+    let accessToken = localStorage.getItem('token');
+    return fetch(apiEndpoint, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(body),
+    })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(errData => {
+                    throw new Error(errData.error || `HTTP error! status: ${response.status}`);
+                });
+            }
+            return response.json();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            throw error;
+        });
+}
+
 function button_search_handler(){
     const button = document.getElementById('searchButton');
     button.addEventListener('click', function() {
@@ -366,17 +385,7 @@ function button_search_handler(){
 
         let json_data_req = get_search_data_req();
 
-        // Fetch data from the API
-        let accessToken = localStorage.getItem('token');
-
-        fetch(apiEndpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`,
-            },
-            body: JSON.stringify(json_data_req),
-        })
+        fetchDataWithAccessToken(apiEndpoint,'POST',json_data_req)
             .then(response => {
                 // Try to extract the error message from the response
                 if (!response.ok) {
@@ -433,15 +442,7 @@ function button_render_handler(){
                 json_data_req.search_all_text = table_input_search.value;
             }
 
-            let accessToken = localStorage.getItem('token');
-            fetch(apiEndpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`,
-                },
-                body: JSON.stringify(json_data_req),
-            })
+            fetchDataWithAccessToken(apiEndpoint,'POST',json_data_req)
                 .then(response => response.text())
                 .then(async data => {
                     console.log('Success:', data);
