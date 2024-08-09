@@ -346,12 +346,10 @@ function button_ai_search_handler(){
                 console.log("All content: ", all_content);
                 const result_container = document.getElementById('ai-search-result-container');
                 result_container.style.display = 'block';
-
                 // Step 1: Split the string by newlines
                 let lines = all_content.split('\n');
                 // Step 2: Wrap each line in a <p> tag
                 let paragraphs = lines.map(line => `<p>${line}</p>`);
-
                 // Step 3: Join the array into a single string
                 let htmlText = paragraphs.join('');
                 result_container.innerHTML = htmlText;
@@ -383,7 +381,16 @@ function button_search_handler(){
             },
             body: JSON.stringify(json_data_req),
         })
-            .then(response => response.json())
+            .then(response => {
+                // Try to extract the error message from the response
+                if (!response.ok) {
+                    return response.json().then(errData => {
+                        // Throw an error with the server's error message
+                        throw new Error(errData.error || `HTTP error! status: ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
                 console.log('Success:', data);
                 //const result = document.getElementById('result');
