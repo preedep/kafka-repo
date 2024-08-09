@@ -95,18 +95,8 @@ function load_dropdown_owner_of_topics() {
     // API endpoint
     const apiEndpoint = '/api/v1/apps';
 
-    // Fetch data from the API
-    let accessToken = localStorage.getItem('token');
-    //console.log("Token: ", token);
-    fetch(apiEndpoint,
-        {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
+
+        fetchDataWithAccessToken(apiEndpoint,'GET',null).then(response => response.json())
         .then(data => {
             const dropdown = document.getElementById('dropdown-owner-topic');
             bind_data_for_option(data, dropdown);
@@ -122,18 +112,8 @@ function load_dropdown_owner_of_topics() {
 function load_dropdown_topics(app_owner_name) {
     // API endpoint
     const apiEndpoint = `/api/v1/apps/${app_owner_name}/topics`;
-    // Fetch data from the API
-    let accessToken = localStorage.getItem('token');
-    //console.log("Token: ", token);
-    fetch(apiEndpoint,
-        {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
+
+    fetchDataWithAccessToken(apiEndpoint,'GET',null).then(response => response.json())
         .then(data => {
             const dropdown = document.getElementById('dropdown-topic-name');
             dropdown.innerHTML = '<option value="0">Select an Topic Name</option>';
@@ -228,18 +208,7 @@ function bind_data_for_option(data, dropdown) {
 function load_dropdown_app_consumer() {
     // API endpoint
     const apiEndpoint = '/api/v1/consumers';
-
-    // Fetch data from the API
-    let accessToken = localStorage.getItem('token');
-    //console.log("Token: ", token);
-    fetch(apiEndpoint,
-        {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json'
-            }
-        })
+    fetchDataWithAccessToken(apiEndpoint,'GET',null)
         .then(response => response.json())
         .then(data => {
             const dropdown = document.getElementById('dropdown-consumer-app');
@@ -352,17 +321,24 @@ function button_ai_search_handler(){
     });
 }
 
+// Fetch data from the API with an access token
 function fetchDataWithAccessToken(apiEndpoint, method, body) {
     // Fetch data from the API
     let accessToken = localStorage.getItem('token');
-    return fetch(apiEndpoint, {
+    let params = {
         method: method,
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(body),
-    })
+        }
+    }
+    if (method === 'POST') {
+        if (body !== null) {
+            params.body = JSON.stringify(body);
+        }
+    }
+
+    return fetch(apiEndpoint, params)
         .then(response => {
             if (!response.ok) {
                 return response.json().then(errData => {
