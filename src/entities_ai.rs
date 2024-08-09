@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AISearchResult {
     #[serde(rename = "@odata.context")]
-    pub odata_context: String,
+    pub odata_context: Option<String>,
     #[serde(rename = "@search.answers")]
     pub search_answers: Option<Vec<AISearchAnswerValue>>,
     #[serde(rename = "@search.nextPageParameters")]

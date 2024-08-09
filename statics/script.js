@@ -95,18 +95,8 @@ function load_dropdown_owner_of_topics() {
     // API endpoint
     const apiEndpoint = '/api/v1/apps';
 
-    // Fetch data from the API
-    let accessToken = localStorage.getItem('token');
-    //console.log("Token: ", token);
-    fetch(apiEndpoint,
-        {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
+
+        fetchDataWithAccessToken(apiEndpoint,'GET',null)
         .then(data => {
             const dropdown = document.getElementById('dropdown-owner-topic');
             bind_data_for_option(data, dropdown);
@@ -122,18 +112,8 @@ function load_dropdown_owner_of_topics() {
 function load_dropdown_topics(app_owner_name) {
     // API endpoint
     const apiEndpoint = `/api/v1/apps/${app_owner_name}/topics`;
-    // Fetch data from the API
-    let accessToken = localStorage.getItem('token');
-    //console.log("Token: ", token);
-    fetch(apiEndpoint,
-        {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
+
+    fetchDataWithAccessToken(apiEndpoint,'GET',null)
         .then(data => {
             const dropdown = document.getElementById('dropdown-topic-name');
             dropdown.innerHTML = '<option value="0">Select an Topic Name</option>';
@@ -228,19 +208,7 @@ function bind_data_for_option(data, dropdown) {
 function load_dropdown_app_consumer() {
     // API endpoint
     const apiEndpoint = '/api/v1/consumers';
-
-    // Fetch data from the API
-    let accessToken = localStorage.getItem('token');
-    //console.log("Token: ", token);
-    fetch(apiEndpoint,
-        {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
+    fetchDataWithAccessToken(apiEndpoint,'GET',null)
         .then(data => {
             const dropdown = document.getElementById('dropdown-consumer-app');
             bind_data_for_option(data, dropdown);
@@ -285,6 +253,50 @@ function get_search_data_req() {
     return json_data_req;
 }
 
+// Fetch data from the API with an access token
+function fetchDataWithAccessToken(apiEndpoint, method, body,isJson = true) {
+    // Fetch data from the API
+    let accessToken = localStorage.getItem('token');
+    let params = {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+        }
+    }
+    if (method === 'POST') {
+        if (body !== null) {
+            params.body = JSON.stringify(body);
+        }
+    }
+
+    return fetch(apiEndpoint, params)
+        .then(response => {
+            if (!response.ok) {
+                if (isJson) {
+                    return response.json().then(errData => {
+                        throw new Error(errData.error || `HTTP error! status: ${response.status}`);
+                    });
+                }else{
+                    return response.text().then(errData => {
+                        throw new Error(errData.error || `HTTP error! status: ${response.status}`);
+                    });
+                }
+            }
+            if (isJson) {
+                return response.json();
+            }else {
+                return response.text();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            throw error;
+        });
+}
+
+
+
 function button_ai_search_handler(){
     const button = document.getElementById('ai_searchButton');
 
@@ -297,13 +309,10 @@ function button_ai_search_handler(){
             return;
         }
 
-        const table = document.getElementById('table-container');
-        table.style.display = 'none';
-        const mermaid = document.getElementById('mermaid-container');
-        mermaid.style.display = 'none';
-
         let json_data_req = get_search_data_req();
 
+        document.getElementById('table-container').style.display = 'none';
+        document.getElementById('mermaid-container').style.display = 'none';
         // Show the loading screen
         document.getElementById('ai-search-result-loading').style.display = 'block';
         document.getElementById('ai-search-result-loading').style.display = 'flex';
@@ -311,25 +320,8 @@ function button_ai_search_handler(){
         // Replace with your API URL
         const apiEndpoint = '/api/v1/ai_search';
         // Fetch data from the API
-        let accessToken = localStorage.getItem('token');
-        fetch(apiEndpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`,
-            },
-            body: JSON.stringify(json_data_req),
-        })
-            .then(response => {
-                // Try to extract the error message from the response
-                if (!response.ok) {
-                    return response.json().then(errData => {
-                        // Throw an error with the server's error message
-                        throw new Error(errData.error || `HTTP error! status: ${response.status}`);
-                    });
-                }
-                return response.json();
-            })
+
+        fetchDataWithAccessToken(apiEndpoint,'POST',json_data_req)
             .then(data => {
                 console.log(data);
                 // Hide the loading screen
@@ -344,15 +336,14 @@ function button_ai_search_handler(){
                     all_content = all_content + content;
                 }
                 console.log("All content: ", all_content);
-                const result_container = document.getElementById('ai-search-result-container');
-                result_container.style.display = 'block';
+                document.getElementById('ai-search-result-container').style.display = 'block';
                 // Step 1: Split the string by newlines
                 let lines = all_content.split('\n');
                 // Step 2: Wrap each line in a <p> tag
                 let paragraphs = lines.map(line => `<p>${line}</p>`);
                 // Step 3: Join the array into a single string
                 let htmlText = paragraphs.join('');
-                result_container.innerHTML = htmlText;
+                document.getElementById('ai-search-result-container').innerHTML = htmlText;
 
             })
             .catch((error) => {
@@ -362,6 +353,7 @@ function button_ai_search_handler(){
             });
     });
 }
+
 function button_search_handler(){
     const button = document.getElementById('searchButton');
     button.addEventListener('click', function() {
@@ -370,54 +362,23 @@ function button_search_handler(){
 
         let json_data_req = get_search_data_req();
 
-        // Fetch data from the API
-        let accessToken = localStorage.getItem('token');
-
-        fetch(apiEndpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`,
-            },
-            body: JSON.stringify(json_data_req),
-        })
-            .then(response => {
-                // Try to extract the error message from the response
-                if (!response.ok) {
-                    return response.json().then(errData => {
-                        // Throw an error with the server's error message
-                        throw new Error(errData.error || `HTTP error! status: ${response.status}`);
-                    });
-                }
-                return response.json();
-            })
+        fetchDataWithAccessToken(apiEndpoint,'POST',json_data_req)
             .then(data => {
                 console.log('Success:', data);
                 //const result = document.getElementById('result');
                 //result.innerHTML = JSON.stringify(data, null, 2);
                 if (data.data.length === 0) {
+                    document.getElementById('table-container').style.display = 'none';
+                    document.getElementById('ai-search-result-container').style.display = 'none';
+                    document.getElementById('mermaid-container').style.display = 'none';
+
                     alert("No data found");
-
-                    let table = document.getElementById('table-container');
-                    table.style.display = 'none';
-
-                    let ai_search_result = document.getElementById('ai-search-result-container');
-                    ai_search_result.style.display = 'none';
-
-                    let mermaid = document.getElementById('mermaid-container');
-                    mermaid.style.display = 'none';
-
                     return;
                 }
+                document.getElementById('table-container').style.display = 'block';
+                document.getElementById('ai-search-result-container').style.display = 'none';
+                document.getElementById('mermaid-container').style.display = 'none';
 
-                let table = document.getElementById('table-container');
-                table.style.display = 'block';
-
-                let ai_search_result = document.getElementById('ai-search-result-container');
-                ai_search_result.style.display = 'none';
-
-                let mermaid = document.getElementById('mermaid-container');
-                mermaid.style.display = 'none';
 
                 renderTable(data.data);
             })
@@ -448,46 +409,21 @@ function button_render_handler(){
                 json_data_req.search_all_text = table_input_search.value;
             }
 
-            let accessToken = localStorage.getItem('token');
-            fetch(apiEndpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`,
-                },
-                body: JSON.stringify(json_data_req),
-            })
-                .then(response => response.text())
+            fetchDataWithAccessToken(apiEndpoint,'POST',json_data_req,false)
                 .then(async data => {
                     console.log('Success:', data);
                     console.log("renderMermaid with data");
 
                     if (data.length === 0) {
+                        document.getElementById('mermaid-container').style.display = 'none';
+                        document.getElementById('table-container').style.display = 'none';
+                        document.getElementById('ai-search-result-container').style.display = 'none';
                         alert("No data found");
-
-                        let mermaid = document.getElementById('mermaid-container');
-                        mermaid.style.display = 'none';
-
-                        let table = document.getElementById('table-container');
-                        table.style.display = 'none';
-
-                        let ai_search_result = document.getElementById('ai-search-result-container');
-                        ai_search_result.style.display = 'none';
-
-
                         return;
                     }
-
-                    let table = document.getElementById('table-container');
-                    table.style.display = 'none';
-
-                    let ai_search_result = document.getElementById('ai-search-result-container');
-                    ai_search_result.style.display = 'none';
-
-
-                    let mermaid = document.getElementById('mermaid-container');
-                    mermaid.style.display = 'block';
-
+                    document.getElementById('table-container').style.display = 'none';
+                    document.getElementById('ai-search-result-container').style.display = 'none';
+                    document.getElementById('mermaid-container').style.display = 'block';
 
                     initializeMermaid();
                     await renderMermaid(data);
