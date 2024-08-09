@@ -42,6 +42,7 @@ async fn main() -> std::io::Result<()> {
     pretty_env_logger::init();
     dotenv::dotenv().ok();
 
+    // Read environment variables
     let kafka_inventory_file =
         std::env::var("KAFKA_INVENTORY_FILE").expect("KAFKA_INVENTORY_FILE must be set");
     let kafka_consumer_file =
@@ -59,6 +60,7 @@ async fn main() -> std::io::Result<()> {
     let ai_search_api_key = std::env::var("AI_SEARCH_KEY").expect("AI_SEARCH_KEY must be set");
     let open_api_key = std::env::var("OPEN_AI_KEY").expect("OPENAI_KEY must be set");
 
+
     debug!("Reading kafka inventory file: {}", kafka_inventory_file);
     debug!("Reading kafka consumer file: {}", kafka_consumer_file);
     debug!("Azure Blob Storage account: {}", azure_blob_account_name);
@@ -67,6 +69,8 @@ async fn main() -> std::io::Result<()> {
         azure_blob_container_name
     );
 
+    // Create the application state
+    // This will be shared across all the threads
     let mut data_state = data_state::AppState {
         kafka_inventory: None,
         kafka_consumer: None,
@@ -92,6 +96,7 @@ async fn main() -> std::io::Result<()> {
     )
     .await;
 
+    // Fetch the dataset from Azure Blob Storage
     let ds_user_authentication = fetch_dataset_az_blob(
         &azure_blob_account_name,
         &azure_blob_container_name,
@@ -147,10 +152,17 @@ async fn main() -> std::io::Result<()> {
         }
     }
 
+    // Rate Limit
     let limit = LimitBuilder::new().set_ttl(10).set_amount(20).build();
-
     // Rate Limiter
     let limiter = RateLimiterBuilder::new()
+        .add_route(
+            RouteBuilder::new()
+                .set_path("/api/v1/ai_search")
+                .set_method("POST")
+                .build(),
+            limit.clone(),
+        )
         .add_route(
             RouteBuilder::new()
                 .set_path("/api/v1/search")
