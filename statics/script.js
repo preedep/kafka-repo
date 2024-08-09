@@ -253,6 +253,50 @@ function get_search_data_req() {
     return json_data_req;
 }
 
+// Fetch data from the API with an access token
+function fetchDataWithAccessToken(apiEndpoint, method, body,isJson = true) {
+    // Fetch data from the API
+    let accessToken = localStorage.getItem('token');
+    let params = {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+        }
+    }
+    if (method === 'POST') {
+        if (body !== null) {
+            params.body = JSON.stringify(body);
+        }
+    }
+
+    return fetch(apiEndpoint, params)
+        .then(response => {
+            if (!response.ok) {
+                if (isJson) {
+                    return response.json().then(errData => {
+                        throw new Error(errData.error || `HTTP error! status: ${response.status}`);
+                    });
+                }else{
+                    return response.text().then(errData => {
+                        throw new Error(errData.error || `HTTP error! status: ${response.status}`);
+                    });
+                }
+            }
+            if (isJson) {
+                return response.json();
+            }else {
+                return response.text();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            throw error;
+        });
+}
+
+
+
 function button_ai_search_handler(){
     const button = document.getElementById('ai_searchButton');
 
@@ -278,16 +322,6 @@ function button_ai_search_handler(){
         // Fetch data from the API
 
         fetchDataWithAccessToken(apiEndpoint,'POST',json_data_req)
-            .then(response => {
-                // Try to extract the error message from the response
-                if (!response.ok) {
-                    return response.json().then(errData => {
-                        // Throw an error with the server's error message
-                        throw new Error(errData.error || `HTTP error! status: ${response.status}`);
-                    });
-                }
-                return response.json();
-            })
             .then(data => {
                 console.log(data);
                 // Hide the loading screen
@@ -320,38 +354,6 @@ function button_ai_search_handler(){
     });
 }
 
-// Fetch data from the API with an access token
-function fetchDataWithAccessToken(apiEndpoint, method, body) {
-    // Fetch data from the API
-    let accessToken = localStorage.getItem('token');
-    let params = {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`,
-        }
-    }
-    if (method === 'POST') {
-        if (body !== null) {
-            params.body = JSON.stringify(body);
-        }
-    }
-
-    return fetch(apiEndpoint, params)
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(errData => {
-                    throw new Error(errData.error || `HTTP error! status: ${response.status}`);
-                });
-            }
-            return response.json();
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            throw error;
-        });
-}
-
 function button_search_handler(){
     const button = document.getElementById('searchButton');
     button.addEventListener('click', function() {
@@ -361,16 +363,6 @@ function button_search_handler(){
         let json_data_req = get_search_data_req();
 
         fetchDataWithAccessToken(apiEndpoint,'POST',json_data_req)
-            .then(response => {
-                // Try to extract the error message from the response
-                if (!response.ok) {
-                    return response.json().then(errData => {
-                        // Throw an error with the server's error message
-                        throw new Error(errData.error || `HTTP error! status: ${response.status}`);
-                    });
-                }
-                return response.json();
-            })
             .then(data => {
                 console.log('Success:', data);
                 //const result = document.getElementById('result');
@@ -417,8 +409,7 @@ function button_render_handler(){
                 json_data_req.search_all_text = table_input_search.value;
             }
 
-            fetchDataWithAccessToken(apiEndpoint,'POST',json_data_req)
-                .then(response => response.text())
+            fetchDataWithAccessToken(apiEndpoint,'POST',json_data_req,false)
                 .then(async data => {
                     console.log('Success:', data);
                     console.log("renderMermaid with data");
