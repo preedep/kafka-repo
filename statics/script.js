@@ -260,6 +260,13 @@ function button_ai_search_handler(){
             alert('Please enter a search query');
             return;
         }
+
+        const table = document.getElementById('table-container');
+        table.style.display = 'none';
+        const mermaid = document.getElementById('mermaid-container');
+        mermaid.style.display = 'none';
+
+
         // Show the loading screen
         document.getElementById('ai-search-result-loading').style.display = 'block';
         document.getElementById('ai-search-result-loading').style.display = 'flex';
@@ -366,11 +373,20 @@ function button_search_handler(){
                     let table = document.getElementById('table-container');
                     table.style.display = 'none';
 
+                    let ai_search_result = document.getElementById('ai-search-result-container');
+                    ai_search_result.style.display = 'none';
+
+                    let mermaid = document.getElementById('mermaid-container');
+                    mermaid.style.display = 'none';
+
                     return;
                 }
 
                 let table = document.getElementById('table-container');
                 table.style.display = 'block';
+
+                let ai_search_result = document.getElementById('ai-search-result-container');
+                ai_search_result.style.display = 'none';
 
                 let mermaid = document.getElementById('mermaid-container');
                 mermaid.style.display = 'none';
@@ -447,11 +463,22 @@ function button_render_handler(){
                         let mermaid = document.getElementById('mermaid-container');
                         mermaid.style.display = 'none';
 
+                        let table = document.getElementById('table-container');
+                        table.style.display = 'none';
+
+                        let ai_search_result = document.getElementById('ai-search-result-container');
+                        ai_search_result.style.display = 'none';
+
+
                         return;
                     }
 
                     let table = document.getElementById('table-container');
                     table.style.display = 'none';
+
+                    let ai_search_result = document.getElementById('ai-search-result-container');
+                    ai_search_result.style.display = 'none';
+
 
                     let mermaid = document.getElementById('mermaid-container');
                     mermaid.style.display = 'block';
