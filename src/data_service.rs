@@ -191,16 +191,24 @@ pub fn search(
         debug!("Filtering by search all text: {}", filter_condition);
         let mut filter_expr = col(COL_CONSUMER_APP_NAME_CONSUMER_FILE)
             .str()
-            .contains(lit(filter_condition.as_str()), false);
+            .to_lowercase()
+            .str()
+            .contains(lit(filter_condition.as_str().to_lowercase()), false);
         filter_expr = filter_expr.or(col(COL_TOPIC_NAME_INVENTORY_FILE)
             .str()
-            .contains(lit(filter_condition.as_str()), false));
+            .to_lowercase()
+            .str()
+            .contains(lit(filter_condition.as_str().to_lowercase()), false));
         filter_expr = filter_expr.or(col(COL_CONSUMER_GROUP_NAME_CONSUMER_FILE)
             .str()
-            .contains(lit(filter_condition.as_str()), false));
+            .to_lowercase()
+            .str()
+            .contains(lit(filter_condition.as_str().to_lowercase()), false));
         filter_expr = filter_expr.or(col(COL_CONSUMER_APP_NAME_2_CONSUMER_FILE)
             .str()
-            .contains(lit(filter_condition.as_str()), false));
+            .to_lowercase()
+            .str()
+            .contains(lit(filter_condition.as_str().to_string()), false));
 
         joined = joined.lazy().filter(filter_expr).collect().map_err(|e| {
             error!("Failed to filter dataframes: {}", e);
