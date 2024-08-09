@@ -96,7 +96,7 @@ function load_dropdown_owner_of_topics() {
     const apiEndpoint = '/api/v1/apps';
 
 
-        fetchDataWithAccessToken(apiEndpoint,'GET',null).then(response => response.json())
+        fetchDataWithAccessToken(apiEndpoint,'GET',null)
         .then(data => {
             const dropdown = document.getElementById('dropdown-owner-topic');
             bind_data_for_option(data, dropdown);
@@ -113,7 +113,7 @@ function load_dropdown_topics(app_owner_name) {
     // API endpoint
     const apiEndpoint = `/api/v1/apps/${app_owner_name}/topics`;
 
-    fetchDataWithAccessToken(apiEndpoint,'GET',null).then(response => response.json())
+    fetchDataWithAccessToken(apiEndpoint,'GET',null)
         .then(data => {
             const dropdown = document.getElementById('dropdown-topic-name');
             dropdown.innerHTML = '<option value="0">Select an Topic Name</option>';
@@ -209,7 +209,6 @@ function load_dropdown_app_consumer() {
     // API endpoint
     const apiEndpoint = '/api/v1/consumers';
     fetchDataWithAccessToken(apiEndpoint,'GET',null)
-        .then(response => response.json())
         .then(data => {
             const dropdown = document.getElementById('dropdown-consumer-app');
             bind_data_for_option(data, dropdown);
