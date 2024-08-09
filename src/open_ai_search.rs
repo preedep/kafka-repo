@@ -3,7 +3,9 @@ use serde_json::Value;
 
 use crate::data_state::AppState;
 use crate::entities::APIError;
-use crate::entities_ai::{AISearchResult, OpenAICompletionResult};
+use crate::entities_ai::{
+    AISearchResult, OpenAICompleteRequest, OpenAICompleteRequestMessage, OpenAICompletionResult,
+};
 
 pub async fn ai_search(
     query_message: &String,
@@ -44,30 +46,40 @@ pub async fn open_ai_completion(
 ) -> Result<OpenAICompletionResult, APIError> {
     let open_ai_key = app_state.clone().azure_open_ai_key.unwrap();
     let client = reqwest::Client::new();
-    let url = "https://nickazureaidev002.openai.azure.com/openai/deployments/gpt-35-turbo/completions?api-version=2023-09-15-preview";
+    let url = "https://nickazureaidev002.openai.azure.com/openai/deployments/gpt-4/chat/completions?api-version=2024-02-15-preview";
+
+    //let query_message = query_message.split("\n").collect::<Vec<&str>>();
+    let json_req = OpenAICompleteRequest {
+        messages: vec![OpenAICompleteRequestMessage::new("user", query_message)],
+        max_tokens: 800,
+        temperature: 0.7,
+        top_p: 0.95,
+        stop: None,
+    };
+
     let response = client
         .post(url)
         .header("Content-Type", "application/json")
         .header("api-key", open_ai_key)
-        .json(&serde_json::json!(
-            {
-                "prompt": query_message,
-                "max_tokens": 2000,
-                "temperature": 1,
-                "top_p": 0.5,
-                "frequency_penalty": 0.0,
-                "presence_penalty": 0.0,
-                //"stop": ["\n"]
-            }
-        ))
+        .json(&json_req)
         .send()
         .await
         .map_err(|e| APIError::new(&format!("Failed to send request to OpenAI: {}", e)))?;
 
     let r = response
-        .json::<OpenAICompletionResult>()
+        .json::<Value>()
         .await
         .map_err(|e| APIError::new(&format!("Failed to parse response from OpenAI: {}", e)))?;
 
-    Ok(r)
+    debug!("OpenAI Response: {:#?}", r);
+
+    Ok(OpenAICompletionResult {
+        id: None,
+        object: None,
+        created: None,
+        model: None,
+        prompt_filter_results: None,
+        choices: None,
+        usage: None,
+    })
 }

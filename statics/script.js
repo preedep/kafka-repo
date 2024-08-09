@@ -264,7 +264,7 @@ function button_ai_search_handler(){
                 'Authorization': `Bearer ${accessToken}`,
             },
             body: JSON.stringify({
-                "query":"What is the topic name of the app owner 'Connect'?"
+                "query":"Please show all topics is produced by EAPI"
             }),
         })
             .then(response => response.json())

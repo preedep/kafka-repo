@@ -68,6 +68,35 @@ pub struct AISearchResultValue {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct OpenAICompleteRequestMessage {
+    #[serde(rename = "role")]
+    pub role: String,
+    #[serde(rename = "content")]
+    pub content: String,
+}
+impl OpenAICompleteRequestMessage {
+    pub fn new(role: &str, content: &str) -> Self {
+        OpenAICompleteRequestMessage {
+            role: role.to_string(),
+            content: content.to_string(),
+        }
+    }
+}
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct OpenAICompleteRequest {
+    #[serde(rename = "messages")]
+    pub messages: Vec<OpenAICompleteRequestMessage>,
+    #[serde(rename = "max_tokens")]
+    pub max_tokens: i64,
+    #[serde(rename = "temperature")]
+    pub temperature: f64,
+    #[serde(rename = "top_p")]
+    pub top_p: f64,
+    #[serde(rename = "stop")]
+    pub stop: Option<Vec<String>>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct OpenAICompletionResult {
     pub id: Option<String>,
     pub object: Option<String>,
