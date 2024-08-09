@@ -114,6 +114,20 @@
         .logout-button:hover {
             background-color: darkred;
         }
+
+        #ai-search-result-loading {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            display: none; /* Hidden by default */
+        }
     </style>
 
     <script src="script.js" type="module"></script>
@@ -134,7 +148,7 @@
 <body>
 
 <div class="header-container">
-    <span>E-Kafka Inventory Finder Version 0.12</span>
+    <span>E-Kafka Inventory Finder Version 0.14</span>
     <button class="logout-button" onclick="logout()">Logout</button>
 </div>
 
@@ -171,7 +185,13 @@
 
     </div>
 
+    <br/>
+    <br/>
 
+    <div>
+        <label for="ai-search-input">AI Search (Preview) (*click AI Search Button) : </label>
+        <input type="text" id="ai-search-input" placeholder="Search for anything..." style="width: 500px">
+    </div>
     <br/>
     <br/>
     <br/>
@@ -180,6 +200,7 @@
 
     <button id="renderButton" style="padding: 10px">Render</button>
 
+    <button id="ai_searchButton" style="padding: 10px;margin-left: 40px">AI Search (Azure Open AI) preview</button>
 
     <br/><br/>
 
@@ -212,6 +233,10 @@
 
 <pre id="mermaid-container-display" class="mermaid">
 </pre>
+</div>
+
+<div id="ai-search-result-loading" style="display: none">Loading, please wait...</div>
+<div id="ai-search-result-container" style="display: none">
 </div>
 
 </body>

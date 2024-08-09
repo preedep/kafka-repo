@@ -1,7 +1,7 @@
-
 use std::io::Cursor;
 
-use log::debug;
+use log::{debug, error};
+use polars::lazy::prelude::*;
 use polars::prelude::*;
 
 use crate::entities::{APIError, SearchKafkaRequest, SearchKafkaResponse};
@@ -177,16 +177,40 @@ pub fn search(
             JoinArgs::new(JoinType::Left),
         )
         .map_err(|e| {
-            debug!("Failed to join dataframes: {}", e);
+            error!("Failed to join dataframes: {}", e);
             APIError::new("Failed to join dataframes")
         })?;
 
-    let joined = joined.lazy().filter(expr).collect().map_err(|e| {
-        debug!("Failed to filter dataframes: {}", e);
+    let mut joined = joined.lazy().filter(expr).collect().map_err(|e| {
+        error!("Failed to filter dataframes: {}", e);
         APIError::new("Failed to filter dataframes")
     })?;
 
-    debug!("Joined dataframe: {}", joined);
+    // Apply the filter to each column and combine the results
+    if let Some(filter_condition) = &search_request.search_all_text {
+        debug!("Filtering by search all text: {}", filter_condition);
+        let mut filter_expr = col(COL_CONSUMER_APP_NAME_CONSUMER_FILE)
+            .str()
+            .contains(lit(filter_condition.as_str()), false);
+        filter_expr = filter_expr.or(col(COL_TOPIC_NAME_INVENTORY_FILE)
+            .str()
+            .contains(lit(filter_condition.as_str()), false));
+        filter_expr = filter_expr.or(col(COL_CONSUMER_GROUP_NAME_CONSUMER_FILE)
+            .str()
+            .contains(lit(filter_condition.as_str()), false));
+        filter_expr = filter_expr.or(col(COL_CONSUMER_APP_NAME_2_CONSUMER_FILE)
+            .str()
+            .contains(lit(filter_condition.as_str()), false));
+
+        joined = joined.lazy().filter(filter_expr).collect().map_err(|e| {
+            error!("Failed to filter dataframes: {}", e);
+
+            APIError::new("Failed to filter dataframes")
+        })?;
+
+        debug!("Filtered by search all text: {}", joined);
+    }
+    /////
     // map result
     for row in 0..joined.height() {
         let mut search_kafka_response = SearchKafkaResponse::default();
@@ -202,6 +226,17 @@ pub fn search(
                 search_kafka_response.consumer_app = col.to_string().replace("\"", "");
             }
         }
+
+        let mut description = String::new();
+        description.push_str("App Owner or Producer is ");
+        description.push_str(search_kafka_response.app_owner.as_str());
+        description.push_str(" and produce message to E-Kafka with topic name  ");
+        description.push_str(search_kafka_response.topic_name.as_str());
+        description.push_str(" and consumed by ");
+        description.push_str(search_kafka_response.consumer_app.as_str());
+        description.push_str(" with consumer group iD ");
+        description.push_str(search_kafka_response.consumer_group_id.as_str());
+        search_kafka_response.description = description;
         result.push(search_kafka_response);
     }
 

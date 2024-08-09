@@ -250,36 +250,125 @@ function load_dropdown_app_consumer() {
         .catch(error => console.error('Error fetching data:', error));
 
 }
+
+function get_search_data_req() {
+
+    const ai_search_input = document.getElementById('ai-search-input');
+    const dropdown_owner_topic = document.getElementById('dropdown-owner-topic');
+    const dropdown_topic_name = document.getElementById('dropdown-topic-name');
+    const dropdown_consumer_app = document.getElementById('dropdown-consumer-app');
+
+    const owner_topic = dropdown_owner_topic.value.trim();
+    const topic_name = dropdown_topic_name.value.trim();
+    const consumer_app = dropdown_consumer_app.value.trim();
+    const ai_search_value = ai_search_input.value.trim();
+
+    console.log("Owner Topic: ", owner_topic);
+    console.log("Topic Name: ", topic_name);
+    console.log("Consumer App: ", consumer_app);
+    console.log("AI Search: ", ai_search_value);
+
+    let json_data_req = {};
+    if (owner_topic !== '0') {
+        json_data_req.app_owner = owner_topic;
+    }
+    if ((topic_name !== '0') && (dropdown_topic_name.style.display !== 'none')) {
+        json_data_req.topic_name = topic_name;
+    }
+    if (consumer_app !== '0') {
+        json_data_req.consumer_app = consumer_app;
+    }
+    if (ai_search_input.value.trim() !== '') {
+        json_data_req.ai_search_query = ai_search_value;
+    }
+
+    return json_data_req;
+}
+
+function button_ai_search_handler(){
+    const button = document.getElementById('ai_searchButton');
+
+
+    button.addEventListener('click', function() {
+        const input = document.getElementById('ai-search-input');
+
+        if (input.value === '') {
+            alert('Please enter a search query');
+            return;
+        }
+
+        const table = document.getElementById('table-container');
+        table.style.display = 'none';
+        const mermaid = document.getElementById('mermaid-container');
+        mermaid.style.display = 'none';
+
+        let json_data_req = get_search_data_req();
+
+        // Show the loading screen
+        document.getElementById('ai-search-result-loading').style.display = 'block';
+        document.getElementById('ai-search-result-loading').style.display = 'flex';
+
+        // Replace with your API URL
+        const apiEndpoint = '/api/v1/ai_search';
+        // Fetch data from the API
+        let accessToken = localStorage.getItem('token');
+        fetch(apiEndpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify(json_data_req),
+        })
+            .then(response => {
+                // Try to extract the error message from the response
+                if (!response.ok) {
+                    return response.json().then(errData => {
+                        // Throw an error with the server's error message
+                        throw new Error(errData.error || `HTTP error! status: ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+                // Hide the loading screen
+                document.getElementById('ai-search-result-loading').style.display = 'none';
+                // Show the search results
+                let ai_result = data.data;
+                let all_content = '';
+                for (let i = 0; i < ai_result.choices.length;i++){
+                    let choice = ai_result.choices[i];
+                    let message = choice.message;
+                    let content = message.content;
+                    all_content = all_content + content;
+                }
+                console.log("All content: ", all_content);
+                const result_container = document.getElementById('ai-search-result-container');
+                result_container.style.display = 'block';
+                // Step 1: Split the string by newlines
+                let lines = all_content.split('\n');
+                // Step 2: Wrap each line in a <p> tag
+                let paragraphs = lines.map(line => `<p>${line}</p>`);
+                // Step 3: Join the array into a single string
+                let htmlText = paragraphs.join('');
+                result_container.innerHTML = htmlText;
+
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                // Hide the loading screen
+                document.getElementById('ai-search-result-loading').style.display = 'none';
+            });
+    });
+}
 function button_search_handler(){
     const button = document.getElementById('searchButton');
     button.addEventListener('click', function() {
         // Replace with your API URL
         const apiEndpoint = '/api/v1/search';
 
-        const dropdown_owner_topic = document.getElementById('dropdown-owner-topic');
-        const dropdown_topic_name = document.getElementById('dropdown-topic-name');
-        const dropdown_consumer_app = document.getElementById('dropdown-consumer-app');
-
-        const owner_topic = dropdown_owner_topic.value;
-        const topic_name = dropdown_topic_name.value;
-        const consumer_app = dropdown_consumer_app.value;
-
-        console.log("Owner Topic: ", owner_topic);
-        console.log("Topic Name: ", topic_name);
-        console.log("Consumer App: ", consumer_app);
-
-
-        let json_data_req = {
-        };
-        if (owner_topic !== '0') {
-            json_data_req.app_owner = owner_topic;
-        }
-        if ((topic_name !== '0')&&(dropdown_topic_name.style.display !== 'none')) {
-            json_data_req.topic_name = topic_name;
-        }
-        if (consumer_app !== '0') {
-            json_data_req.consumer_app = consumer_app;
-        }
+        let json_data_req = get_search_data_req();
 
         // Fetch data from the API
         let accessToken = localStorage.getItem('token');
@@ -292,7 +381,16 @@ function button_search_handler(){
             },
             body: JSON.stringify(json_data_req),
         })
-            .then(response => response.json())
+            .then(response => {
+                // Try to extract the error message from the response
+                if (!response.ok) {
+                    return response.json().then(errData => {
+                        // Throw an error with the server's error message
+                        throw new Error(errData.error || `HTTP error! status: ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
                 console.log('Success:', data);
                 //const result = document.getElementById('result');
@@ -303,11 +401,20 @@ function button_search_handler(){
                     let table = document.getElementById('table-container');
                     table.style.display = 'none';
 
+                    let ai_search_result = document.getElementById('ai-search-result-container');
+                    ai_search_result.style.display = 'none';
+
+                    let mermaid = document.getElementById('mermaid-container');
+                    mermaid.style.display = 'none';
+
                     return;
                 }
 
                 let table = document.getElementById('table-container');
                 table.style.display = 'block';
+
+                let ai_search_result = document.getElementById('ai-search-result-container');
+                ai_search_result.style.display = 'none';
 
                 let mermaid = document.getElementById('mermaid-container');
                 mermaid.style.display = 'none';
@@ -327,71 +434,68 @@ function button_render_handler(){
 
 
     button.addEventListener('click', function() {
-        // Replace with your API URL
-        const apiEndpoint = '/api/v1/render';
 
-        const dropdown_owner_topic = document.getElementById('dropdown-owner-topic');
-        const dropdown_topic_name = document.getElementById('dropdown-topic-name');
-        const dropdown_consumer_app = document.getElementById('dropdown-consumer-app');
+            // render by api
+            // Replace with your API URL
+            const apiEndpoint = '/api/v1/render';
 
-        const owner_topic = dropdown_owner_topic.value;
-        const topic_name = dropdown_topic_name.value;
-        const consumer_app = dropdown_consumer_app.value;
+            let json_data_req = get_search_data_req();
 
-        console.log("Owner Topic: ", owner_topic);
-        console.log("Topic Name: ", topic_name);
-        console.log("Consumer App: ", consumer_app);
+            const table_input_search = document.getElementById('table-result-search-input');
+            console.log("input ",table_input_search.value);
+            if (table_input_search.value !== '') {
+                console.log("Search all text: ", table_input_search.value);
+                json_data_req.search_all_text = table_input_search.value;
+            }
+
+            let accessToken = localStorage.getItem('token');
+            fetch(apiEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
+                },
+                body: JSON.stringify(json_data_req),
+            })
+                .then(response => response.text())
+                .then(async data => {
+                    console.log('Success:', data);
+                    console.log("renderMermaid with data");
+
+                    if (data.length === 0) {
+                        alert("No data found");
+
+                        let mermaid = document.getElementById('mermaid-container');
+                        mermaid.style.display = 'none';
+
+                        let table = document.getElementById('table-container');
+                        table.style.display = 'none';
+
+                        let ai_search_result = document.getElementById('ai-search-result-container');
+                        ai_search_result.style.display = 'none';
 
 
-        let json_data_req = {
-        };
-        if (owner_topic !== '0') {
-            json_data_req.app_owner = owner_topic;
-        }
-        if ((topic_name !== '0') && (dropdown_topic_name.style.display !== 'none')) {
-            json_data_req.topic_name = topic_name;
-        }
-        if (consumer_app !== '0') {
-            json_data_req.consumer_app = consumer_app;
-        }
+                        return;
+                    }
 
-        let accessToken = localStorage.getItem('token');
-        fetch(apiEndpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`,
-            },
-            body: JSON.stringify(json_data_req),
-        })
-            .then(response => response.text())
-            .then(async data => {
-                console.log('Success:', data);
-                console.log("renderMermaid with data");
+                    let table = document.getElementById('table-container');
+                    table.style.display = 'none';
 
-                if (data.length === 0) {
-                    alert("No data found");
+                    let ai_search_result = document.getElementById('ai-search-result-container');
+                    ai_search_result.style.display = 'none';
+
 
                     let mermaid = document.getElementById('mermaid-container');
-                    mermaid.style.display = 'none';
-
-                    return;
-                }
-
-                let table = document.getElementById('table-container');
-                table.style.display = 'none';
-
-                let mermaid = document.getElementById('mermaid-container');
-                mermaid.style.display = 'block';
+                    mermaid.style.display = 'block';
 
 
-                initializeMermaid();
-                await renderMermaid(data);
+                    initializeMermaid();
+                    await renderMermaid(data);
 
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
 
     });
 }
@@ -418,15 +522,21 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log("initializeMermaid");
     initializeMermaid();
 
+    // load drop down list
     load_dropdown_owner_of_topics();
     load_dropdown_app_consumer();
+    // detect change dropdown
     detect_change_owner_of_topics();
     detect_change_topic_name();
+    // button handler
     button_search_handler();
     button_render_handler();
+    button_ai_search_handler();
     button_download_csv_handler();
     button_download_svg_handler();
-    load_filter_table();
 
+    // search all text in table search result
+    load_filter_table();
+    //search in dropdown list
     search_able_dropdown_topic_name_handler()
 });
