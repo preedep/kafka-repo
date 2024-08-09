@@ -252,7 +252,7 @@ function load_dropdown_app_consumer() {
 }
 function button_ai_search_handler(){
     const button = document.getElementById('ai_searchButton');
-    const result = document.getElementById('ai-search-result-container');
+
 
     button.addEventListener('click', function() {
         const input = document.getElementById('ai-search-input');
@@ -284,6 +284,27 @@ function button_ai_search_handler(){
                 // Hide the loading screen
                 document.getElementById('ai-search-result-loading').style.display = 'none';
                 // Show the search results
+                let ai_result = data.data;
+                let all_content = '';
+                for (let i = 0; i < ai_result.choices.length;i++){
+                    let choice = ai_result.choices[i];
+                    let message = choice.message;
+                    let content = message.content;
+                    all_content = all_content + content;
+                }
+                console.log("All content: ", all_content);
+                const result_container = document.getElementById('ai-search-result-container');
+                result_container.style.display = 'block';
+
+                // Step 1: Split the string by newlines
+                let lines = all_content.split('\n');
+                // Step 2: Wrap each line in a <p> tag
+                let paragraphs = lines.map(line => `<p>${line}</p>`);
+
+                // Step 3: Join the array into a single string
+                let htmlText = paragraphs.join('');
+                result_container.innerHTML = htmlText;
+
             })
             .catch((error) => {
                 console.error('Error:', error);
