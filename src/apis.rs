@@ -8,7 +8,9 @@ use log::kv::ToKey;
 
 use crate::data_service::{post_login, search};
 use crate::data_state::AppState;
-use crate::entities::{APIError, APIResponse, Claims, JwtResponse, SearchKafkaRequest, SearchKafkaResponse, UserLogin};
+use crate::entities::{
+    APIError, APIResponse, Claims, JwtResponse, SearchKafkaRequest, SearchKafkaResponse, UserLogin,
+};
 use crate::entities_ai::{AISearchResult, OpenAICompletionResult};
 use crate::export::export_mm_file;
 use crate::{data_service, entities};
@@ -169,7 +171,6 @@ pub async fn post_ai_search(
         if let (Some(ds_inventory), Some(ds_consumer)) =
             (&app_state.kafka_inventory, &app_state.kafka_consumer)
         {
-
             let result = search(ds_inventory, ds_consumer, &search_request)?;
             let csv_data = result
                 .iter()
@@ -185,16 +186,16 @@ pub async fn post_ai_search(
             final_prompt.push_str(&csv_data);
         }
 
-        let final_prompt = build_prompt(query_message,
-                                        &final_prompt);
+        let final_prompt = build_prompt(query_message, &final_prompt);
 
         //debug!("Final Prompt: \n{}", final_prompt);
         let result = crate::open_ai_search::open_ai_completion(&final_prompt, &app_state).await?;
         debug!("Result from Open AI Completion: {:#?}", result);
         Ok(APIResponse { data: result })
-    }
-    else {
-        Err(APIError::new("Failed to search AI , Please provide query message"))
+    } else {
+        Err(APIError::new(
+            "Failed to search AI , Please provide query message",
+        ))
     }
 }
 

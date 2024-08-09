@@ -267,6 +267,31 @@ function button_ai_search_handler(){
         mermaid.style.display = 'none';
 
 
+        const dropdown_owner_topic = document.getElementById('dropdown-owner-topic');
+        const dropdown_topic_name = document.getElementById('dropdown-topic-name');
+        const dropdown_consumer_app = document.getElementById('dropdown-consumer-app');
+
+        const owner_topic = dropdown_owner_topic.value;
+        const topic_name = dropdown_topic_name.value;
+        const consumer_app = dropdown_consumer_app.value;
+
+        console.log("Owner Topic: ", owner_topic);
+        console.log("Topic Name: ", topic_name);
+        console.log("Consumer App: ", consumer_app);
+
+        let json_data_req = {
+        };
+        if (owner_topic !== '0') {
+            json_data_req.app_owner = owner_topic;
+        }
+        if ((topic_name !== '0')&&(dropdown_topic_name.style.display !== 'none')) {
+            json_data_req.topic_name = topic_name;
+        }
+        if (consumer_app !== '0') {
+            json_data_req.consumer_app = consumer_app;
+        }
+        json_data_req.ai_search_query = input.value;
+
         // Show the loading screen
         document.getElementById('ai-search-result-loading').style.display = 'block';
         document.getElementById('ai-search-result-loading').style.display = 'flex';
@@ -281,9 +306,7 @@ function button_ai_search_handler(){
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${accessToken}`,
             },
-            body: JSON.stringify({
-                "query":input.value
-            }),
+            body: JSON.stringify(json_data_req),
         })
             .then(response => response.json())
             .then(data => {

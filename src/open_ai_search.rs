@@ -73,5 +73,5 @@ pub async fn open_ai_completion(
 
     debug!("OpenAI Response: {:#?}", r);
 
-   Ok(r)
+    Ok(r)
 }

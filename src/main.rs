@@ -60,7 +60,6 @@ async fn main() -> std::io::Result<()> {
     let ai_search_api_key = std::env::var("AI_SEARCH_KEY").expect("AI_SEARCH_KEY must be set");
     let open_api_key = std::env::var("OPEN_AI_KEY").expect("OPENAI_KEY must be set");
 
-
     debug!("Reading kafka inventory file: {}", kafka_inventory_file);
     debug!("Reading kafka consumer file: {}", kafka_consumer_file);
     debug!("Azure Blob Storage account: {}", azure_blob_account_name);
