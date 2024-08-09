@@ -96,6 +96,40 @@ pub struct OpenAICompleteRequest {
     pub stop: Option<Vec<String>>,
 }
 
+//
+//  response of Open AI API
+//
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct OpenAICompletionResult {
+    pub id: String,
+    pub object: String,
+    pub created: u64,
+    pub model: String,
+    pub choices: Vec<Choice>,
+    pub usage: Usage,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Choice {
+    pub index: u32,
+    pub message: Message,
+    pub finish_reason: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Message {
+    pub role: String,
+    pub content: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Usage {
+    pub prompt_tokens: u32,
+    pub completion_tokens: u32,
+    pub total_tokens: u32,
+}
+
+/*
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct OpenAICompletionResult {
     pub id: Option<String>,
@@ -108,12 +142,13 @@ pub struct OpenAICompletionResult {
     pub usage: Option<OpenAIUsage>,
 }
 
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct OpenAIPromptFilterResult {
     #[serde(rename = "prompt_index")]
-    pub prompt_index: i64,
+    pub prompt_index: Option<i64>,
     #[serde(rename = "content_filter_results")]
-    pub content_filter_results: OpenAIContentFilterResults,
+    pub content_filter_results: Option<OpenAIContentFilterResults>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -158,35 +193,34 @@ pub struct OpenAIViolence {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct OpenAIChoice {
-    pub text: String,
-    pub index: i64,
+    pub text: Option<String>,
+    pub index: Option<i64>,
     #[serde(rename = "finish_reason")]
-    pub finish_reason: String,
+    pub finish_reason: Option<String>,
     #[serde(rename = "logprobs")]
-    pub log_probs: serde_json::Value,
+    pub log_probs: Option<serde_json::Value>,
     #[serde(rename = "content_filter_results")]
-    pub content_filter_results: OpenAIContentFilterResults,
+    pub content_filter_results: Option<OpenAIContentFilterResults>,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct OpenAIProtectedMaterialCode {
     pub filtered: bool,
     pub detected: bool,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct OpenAIProtectedMaterialText {
     pub filtered: bool,
     pub detected: bool,
 }
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct OpenAIUsage {
     #[serde(rename = "prompt_tokens")]
-    pub prompt_tokens: i64,
+    pub prompt_tokens: Option<i64>,
     #[serde(rename = "completion_tokens")]
-    pub completion_tokens: i64,
+    pub completion_tokens: Option<i64>,
     #[serde(rename = "total_tokens")]
-    pub total_tokens: i64,
+    pub total_tokens: Option<i64>,
 }
+*/

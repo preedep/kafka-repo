@@ -114,6 +114,20 @@
         .logout-button:hover {
             background-color: darkred;
         }
+
+        #ai-search-result-loading {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            display: none; /* Hidden by default */
+        }
     </style>
 
     <script src="script.js" type="module"></script>
@@ -171,7 +185,13 @@
 
     </div>
 
+    <br/>
+    <br/>
 
+    <div>
+        <label for="ai-search-input">AI Search (Preview) (*click AI Search Button) : </label>
+        <input type="text" id="ai-search-input" placeholder="Search for anything..." style="width: 500px">
+    </div>
     <br/>
     <br/>
     <br/>
@@ -215,8 +235,9 @@
 </pre>
 </div>
 
-<div id="ai_search" style="display: none">
-
+<div id="ai-search-result-loading" style="display: none">Loading, please wait...</div>
+<div id="ai-search-result-container" style="display: none">
+    <p id="data"></p>
 </div>
 
 </body>

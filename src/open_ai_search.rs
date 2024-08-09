@@ -67,19 +67,11 @@ pub async fn open_ai_completion(
         .map_err(|e| APIError::new(&format!("Failed to send request to OpenAI: {}", e)))?;
 
     let r = response
-        .json::<Value>()
+        .json::<OpenAICompletionResult>()
         .await
         .map_err(|e| APIError::new(&format!("Failed to parse response from OpenAI: {}", e)))?;
 
     debug!("OpenAI Response: {:#?}", r);
 
-    Ok(OpenAICompletionResult {
-        id: None,
-        object: None,
-        created: None,
-        model: None,
-        prompt_filter_results: None,
-        choices: None,
-        usage: None,
-    })
+   Ok(r)
 }

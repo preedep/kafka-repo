@@ -252,7 +252,18 @@ function load_dropdown_app_consumer() {
 }
 function button_ai_search_handler(){
     const button = document.getElementById('ai_searchButton');
+    const result = document.getElementById('ai-search-result-container');
+
     button.addEventListener('click', function() {
+        const input = document.getElementById('ai-search-input');
+        if (input.value === '') {
+            alert('Please enter a search query');
+            return;
+        }
+        // Show the loading screen
+        document.getElementById('ai-search-result-loading').style.display = 'block';
+        document.getElementById('ai-search-result-loading').style.display = 'flex';
+
         // Replace with your API URL
         const apiEndpoint = '/api/v1/ai_search';
         // Fetch data from the API
@@ -264,15 +275,20 @@ function button_ai_search_handler(){
                 'Authorization': `Bearer ${accessToken}`,
             },
             body: JSON.stringify({
-                "query":"Please show all topics is produced by EAPI"
+                "query":input.value
             }),
         })
             .then(response => response.json())
             .then(data => {
                 console.log(data);
+                // Hide the loading screen
+                document.getElementById('ai-search-result-loading').style.display = 'none';
+                // Show the search results
             })
             .catch((error) => {
                 console.error('Error:', error);
+                // Hide the loading screen
+                document.getElementById('ai-search-result-loading').style.display = 'none';
             });
     });
 }
