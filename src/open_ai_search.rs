@@ -8,7 +8,7 @@ use crate::entities_ai::{
 };
 
 pub async fn ai_search(
-    index_name:&String,
+    index_name: &String,
     semantics_configuration: &String,
     query_message: &String,
     app_state: &AppState,
@@ -27,7 +27,7 @@ pub async fn ai_search(
                 "queryType": "semantic",
                 "semanticConfiguration": semantics_configuration,
                 "captions": "extractive",
-                "answers": "extractive|count-3",
+                "answers": "extractive|count-5",
                 "queryLanguage": "en-US"
             }
         ))

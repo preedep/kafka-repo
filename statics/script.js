@@ -105,7 +105,8 @@ function load_dropdown_owner_of_topics() {
         })
         .catch(error => {
             console.error('Error fetching data:', error)
-            //alert(error);
+            alert(error);
+            //alert('Error fetching data: Please check your network connection ',error);
         });
 }
 
@@ -136,7 +137,11 @@ function load_dropdown_topics(app_owner_name) {
             console.log(data);
 
         })
-        .catch(error => console.error('Error fetching data:', error));
+        .catch(error => {
+            console.error('Error fetching data:', error);
+            
+            alert(error);
+        });
 }
 function detect_change_topic_name() {
     console.log("detect_change_topic_name");
@@ -215,7 +220,10 @@ function load_dropdown_app_consumer() {
             console.log(data);
 
         })
-        .catch(error => console.error('Error fetching data:', error));
+        .catch(error => {
+            console.error('Error fetching data:', error)
+            alert(error);
+        });
 
 }
 
@@ -350,6 +358,7 @@ function button_ai_search_handler(){
                 console.error('Error:', error);
                 // Hide the loading screen
                 document.getElementById('ai-search-result-loading').style.display = 'none';
+                alert(error);
             });
     });
 }
@@ -384,6 +393,7 @@ function button_search_handler(){
             })
             .catch((error) => {
                 console.error('Error:', error);
+                alert(error);
             });
 
     });
@@ -431,6 +441,7 @@ function button_render_handler(){
                 })
                 .catch((error) => {
                     console.error('Error:', error);
+                    alert(error);
                 });
 
     });
