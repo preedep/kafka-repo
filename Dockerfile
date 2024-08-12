@@ -31,8 +31,8 @@ RUN cargo build --release --target x86_64-unknown-linux-musl -j 1
 FROM alpine:latest
 
 # Install necessary runtime dependencies
-RUN apk add --no-cache libgcc libstdc++ openssl ca-certificates
-
+#RUN apk add --no-cache libgcc libstdc++ openssl ca-certificates
+RUN apk add --no-cache openssl ca-certificates
 # Create a user to run the application
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
