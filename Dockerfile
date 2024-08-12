@@ -1,6 +1,7 @@
 # Step 1: Build the application
 FROM rust:alpine AS builder
 
+# Install dependencies necessary for building the application
 RUN apk update && apk add --no-cache \
     openssl \
     openssl-dev \
@@ -8,20 +9,23 @@ RUN apk update && apk add --no-cache \
     pkgconfig \
     build-base \
     clang \
-    clang-dev \
-    llvm \
-    llvm-dev
+    llvm-dev \
+    cmake
+
+# Install the x86_64-unknown-linux-musl target
+RUN rustup target add x86_64-unknown-linux-musl
 
 # Create app directory
 WORKDIR /app
 
-# Copy the source code into the container
+# Copy the Cargo.toml and Cargo.lock files to build dependencies first (caching)
 COPY Cargo.toml Cargo.lock ./
+
+# Copy the source code into the container
 COPY src ./src
 
-
-# Build the application
-RUN cargo build --release
+# Build the application in release mode targeting x86_64-unknown-linux-musl
+RUN cargo build --release --target x86_64-unknown-linux-musl -j 1
 
 # Step 2: Create the runtime image
 FROM alpine:latest
@@ -36,7 +40,7 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 WORKDIR /app
 
 # Copy the built application from the builder
-COPY --from=builder /app/target/release/kafka-repo kafka-repo
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/kafka-repo kafka-repo
 
 COPY .env .env
 COPY ./statics ./statics

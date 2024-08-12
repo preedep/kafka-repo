@@ -74,7 +74,7 @@ derive_more = "0.99"
 
 [profile.release]
 opt-level = 3
-lto = "fat"  # or "thin" for faster build times with less optimization
+lto = "thin"
 debug = false
 codegen-units = 1
 panic = 'abort'
