@@ -147,19 +147,19 @@ pub async fn post_ai_search(
 
     if let Some(query_message) = &search_request.ai_search_query {
         // AI search must specific with query message first
-        let indexes = vec![
-                                        "ekafka-inventory-idx-001",
-                                        "ekafka-inventory-idx-002-json"
-                                    ];
+        let indexes = vec!["ekafka-inventory-idx-001", "ekafka-inventory-idx-002-json"];
         let semantic_configuration = vec!["ekafka-semantic-dev001", "ekafka-semantic-json"];
 
-        for (index, index_name) in indexes.iter().enumerate(){
+        for (index, index_name) in indexes.iter().enumerate() {
             let index_name = index_name.to_string();
             let semantic_configuration = semantic_configuration[index].to_string();
-            let result = crate::open_ai_search::ai_search(&index_name,
-                                                            &semantic_configuration,
-                                                          query_message,
-                                                          &app_state).await?;
+            let result = crate::open_ai_search::ai_search(
+                &index_name,
+                &semantic_configuration,
+                query_message,
+                &app_state,
+            )
+            .await?;
 
             debug!("Result from AI Search: {:#?}", result);
             if let Some(content) = result.search_answers {
