@@ -128,6 +128,41 @@
             font-size: 24px;
             display: none; /* Hidden by default */
         }
+
+
+
+        #ai-search-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        #ai-search-input {
+            width: 500px;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        #ai_searchButton {
+            padding: 10px;
+            margin-left: 10px;
+            background-color: #4CAF50; /* Change to your preferred color */
+            color: white;
+            border: none;
+            border-radius: 50%; /* Makes the button circular */
+            width: 50px; /* Diameter of the circle */
+            height: 50px; /* Diameter of the circle */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Optional: add shadow */
+        }
+
+        #ai_searchButton img {
+            max-width: 50px; /* Size of the icon */
+            max-height: 50px;
+        }
     </style>
 
     <script src="script.js" type="module"></script>
@@ -148,7 +183,7 @@
 <body>
 
 <div class="header-container">
-    <span>E-Kafka Inventory Finder Version 0.18</span>
+    <span>E-Kafka Inventory Finder Version 0.19</span>
     <button class="logout-button" onclick="logout()">Logout</button>
 </div>
 
@@ -187,10 +222,15 @@
 
     <br/>
     <br/>
-    <div>
+    <div id="ai-search-container">
         <label for="ai-search-input">AI Search (Preview) (*click AI Search Button) : </label>
         <input type="text" id="ai-search-input" placeholder="Search for anything..." style="width: 500px">
+        <!--
         <button id="ai_searchButton" style="padding: 10px;margin-left: 40px">AI Search (Azure Open AI) preview</button>
+        -->
+        <button id="ai_searchButton">
+            <img src="img/chatgpt.jpeg" alt="ChatGPT Logo">
+        </button>
     </div>
     <br/>
     <br/>
