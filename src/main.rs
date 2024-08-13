@@ -26,7 +26,7 @@ mod entities;
 mod entities_ai;
 mod export;
 mod jwt_middleware;
-mod open_ai_search;
+mod azure_ai_apis;
 
 fn is_allowed_origin(origin: &str) -> bool {
     // List of allowed origins
@@ -57,7 +57,11 @@ async fn main() -> std::io::Result<()> {
         std::env::var("STORAGE_CONTAINER").expect("AZURE_BLOB_CONTAINER_NAME must be set");
 
     let jwt_secret_key = std::env::var("JWT_SECRET_KEY").expect("JWT_SECRET must be set");
+    let ai_search_api_url = std::env::var("AI_SEARCH_SERVICE_URL").expect("AI_SEARCH_URL must be set");
     let ai_search_api_key = std::env::var("AI_SEARCH_KEY").expect("AI_SEARCH_KEY must be set");
+
+
+    let open_ai_url = std::env::var("OPEN_AI_SERVICE_URL").expect("OPENAI_URL must be set");
     let open_api_key = std::env::var("OPEN_AI_KEY").expect("OPENAI_KEY must be set");
 
     debug!("Reading kafka inventory file: {}", kafka_inventory_file);
@@ -67,6 +71,10 @@ async fn main() -> std::io::Result<()> {
         "Azure Blob Storage container: {}",
         azure_blob_container_name
     );
+    debug!("AI Search URL : {}", ai_search_api_url);
+    debug!("Open AI Search URL : {}", open_ai_url);
+
+
 
     // Create the application state
     // This will be shared across all the threads
@@ -75,7 +83,9 @@ async fn main() -> std::io::Result<()> {
         kafka_consumer: None,
         user_authentication: None,
         jwt_secret: jwt_secret_key.clone(),
+        azure_ai_search_url: Some(ai_search_api_url),
         azure_ai_search_key: Some(ai_search_api_key),
+        azure_open_ai_url: Some(open_ai_url),
         azure_open_ai_key: Some(open_api_key),
     };
 

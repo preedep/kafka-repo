@@ -153,7 +153,7 @@ pub async fn post_ai_search(
         for (index, index_name) in indexes.iter().enumerate() {
             let index_name = index_name.to_string();
             let semantic_configuration = semantic_configuration[index].to_string();
-            let result = crate::open_ai_search::ai_search(
+            let result = crate::azure_ai_apis::ai_search(
                 &index_name,
                 &semantic_configuration,
                 query_message,
@@ -201,7 +201,7 @@ pub async fn post_ai_search(
         let final_prompt = build_prompt(query_message, &final_prompt);
 
         //debug!("Final Prompt: \n{}", final_prompt);
-        let result = crate::open_ai_search::open_ai_completion(&final_prompt, &app_state).await?;
+        let result = crate::azure_ai_apis::open_ai_completion(&final_prompt, &app_state).await?;
         debug!("Result from Open AI Completion: {:#?}", result);
         Ok(APIResponse { data: result })
     } else {

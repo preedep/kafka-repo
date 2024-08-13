@@ -13,9 +13,10 @@ pub async fn ai_search(
     query_message: &String,
     app_state: &AppState,
 ) -> Result<AISearchResult, APIError> {
+    let api_endpoint = app_state.clone().azure_ai_search_url.unwrap();
     let ai_search_key = app_state.clone().azure_ai_search_key.unwrap();
     let client = reqwest::Client::new();
-    let url = format!("https://nick-ai-dev002.search.windows.net/indexes('{}')/docs/search?api-version=2024-05-01-preview", index_name);
+    let url = format!("{}/indexes('{}')/docs/search?api-version=2024-05-01-preview",api_endpoint, index_name);
     //let url = "https://nick-ai-dev002.search.windows.net/indexes('ekafka-inventory-idx-001')/docs/search?api-version=2024-05-01-preview";
     let response = client
         .post(url)
@@ -49,7 +50,7 @@ pub async fn open_ai_completion(
 ) -> Result<OpenAICompletionResult, APIError> {
     let open_ai_key = app_state.clone().azure_open_ai_key.unwrap();
     let client = reqwest::Client::new();
-    let url = "https://nickazureaidev002.openai.azure.com/openai/deployments/gpt-4/chat/completions?api-version=2024-02-15-preview";
+    let url = format!("{}/openai/deployments/gpt-4/chat/completions?api-version=2024-02-15-preview", api_endpoint);
 
     //let query_message = query_message.split("\n").collect::<Vec<&str>>();
     let json_req = OpenAICompleteRequest {
