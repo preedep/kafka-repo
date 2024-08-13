@@ -48,6 +48,7 @@ pub async fn open_ai_completion(
     query_message: &String,
     app_state: &AppState,
 ) -> Result<OpenAICompletionResult, APIError> {
+    let api_endpoint = app_state.clone().azure_open_ai_url.unwrap();
     let open_ai_key = app_state.clone().azure_open_ai_key.unwrap();
     let client = reqwest::Client::new();
     let url = format!("{}/openai/deployments/gpt-4/chat/completions?api-version=2024-02-15-preview", api_endpoint);
