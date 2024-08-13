@@ -17,7 +17,6 @@ pub async fn ai_search(
     let ai_search_key = app_state.clone().azure_ai_search_key.unwrap();
     let client = reqwest::Client::new();
     let url = format!("{}/indexes('{}')/docs/search?api-version=2024-05-01-preview",api_endpoint, index_name);
-    //let url = "https://nick-ai-dev002.search.windows.net/indexes('ekafka-inventory-idx-001')/docs/search?api-version=2024-05-01-preview";
     let response = client
         .post(url)
         .header("Content-Type", "application/json")
