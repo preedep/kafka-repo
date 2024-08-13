@@ -19,6 +19,7 @@ use crate::data_service::read_csv;
 use crate::data_utils::fetch_dataset_az_blob;
 
 mod apis;
+mod azure_ai_apis;
 mod data_service;
 mod data_state;
 mod data_utils;
@@ -26,7 +27,6 @@ mod entities;
 mod entities_ai;
 mod export;
 mod jwt_middleware;
-mod azure_ai_apis;
 
 fn is_allowed_origin(origin: &str) -> bool {
     // List of allowed origins
@@ -57,9 +57,9 @@ async fn main() -> std::io::Result<()> {
         std::env::var("STORAGE_CONTAINER").expect("AZURE_BLOB_CONTAINER_NAME must be set");
 
     let jwt_secret_key = std::env::var("JWT_SECRET_KEY").expect("JWT_SECRET must be set");
-    let ai_search_api_url = std::env::var("AI_SEARCH_SERVICE_URL").expect("AI_SEARCH_URL must be set");
+    let ai_search_api_url =
+        std::env::var("AI_SEARCH_SERVICE_URL").expect("AI_SEARCH_URL must be set");
     let ai_search_api_key = std::env::var("AI_SEARCH_KEY").expect("AI_SEARCH_KEY must be set");
-
 
     let open_ai_url = std::env::var("OPEN_AI_SERVICE_URL").expect("OPENAI_URL must be set");
     let open_api_key = std::env::var("OPEN_AI_KEY").expect("OPENAI_KEY must be set");
@@ -73,8 +73,6 @@ async fn main() -> std::io::Result<()> {
     );
     debug!("AI Search URL : {}", ai_search_api_url);
     debug!("Open AI Search URL : {}", open_ai_url);
-
-
 
     // Create the application state
     // This will be shared across all the threads

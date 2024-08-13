@@ -16,7 +16,10 @@ pub async fn ai_search(
     let api_endpoint = app_state.clone().azure_ai_search_url.unwrap();
     let ai_search_key = app_state.clone().azure_ai_search_key.unwrap();
     let client = reqwest::Client::new();
-    let url = format!("{}/indexes('{}')/docs/search?api-version=2024-05-01-preview",api_endpoint, index_name);
+    let url = format!(
+        "{}/indexes('{}')/docs/search?api-version=2024-05-01-preview",
+        api_endpoint, index_name
+    );
     let response = client
         .post(url)
         .header("Content-Type", "application/json")
@@ -50,7 +53,10 @@ pub async fn open_ai_completion(
     let api_endpoint = app_state.clone().azure_open_ai_url.unwrap();
     let open_ai_key = app_state.clone().azure_open_ai_key.unwrap();
     let client = reqwest::Client::new();
-    let url = format!("{}/openai/deployments/gpt-4/chat/completions?api-version=2024-02-15-preview", api_endpoint);
+    let url = format!(
+        "{}/openai/deployments/gpt-4/chat/completions?api-version=2024-02-15-preview",
+        api_endpoint
+    );
 
     //let query_message = query_message.split("\n").collect::<Vec<&str>>();
     let json_req = OpenAICompleteRequest {
