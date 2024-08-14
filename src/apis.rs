@@ -164,22 +164,20 @@ pub async fn post_ai_search(
             .await?;
 
             debug!("Result from AI Search: {:#?}", result);
-            /*
+
             if let Some(content) = result.search_answers {
                 let combine_data = content
                     .iter()
                     .map(|c| {
                         format!(
-                            "Answer: {}\nHighlights: {}\n",
+                            "Answer: {}\n",
                             c.clone().text.unwrap_or("".to_string()),
-                            c.clone().highlights.unwrap_or("".to_string())
                         )
                     })
                     .collect::<Vec<String>>()
                     .join("\n");
                 final_prompt.push_str(&combine_data);
             }
-            */
             if let Some(value) = result.value {
                 let combine_data = value
                     .iter()
@@ -188,9 +186,9 @@ pub async fn post_ai_search(
                             cap.iter().map(|c|{
                                 if !c.clone().text.unwrap_or_default().is_empty() &&
                                     !c.clone().highlights.unwrap_or_default().is_empty(){
-                                    format!("Answer: {}\nHighlights: {}\n",
+                                    format!("Summary: {}\nRelevant Section: {}\n",
                                             c.clone().text.unwrap_or_default(),
-                                            c.clone().text.unwrap_or_default())
+                                            c.clone().highlights.unwrap_or_default())
                                 }else{
                                     "".to_string()
                                 }
