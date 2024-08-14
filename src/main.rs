@@ -47,21 +47,21 @@ async fn main() -> std::io::Result<()> {
         std::env::var("KAFKA_INVENTORY_FILE").expect("KAFKA_INVENTORY_FILE must be set");
     let kafka_consumer_file =
         std::env::var("KAFKA_CONSUMER_FILE").expect("KAFKA_CONSUMER must be set");
-
+    // User Authentication
     let user_authentication_file =
         std::env::var("USER_AUTHENTICATION_FILE").expect("USER_AUTHENTICATION_FILE must be set");
-
+    // Azure Blob Storage for Datasets Kafka Inventory and Kafka Consumer and User Authentication
     let azure_blob_account_name =
         std::env::var("STORAGE_ACCOUNT").expect("AZURE_BLOB_ACCOUNT_NAME must be set");
     let azure_blob_container_name =
         std::env::var("STORAGE_CONTAINER").expect("AZURE_BLOB_CONTAINER_NAME must be set");
 
+    // JWT Secret Key
     let jwt_secret_key = std::env::var("JWT_SECRET_KEY").expect("JWT_SECRET must be set");
     // Azure AI Search
     let ai_search_api_url =
         std::env::var("AI_SEARCH_SERVICE_URL").expect("AI_SEARCH_URL must be set");
     let ai_search_api_key = std::env::var("AI_SEARCH_KEY").expect("AI_SEARCH_KEY must be set");
-
 
      let ai_search_indexes = std::env::var("AI_SEARCH_SERVICE_INDEXES").expect("AI_SEARCH_SERVICE_INDEXES must be set");
      let ai_search_use_semantics = std::env::var("AI_SEARCH_WITH_SEMANTIC").unwrap_or("false".to_string());
