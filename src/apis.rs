@@ -183,17 +183,22 @@ pub async fn post_ai_search(
             if let Some(value) = result.value {
                 let combine_data = value
                     .iter()
-                    .map(|c| {
-                       let msg = c.clone().search_captions.clone().unwrap_or_default().into_iter()
-                           .map(|cap|{
-                             format!("Answer: {}\nHighlights: {}\n", cap.clone().text.unwrap_or("".to_string()),
-                                     cap.clone().highlights.unwrap_or("".to_string())
-                             )
-                           });
-                          msg.collect::<Vec<String>>().join("\n")
-                    })
-                    .collect::<Vec<String>>()
-                    .join("\n");
+                    .map(|c|{
+                        if let Some(cap) = &c.search_captions {
+                            cap.iter().map(|c|{
+                                if !c.clone().text.unwrap_or_default().is_empty() &&
+                                    !c.clone().highlights.unwrap_or_default().is_empty(){
+                                    format!("Answer: {}\nHighlights: {}\n",
+                                            c.clone().text.unwrap_or_default(),
+                                            c.clone().text.unwrap_or_default())
+                                }else{
+                                    "".to_string()
+                                }
+                            }).skip_while(|p|p.is_empty()).collect::<Vec<String>>().join("\n")
+                        }else{
+                            "".to_string()
+                        }
+                    }).skip_while(|p|p.is_empty()).collect::<Vec<String>>().join("\n");
 
                 final_prompt.push_str(&combine_data);
             }
@@ -221,7 +226,7 @@ pub async fn post_ai_search(
 
         let final_prompt = build_prompt(query_message, &final_prompt);
 
-        //debug!("Final Prompt: \n{}", final_prompt);
+        debug!("Final Prompt: \n{}", final_prompt);
         let result = crate::azure_ai_apis::open_ai_completion(&final_prompt, &app_state).await?;
         debug!("Result from Open AI Completion: {:#?}", result);
         Ok(APIResponse { data: result })

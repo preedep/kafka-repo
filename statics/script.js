@@ -13,12 +13,13 @@ function filterTable() {
     const table = document.getElementById('data-table');
     const tbody = table.getElementsByTagName('tbody')[0];
     const rows = tbody.getElementsByTagName('tr');
+    let visibleRowIndex = 1; // Initialize row number for visible rows
 
     for (let i = 0; i < rows.length; i++) {
         const cells = rows[i].getElementsByTagName('td');
         let rowContainsFilter = false;
 
-        for (let j = 0; j < cells.length; j++) {
+        for (let j = 1; j < cells.length; j++) { // Start from j = 1 to skip the row number column
             const cell = cells[j];
             const text = cell.innerText.toLowerCase();
             const originalText = cell.innerText;
@@ -38,7 +39,13 @@ function filterTable() {
             }
         }
 
-        rows[i].style.display = rowContainsFilter ? '' : 'none';
+        if (rowContainsFilter) {
+            rows[i].style.display = '';
+            rows[i].getElementsByTagName('td')[0].textContent = visibleRowIndex + ''; // Update row number
+            visibleRowIndex++; // Increment row number for next visible row
+        } else {
+            rows[i].style.display = 'none';
+        }
     }
 }
 
