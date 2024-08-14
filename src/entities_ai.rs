@@ -13,9 +13,9 @@ pub struct AISearchResult {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AISearchResultCaption {
     #[serde(rename = "text")]
-    pub text: String,
+    pub text: Option<String>,
     #[serde(rename = "highlights")]
-    pub highlights: String,
+    pub highlights: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -59,12 +59,16 @@ pub struct AISearchResultValue {
     pub app_owner: Option<String>,
     #[serde(rename = "Topic_name")]
     pub topic_name: Option<String>,
+    #[serde(rename = "MQ_topic")]
+    pub mq_topic: Option<String>,
     #[serde(rename = "Consumer_group_id")]
     pub consumer_group_id: Option<String>,
     #[serde(rename = "Consumer_app")]
     pub consumer_app: Option<String>,
     #[serde(rename = "Description")]
     pub description: Option<String>,
+    #[serde(rename = "Note")]
+    pub note: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -101,126 +105,30 @@ pub struct OpenAICompleteRequest {
 //
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct OpenAICompletionResult {
-    pub id: String,
-    pub object: String,
-    pub created: u64,
-    pub model: String,
-    pub choices: Vec<Choice>,
-    pub usage: Usage,
+    pub id: Option<String>,
+    pub object: Option<String>,
+    pub created: Option<u64>,
+    pub model: Option<String>,
+    pub choices: Option<Vec<Choice>>,
+    pub usage: Option<Usage>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Choice {
-    pub index: u32,
-    pub message: Message,
-    pub finish_reason: String,
+    pub index: Option<u32>,
+    pub message: Option<Message>,
+    pub finish_reason: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Message {
-    pub role: String,
-    pub content: String,
+    pub role: Option<String>,
+    pub content: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Usage {
-    pub prompt_tokens: u32,
-    pub completion_tokens: u32,
-    pub total_tokens: u32,
+    pub prompt_tokens: Option<u32>,
+    pub completion_tokens: Option<u32>,
+    pub total_tokens: Option<u32>,
 }
-
-/*
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct OpenAICompletionResult {
-    pub id: Option<String>,
-    pub object: Option<String>,
-    pub created: Option<i64>,
-    pub model: Option<String>,
-    #[serde(rename = "prompt_filter_results")]
-    pub prompt_filter_results: Option<Vec<OpenAIPromptFilterResult>>,
-    pub choices: Option<Vec<OpenAIChoice>>,
-    pub usage: Option<OpenAIUsage>,
-}
-
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct OpenAIPromptFilterResult {
-    #[serde(rename = "prompt_index")]
-    pub prompt_index: Option<i64>,
-    #[serde(rename = "content_filter_results")]
-    pub content_filter_results: Option<OpenAIContentFilterResults>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct OpenAIContentFilterResults {
-    pub hate: Option<OpenAIHate>,
-    pub jailbreak: Option<OpenAIJailbreak>,
-    #[serde(rename = "self_harm")]
-    pub self_harm: Option<OpenAISelfHarm>,
-    pub sexual: Option<OpenAISexual>,
-    pub violence: Option<OpenAIViolence>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct OpenAIHate {
-    pub filtered: bool,
-    pub severity: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct OpenAIJailbreak {
-    pub filtered: bool,
-    pub detected: bool,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct OpenAISelfHarm {
-    pub filtered: bool,
-    pub severity: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct OpenAISexual {
-    pub filtered: bool,
-    pub severity: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct OpenAIViolence {
-    pub filtered: bool,
-    pub severity: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct OpenAIChoice {
-    pub text: Option<String>,
-    pub index: Option<i64>,
-    #[serde(rename = "finish_reason")]
-    pub finish_reason: Option<String>,
-    #[serde(rename = "logprobs")]
-    pub log_probs: Option<serde_json::Value>,
-    #[serde(rename = "content_filter_results")]
-    pub content_filter_results: Option<OpenAIContentFilterResults>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct OpenAIProtectedMaterialCode {
-    pub filtered: bool,
-    pub detected: bool,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct OpenAIProtectedMaterialText {
-    pub filtered: bool,
-    pub detected: bool,
-}
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct OpenAIUsage {
-    #[serde(rename = "prompt_tokens")]
-    pub prompt_tokens: Option<i64>,
-    #[serde(rename = "completion_tokens")]
-    pub completion_tokens: Option<i64>,
-    #[serde(rename = "total_tokens")]
-    pub total_tokens: Option<i64>,
-}
-*/

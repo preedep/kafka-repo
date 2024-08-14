@@ -4,7 +4,7 @@ use actix_web::web::Json;
 use actix_web::{web, HttpResponse, Responder};
 use jsonwebtoken::EncodingKey;
 use log::debug;
-use log::kv::ToKey;
+//use log::kv::ToKey;
 
 use crate::data_service::{post_login, search};
 use crate::data_state::AppState;
@@ -147,13 +147,15 @@ pub async fn post_ai_search(
 
     if let Some(query_message) = &search_request.ai_search_query {
         // AI search must specific with query message first
-        let indexes = vec!["ekafka-inventory-idx-001", "ekafka-inventory-idx-002-json"];
-        let semantic_configuration = vec!["ekafka-semantic-dev001", "ekafka-semantic-json"];
+
+        let indexes = app_state.azure_ai_search_indexes.clone().unwrap_or_default();
+        let semantic_configuration = app_state.azure_ai_search_semantics.clone().unwrap_or_default();
 
         for (index, index_name) in indexes.iter().enumerate() {
             let index_name = index_name.to_string();
             let semantic_configuration = semantic_configuration[index].to_string();
-            let result = crate::open_ai_search::ai_search(
+            //call ai search with index and semantic configuration
+            let result = crate::azure_ai_apis::ai_search(
                 &index_name,
                 &semantic_configuration,
                 query_message,
@@ -162,18 +164,40 @@ pub async fn post_ai_search(
             .await?;
 
             debug!("Result from AI Search: {:#?}", result);
+
             if let Some(content) = result.search_answers {
                 let combine_data = content
                     .iter()
                     .map(|c| {
                         format!(
-                            "Answer: {}\nHighlights: {}\n",
+                            "Answer: {}\n",
                             c.clone().text.unwrap_or("".to_string()),
-                            c.clone().highlights.unwrap_or("".to_string())
                         )
                     })
                     .collect::<Vec<String>>()
                     .join("\n");
+                final_prompt.push_str(&combine_data);
+            }
+            if let Some(value) = result.value {
+                let combine_data = value
+                    .iter()
+                    .map(|c|{
+                        if let Some(cap) = &c.search_captions {
+                            cap.iter().map(|c|{
+                                if !c.clone().text.unwrap_or_default().is_empty() &&
+                                    !c.clone().highlights.unwrap_or_default().is_empty(){
+                                    format!("Summary: {}\nRelevant Section: {}\n",
+                                            c.clone().text.unwrap_or_default(),
+                                            c.clone().highlights.unwrap_or_default())
+                                }else{
+                                    "".to_string()
+                                }
+                            }).skip_while(|p|p.is_empty()).collect::<Vec<String>>().join("\n")
+                        }else{
+                            "".to_string()
+                        }
+                    }).skip_while(|p|p.is_empty()).collect::<Vec<String>>().join("\n");
+
                 final_prompt.push_str(&combine_data);
             }
         }
@@ -188,7 +212,7 @@ pub async fn post_ai_search(
                 .iter()
                 .map(|d| {
                     format!(
-                        "Producer or App Owner: {}\nE-Kafka Topic Name: {}\nConsumer Group Id: {}\nConsumer or Consume App: {}\n",
+                        "App Owner: {}\nE-Kafka Topic Name: {}\nConsumer Group Id: {}\nConsumer or Consume App: {}\n",
                         d.app_owner, d.topic_name, d.consumer_group_id, d.consumer_app
                     )
                 })
@@ -200,8 +224,8 @@ pub async fn post_ai_search(
 
         let final_prompt = build_prompt(query_message, &final_prompt);
 
-        //debug!("Final Prompt: \n{}", final_prompt);
-        let result = crate::open_ai_search::open_ai_completion(&final_prompt, &app_state).await?;
+        debug!("Final Prompt: \n{}", final_prompt);
+        let result = crate::azure_ai_apis::open_ai_completion(&final_prompt, &app_state).await?;
         debug!("Result from Open AI Completion: {:#?}", result);
         Ok(APIResponse { data: result })
     } else {

@@ -19,6 +19,7 @@ use crate::data_service::read_csv;
 use crate::data_utils::fetch_dataset_az_blob;
 
 mod apis;
+mod azure_ai_apis;
 mod data_service;
 mod data_state;
 mod data_utils;
@@ -26,7 +27,6 @@ mod entities;
 mod entities_ai;
 mod export;
 mod jwt_middleware;
-mod open_ai_search;
 
 fn is_allowed_origin(origin: &str) -> bool {
     // List of allowed origins
@@ -47,17 +47,28 @@ async fn main() -> std::io::Result<()> {
         std::env::var("KAFKA_INVENTORY_FILE").expect("KAFKA_INVENTORY_FILE must be set");
     let kafka_consumer_file =
         std::env::var("KAFKA_CONSUMER_FILE").expect("KAFKA_CONSUMER must be set");
-
+    // User Authentication
     let user_authentication_file =
         std::env::var("USER_AUTHENTICATION_FILE").expect("USER_AUTHENTICATION_FILE must be set");
-
+    // Azure Blob Storage for Datasets Kafka Inventory and Kafka Consumer and User Authentication
     let azure_blob_account_name =
         std::env::var("STORAGE_ACCOUNT").expect("AZURE_BLOB_ACCOUNT_NAME must be set");
     let azure_blob_container_name =
         std::env::var("STORAGE_CONTAINER").expect("AZURE_BLOB_CONTAINER_NAME must be set");
 
+    // JWT Secret Key
     let jwt_secret_key = std::env::var("JWT_SECRET_KEY").expect("JWT_SECRET must be set");
+    // Azure AI Search
+    let ai_search_api_url =
+        std::env::var("AI_SEARCH_SERVICE_URL").expect("AI_SEARCH_URL must be set");
     let ai_search_api_key = std::env::var("AI_SEARCH_KEY").expect("AI_SEARCH_KEY must be set");
+
+     let ai_search_indexes = std::env::var("AI_SEARCH_SERVICE_INDEXES").expect("AI_SEARCH_SERVICE_INDEXES must be set");
+     let ai_search_use_semantics = std::env::var("AI_SEARCH_WITH_SEMANTIC").unwrap_or("false".to_string());
+     let ai_search_semantics = std::env::var("AI_SEARCH_SEMANTIC_NAMES").expect("AI_SEARCH_SEMANTIC_NAMES must be set");
+     let ai_search_select_fields = std::env::var("AI_SEARCH_SELECT_FIELDS").unwrap_or("".to_string());
+    // Open AI
+    let open_ai_url = std::env::var("OPEN_AI_SERVICE_URL").expect("OPENAI_URL must be set");
     let open_api_key = std::env::var("OPEN_AI_KEY").expect("OPENAI_KEY must be set");
 
     debug!("Reading kafka inventory file: {}", kafka_inventory_file);
@@ -67,6 +78,8 @@ async fn main() -> std::io::Result<()> {
         "Azure Blob Storage container: {}",
         azure_blob_container_name
     );
+    debug!("AI Search URL : {}", ai_search_api_url);
+    debug!("Open AI Search URL : {}", open_ai_url);
 
     // Create the application state
     // This will be shared across all the threads
@@ -75,7 +88,15 @@ async fn main() -> std::io::Result<()> {
         kafka_consumer: None,
         user_authentication: None,
         jwt_secret: jwt_secret_key.clone(),
+        // Azure AI Search
+        azure_ai_search_url: Some(ai_search_api_url),
         azure_ai_search_key: Some(ai_search_api_key),
+        azure_ai_search_indexes: Some(ai_search_indexes.split(",").map(|s| s.trim().to_string()).collect()),
+        azure_ai_search_use_semantics: ai_search_use_semantics.parse().unwrap_or(false),
+        azure_ai_search_semantics: Some(ai_search_semantics.split(",").map(|s| s.trim().to_string()).collect()),
+        azure_ai_search_select_fields: Some(ai_search_select_fields),
+        // Open AI
+        azure_open_ai_url: Some(open_ai_url),
         azure_open_ai_key: Some(open_api_key),
     };
 

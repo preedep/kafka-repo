@@ -6,17 +6,29 @@ use crate::entities::APIError;
 use crate::entities_ai::{
     AISearchResult, OpenAICompleteRequest, OpenAICompleteRequestMessage, OpenAICompletionResult,
 };
-
+/**
+ * Performs an AI search using the Azure AI Search service.
+ *
+ * \param index_name The name of the index to search.
+ * \param semantics_configuration The semantic configuration to use for the search.
+ * \param query_message The search query message.
+ * \param app_state The application state containing configuration and credentials.
+ * \return A result containing the AI search result or an API error.
+ */
 pub async fn ai_search(
     index_name: &String,
     semantics_configuration: &String,
     query_message: &String,
     app_state: &AppState,
 ) -> Result<AISearchResult, APIError> {
+    let api_endpoint = app_state.clone().azure_ai_search_url.unwrap();
     let ai_search_key = app_state.clone().azure_ai_search_key.unwrap();
     let client = reqwest::Client::new();
-    let url = format!("https://nick-ai-dev002.search.windows.net/indexes('{}')/docs/search?api-version=2024-05-01-preview", index_name);
-    //let url = "https://nick-ai-dev002.search.windows.net/indexes('ekafka-inventory-idx-001')/docs/search?api-version=2024-05-01-preview";
+    let url = format!(
+        "{}/indexes('{}')/docs/search?api-version=2024-05-01-preview",
+        api_endpoint, index_name
+    );
+    let select_fields = app_state.azure_ai_search_select_fields.clone().unwrap_or("*".to_string());
     let response = client
         .post(url)
         .header("Content-Type", "application/json")
@@ -28,7 +40,8 @@ pub async fn ai_search(
                 "semanticConfiguration": semantics_configuration,
                 "captions": "extractive",
                 "answers": "extractive|count-5",
-                "queryLanguage": "en-US"
+                "queryLanguage": "en-US",
+                "select": select_fields
             }
         ))
         .send()
@@ -42,14 +55,24 @@ pub async fn ai_search(
 
     Ok(r)
 }
-
+/**
+ * Performs a completion request using the OpenAI API.
+ *
+ * \param query_message The query message to send to OpenAI.
+ * \param app_state The application state containing configuration and credentials.
+ * \return A result containing the OpenAI completion result or an API error.
+ */
 pub async fn open_ai_completion(
     query_message: &String,
     app_state: &AppState,
 ) -> Result<OpenAICompletionResult, APIError> {
+    let api_endpoint = app_state.clone().azure_open_ai_url.unwrap();
     let open_ai_key = app_state.clone().azure_open_ai_key.unwrap();
     let client = reqwest::Client::new();
-    let url = "https://nickazureaidev002.openai.azure.com/openai/deployments/gpt-4/chat/completions?api-version=2024-02-15-preview";
+    let url = format!(
+        "{}/openai/deployments/gpt-4/chat/completions?api-version=2023-03-15-preview",
+        api_endpoint
+    );
 
     //let query_message = query_message.split("\n").collect::<Vec<&str>>();
     let json_req = OpenAICompleteRequest {

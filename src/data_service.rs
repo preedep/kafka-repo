@@ -41,7 +41,6 @@ pub fn read_csv_from_string(data: &String) -> PolarsResult<DataFrame> {
 }
 pub fn post_login(ds: &DataFrame, user_name: &String, password: &String) -> Result<bool, APIError> {
     debug!("Post login");
-
     let ds = ds.clone();
     let user_id = col("User_ID").eq(lit(user_name.as_str()));
     let password = col("Password").eq(lit(password.as_str()));
@@ -133,7 +132,14 @@ fn map_single_result(topic_list: &mut Vec<String>, ds: DataFrame, idx: usize) {
         }
     }
 }
-
+/**
+ * Searches the inventory and consumer dataframes based on the provided search request.
+ *
+ * \param ds_inventory The inventory dataframe.
+ * \param ds_consumer The consumer dataframe.
+ * \param search_request The search request containing filter criteria.
+ * \return A result containing a vector of SearchKafkaResponse or an APIError.
+ */
 pub fn search(
     ds_inventory: &DataFrame,
     ds_consumer: &DataFrame,

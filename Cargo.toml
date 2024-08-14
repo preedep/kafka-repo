@@ -27,33 +27,32 @@ pest = { version = "2" }
 pest_derive = { version = "2" }
 
 
-opentelemetry-application-insights = { version = "0.33", default-features = false, features = [
-    "logs",
-    "metrics",
-    "live-metrics",
-    "reqwest-client-rustls",
-] }
-opentelemetry = { version = "0.23", default-features = false, features = [
-    "logs_level_enabled",
-    "metrics",
-    "trace",
-    "logs",
-] }
-opentelemetry_sdk = { version = "0.23", features = [
-    "metrics",
-    "logs",
-    "trace",
-    "logs_level_enabled",
-    "rt-tokio",
-] }
-opentelemetry-appender-log = { version = "0.4", features = [
-    "logs_level_enabled",
-    "with-serde",
-] }
-opentelemetry-semantic-conventions = { version = "0.15" }
-opentelemetry-http = { version = "0.12", features = ["reqwest-rustls"] }
-
-actix-web-opentelemetry = { version = "0.18", features = ["metrics"] }
+#opentelemetry-application-insights = { version = "0.33", default-features = false, features = [
+#    "logs",
+#    "metrics",
+#    "live-metrics",
+#    "reqwest-client-rustls",
+#] }
+#opentelemetry = { version = "0.23", default-features = false, features = [
+#    "logs_level_enabled",
+#    "metrics",
+#    "trace",
+#    "logs",
+#] }
+#opentelemetry_sdk = { version = "0.23", features = [
+#    "metrics",
+#    "logs",
+#    "trace",
+#    "logs_level_enabled",
+#    "rt-tokio",
+#] }
+#opentelemetry-appender-log = { version = "0.4", features = [
+#    "logs_level_enabled",
+#    "with-serde",
+#] }
+#opentelemetry-semantic-conventions = { version = "0.15" }
+#opentelemetry-http = { version = "0.12", features = ["reqwest-rustls"] }
+#actix-web-opentelemetry = { version = "0.18", features = ["metrics"] }
 
 reqwest = { version = "0.11", default-features = false, features = [
     "rustls-tls",
