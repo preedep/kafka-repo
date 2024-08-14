@@ -91,9 +91,9 @@ async fn main() -> std::io::Result<()> {
         // Azure AI Search
         azure_ai_search_url: Some(ai_search_api_url),
         azure_ai_search_key: Some(ai_search_api_key),
-        azure_ai_search_indexes: None,
-        azure_ai_search_use_semantics: false,
-        azure_ai_search_semantics: None,
+        azure_ai_search_indexes: Some(ai_search_indexes.split(",").map(|s| s.to_string().trim()).collect()),
+        azure_ai_search_use_semantics: ai_search_use_semantics.parse().unwrap_or(false),
+        azure_ai_search_semantics: Some(ai_search_semantics.split(",").map(|s| s.to_string().trim()).collect()),
         // Open AI
         azure_open_ai_url: Some(open_ai_url),
         azure_open_ai_key: Some(open_api_key),
