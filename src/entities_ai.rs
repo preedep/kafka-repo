@@ -13,9 +13,9 @@ pub struct AISearchResult {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AISearchResultCaption {
     #[serde(rename = "text")]
-    pub text: String,
+    pub text: Option<String>,
     #[serde(rename = "highlights")]
-    pub highlights: String,
+    pub highlights: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -59,12 +59,16 @@ pub struct AISearchResultValue {
     pub app_owner: Option<String>,
     #[serde(rename = "Topic_name")]
     pub topic_name: Option<String>,
+    #[serde(rename = "MQ_topic")]
+    pub mq_topic: Option<String>,
     #[serde(rename = "Consumer_group_id")]
     pub consumer_group_id: Option<String>,
     #[serde(rename = "Consumer_app")]
     pub consumer_app: Option<String>,
     #[serde(rename = "Description")]
     pub description: Option<String>,
+    #[serde(rename = "Note")]
+    pub note: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

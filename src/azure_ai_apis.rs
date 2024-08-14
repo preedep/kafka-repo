@@ -28,6 +28,7 @@ pub async fn ai_search(
         "{}/indexes('{}')/docs/search?api-version=2024-05-01-preview",
         api_endpoint, index_name
     );
+    let select_fields = app_state.azure_ai_search_select_fields.clone().unwrap_or("*".to_string());
     let response = client
         .post(url)
         .header("Content-Type", "application/json")
@@ -39,7 +40,8 @@ pub async fn ai_search(
                 "semanticConfiguration": semantics_configuration,
                 "captions": "extractive",
                 "answers": "extractive|count-5",
-                "queryLanguage": "en-US"
+                "queryLanguage": "en-US",
+                "select": select_fields
             }
         ))
         .send()
@@ -68,7 +70,7 @@ pub async fn open_ai_completion(
     let open_ai_key = app_state.clone().azure_open_ai_key.unwrap();
     let client = reqwest::Client::new();
     let url = format!(
-        "{}/openai/deployments/gpt-4/chat/completions?api-version=2024-02-15-preview",
+        "{}/openai/deployments/gpt-4/chat/completions?api-version=2023-03-15-preview",
         api_endpoint
     );
 

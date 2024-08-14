@@ -66,7 +66,7 @@ async fn main() -> std::io::Result<()> {
      let ai_search_indexes = std::env::var("AI_SEARCH_SERVICE_INDEXES").expect("AI_SEARCH_SERVICE_INDEXES must be set");
      let ai_search_use_semantics = std::env::var("AI_SEARCH_WITH_SEMANTIC").unwrap_or("false".to_string());
      let ai_search_semantics = std::env::var("AI_SEARCH_SEMANTIC_NAMES").expect("AI_SEARCH_SEMANTIC_NAMES must be set");
-
+     let ai_search_select_fields = std::env::var("AI_SEARCH_SELECT_FIELDS").unwrap_or("".to_string());
     // Open AI
     let open_ai_url = std::env::var("OPEN_AI_SERVICE_URL").expect("OPENAI_URL must be set");
     let open_api_key = std::env::var("OPEN_AI_KEY").expect("OPENAI_KEY must be set");
@@ -91,9 +91,10 @@ async fn main() -> std::io::Result<()> {
         // Azure AI Search
         azure_ai_search_url: Some(ai_search_api_url),
         azure_ai_search_key: Some(ai_search_api_key),
-        azure_ai_search_indexes: Some(ai_search_indexes.split(",").map(|s| s.to_string().trim()).collect()),
+        azure_ai_search_indexes: Some(ai_search_indexes.split(",").map(|s| s.trim().to_string()).collect()),
         azure_ai_search_use_semantics: ai_search_use_semantics.parse().unwrap_or(false),
-        azure_ai_search_semantics: Some(ai_search_semantics.split(",").map(|s| s.to_string().trim()).collect()),
+        azure_ai_search_semantics: Some(ai_search_semantics.split(",").map(|s| s.trim().to_string()).collect()),
+        azure_ai_search_select_fields: Some(ai_search_select_fields),
         // Open AI
         azure_open_ai_url: Some(open_ai_url),
         azure_open_ai_key: Some(open_api_key),

@@ -13,6 +13,7 @@ pub struct AppState {
     pub azure_ai_search_indexes: Option<Vec<String>>,
     pub azure_ai_search_use_semantics: bool,
     pub azure_ai_search_semantics: Option<Vec<String>>,
+    pub azure_ai_search_select_fields: Option<String>,
     // Open AI
     pub azure_open_ai_url: Option<String>,
     pub azure_open_ai_key: Option<String>,

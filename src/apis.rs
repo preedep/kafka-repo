@@ -148,12 +148,13 @@ pub async fn post_ai_search(
     if let Some(query_message) = &search_request.ai_search_query {
         // AI search must specific with query message first
 
-        let indexes = vec!["ekafka-inventory-idx-001", "ekafka-inventory-idx-002-json"];
-        let semantic_configuration = vec!["ekafka-semantic-dev001", "ekafka-semantic-json"];
+        let indexes = app_state.azure_ai_search_indexes.clone().unwrap_or_default();
+        let semantic_configuration = app_state.azure_ai_search_semantics.clone().unwrap_or_default();
 
         for (index, index_name) in indexes.iter().enumerate() {
             let index_name = index_name.to_string();
             let semantic_configuration = semantic_configuration[index].to_string();
+            //call ai search with index and semantic configuration
             let result = crate::azure_ai_apis::ai_search(
                 &index_name,
                 &semantic_configuration,
@@ -163,6 +164,7 @@ pub async fn post_ai_search(
             .await?;
 
             debug!("Result from AI Search: {:#?}", result);
+            /*
             if let Some(content) = result.search_answers {
                 let combine_data = content
                     .iter()
@@ -175,6 +177,24 @@ pub async fn post_ai_search(
                     })
                     .collect::<Vec<String>>()
                     .join("\n");
+                final_prompt.push_str(&combine_data);
+            }
+            */
+            if let Some(value) = result.value {
+                let combine_data = value
+                    .iter()
+                    .map(|c| {
+                       let msg = c.clone().search_captions.clone().unwrap_or_default().into_iter()
+                           .map(|cap|{
+                             format!("Answer: {}\nHighlights: {}\n", cap.clone().text.unwrap_or("".to_string()),
+                                     cap.clone().highlights.unwrap_or("".to_string())
+                             )
+                           });
+                          msg.collect::<Vec<String>>().join("\n")
+                    })
+                    .collect::<Vec<String>>()
+                    .join("\n");
+
                 final_prompt.push_str(&combine_data);
             }
         }
