@@ -147,6 +147,7 @@ pub async fn post_ai_search(
 
     if let Some(query_message) = &search_request.ai_search_query {
         // AI search must specific with query message first
+
         let indexes = vec!["ekafka-inventory-idx-001", "ekafka-inventory-idx-002-json"];
         let semantic_configuration = vec!["ekafka-semantic-dev001", "ekafka-semantic-json"];
 

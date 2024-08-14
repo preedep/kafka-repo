@@ -57,10 +57,17 @@ async fn main() -> std::io::Result<()> {
         std::env::var("STORAGE_CONTAINER").expect("AZURE_BLOB_CONTAINER_NAME must be set");
 
     let jwt_secret_key = std::env::var("JWT_SECRET_KEY").expect("JWT_SECRET must be set");
+    // Azure AI Search
     let ai_search_api_url =
         std::env::var("AI_SEARCH_SERVICE_URL").expect("AI_SEARCH_URL must be set");
     let ai_search_api_key = std::env::var("AI_SEARCH_KEY").expect("AI_SEARCH_KEY must be set");
 
+
+     let ai_search_indexes = std::env::var("AI_SEARCH_SERVICE_INDEXES").expect("AI_SEARCH_SERVICE_INDEXES must be set");
+     let ai_search_use_semantics = std::env::var("AI_SEARCH_WITH_SEMANTIC").unwrap_or("false".to_string());
+     let ai_search_semantics = std::env::var("AI_SEARCH_SEMANTIC_NAMES").expect("AI_SEARCH_SEMANTIC_NAMES must be set");
+
+    // Open AI
     let open_ai_url = std::env::var("OPEN_AI_SERVICE_URL").expect("OPENAI_URL must be set");
     let open_api_key = std::env::var("OPEN_AI_KEY").expect("OPENAI_KEY must be set");
 
@@ -81,8 +88,13 @@ async fn main() -> std::io::Result<()> {
         kafka_consumer: None,
         user_authentication: None,
         jwt_secret: jwt_secret_key.clone(),
+        // Azure AI Search
         azure_ai_search_url: Some(ai_search_api_url),
         azure_ai_search_key: Some(ai_search_api_key),
+        azure_ai_search_indexes: None,
+        azure_ai_search_use_semantics: false,
+        azure_ai_search_semantics: None,
+        // Open AI
         azure_open_ai_url: Some(open_ai_url),
         azure_open_ai_key: Some(open_api_key),
     };
