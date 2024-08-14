@@ -331,6 +331,11 @@ function button_ai_search_handler(){
 
         fetchDataWithAccessToken(apiEndpoint,'POST',json_data_req)
             .then(data => {
+                if (!data){
+                    alert("No data found , Something wrong!!!");
+                    return;
+                }
+
                 console.log(data);
                 // Hide the loading screen
                 document.getElementById('ai-search-result-loading').style.display = 'none';

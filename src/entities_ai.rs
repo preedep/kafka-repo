@@ -105,30 +105,30 @@ pub struct OpenAICompleteRequest {
 //
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct OpenAICompletionResult {
-    pub id: String,
-    pub object: String,
-    pub created: u64,
-    pub model: String,
-    pub choices: Vec<Choice>,
-    pub usage: Usage,
+    pub id: Option<String>,
+    pub object: Option<String>,
+    pub created: Option<u64>,
+    pub model: Option<String>,
+    pub choices: Option<Vec<Choice>>,
+    pub usage: Option<Usage>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Choice {
-    pub index: u32,
-    pub message: Message,
-    pub finish_reason: String,
+    pub index: Option<u32>,
+    pub message: Option<Message>,
+    pub finish_reason: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Message {
-    pub role: String,
-    pub content: String,
+    pub role: Option<String>,
+    pub content: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Usage {
-    pub prompt_tokens: u32,
-    pub completion_tokens: u32,
-    pub total_tokens: u32,
+    pub prompt_tokens: Option<u32>,
+    pub completion_tokens: Option<u32>,
+    pub total_tokens: Option<u32>,
 }
