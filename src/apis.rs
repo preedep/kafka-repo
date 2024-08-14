@@ -209,7 +209,7 @@ pub async fn post_ai_search(
                 .iter()
                 .map(|d| {
                     format!(
-                        "Producer or App Owner: {}\nE-Kafka Topic Name: {}\nConsumer Group Id: {}\nConsumer or Consume App: {}\n",
+                        "App Owner: {}\nE-Kafka Topic Name: {}\nConsumer Group Id: {}\nConsumer or Consume App: {}\n",
                         d.app_owner, d.topic_name, d.consumer_group_id, d.consumer_app
                     )
                 })
