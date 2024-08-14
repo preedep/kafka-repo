@@ -6,7 +6,15 @@ use crate::entities::APIError;
 use crate::entities_ai::{
     AISearchResult, OpenAICompleteRequest, OpenAICompleteRequestMessage, OpenAICompletionResult,
 };
-
+/**
+ * Performs an AI search using the Azure AI Search service.
+ *
+ * \param index_name The name of the index to search.
+ * \param semantics_configuration The semantic configuration to use for the search.
+ * \param query_message The search query message.
+ * \param app_state The application state containing configuration and credentials.
+ * \return A result containing the AI search result or an API error.
+ */
 pub async fn ai_search(
     index_name: &String,
     semantics_configuration: &String,
@@ -45,7 +53,13 @@ pub async fn ai_search(
 
     Ok(r)
 }
-
+/**
+ * Performs a completion request using the OpenAI API.
+ *
+ * \param query_message The query message to send to OpenAI.
+ * \param app_state The application state containing configuration and credentials.
+ * \return A result containing the OpenAI completion result or an API error.
+ */
 pub async fn open_ai_completion(
     query_message: &String,
     app_state: &AppState,
