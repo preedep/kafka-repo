@@ -5,3 +5,4 @@ Cargo.lock
 *.csv
 /flowchart.mmd
 /flowchart.mmd.svg
+dataset/*.csv
