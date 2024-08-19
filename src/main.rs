@@ -127,7 +127,7 @@ async fn main() -> std::io::Result<()> {
         &azure_blob_container_name,
         &kafka_inventory_file,
     )
-    .await;
+        .await;
 
     // Fetch the dataset from Azure Blob Storage
     let ds_consumer = fetch_dataset_az_blob(
@@ -135,7 +135,7 @@ async fn main() -> std::io::Result<()> {
         &azure_blob_container_name,
         &kafka_consumer_file,
     )
-    .await;
+        .await;
 
     // Fetch the dataset from Azure Blob Storage
     let ds_user_authentication = fetch_dataset_az_blob(
@@ -143,7 +143,7 @@ async fn main() -> std::io::Result<()> {
         &azure_blob_container_name,
         &user_authentication_file,
     )
-    .await;
+        .await;
 
     // Check if the dataset was fetched successfully
     match ds_inventory {
@@ -311,7 +311,7 @@ async fn main() -> std::io::Result<()> {
                     .use_etag(true),
             )
     })
-    .bind(("0.0.0.0", 8888))?
-    .run()
-    .await
+        .bind(("0.0.0.0", 8888))?
+        .run()
+        .await
 }

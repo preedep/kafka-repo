@@ -48,10 +48,10 @@ pub async fn login(
                     &claims,
                     &EncodingKey::from_secret(data.jwt_secret.as_ref()),
                 )
-                .map_err(|e| {
-                    debug!("Failed to encode jwt token: {}", e);
-                    APIError::new("Failed to encode jwt token")
-                })?;
+                    .map_err(|e| {
+                        debug!("Failed to encode jwt token: {}", e);
+                        APIError::new("Failed to encode jwt token")
+                    })?;
 
                 let response = JwtResponse {
                     token: jwt_token,
@@ -161,14 +161,14 @@ pub async fn post_ai_search(
                     query_message,
                     &app_state,
                 )
-                .await?;
+                    .await?;
 
                 debug!("Result from AI Search: {:#?}", result);
 
                 if let Some(content) = result.search_answers {
                     let combine_data = content
                         .iter()
-                        .map(|c| format!("Answer: {}\n", c.clone().text.unwrap_or("".to_string()),))
+                        .map(|c| format!("Answer: {}\n", c.clone().text.unwrap_or("".to_string()), ))
                         .collect::<Vec<String>>()
                         .join("\n");
                     final_prompt.push_str(&combine_data);
