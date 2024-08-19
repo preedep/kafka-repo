@@ -234,7 +234,7 @@ pub async fn post_ai_search(
         debug!("Final Prompt: \n{}", final_prompt);
         let result = crate::azure_ai_apis::open_ai_completion(&final_prompt, &app_state).await?;
         debug!("Result from Open AI Completion: {:#?}", result);
-        if let None = result.choices {
+        if result.choices.is_none() {
             return Err(APIError::new("Open AI Completion result is empty"));
         }
         Ok(APIResponse { data: result })
