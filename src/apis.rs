@@ -138,6 +138,16 @@ fn build_prompt(query: &str, context: &str) -> String {
     )
 }
 
+/// Perform AI search using Azure AI and Open AI Completion.
+///
+/// # Arguments
+///
+/// * `app_state` - The shared state of the application.
+/// * `search_request` - The request object containing the search query for AI search.
+///
+/// # Returns
+///
+/// Returns `APIWebResponse` with content of type `OpenAICompletionResult` or an `APIError` if the search fails.
 pub async fn post_ai_search(
     app_state: web::Data<Arc<AppState>>,
     search_request: Json<SearchKafkaRequest>,
