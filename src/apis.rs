@@ -147,59 +147,66 @@ pub async fn post_ai_search(
 
     if let Some(query_message) = &search_request.ai_search_query {
         // AI search must specific with query message first
+        let indexes = app_state
+            .azure_ai_search_indexes
+            .clone()
+            .unwrap_or_default();
+        for (_index, ai_search_index) in indexes.iter().enumerate() {
+            let index_name = ai_search_index.index_name.clone();
+            for semantic in ai_search_index.clone().semantics.unwrap() {
+                let result = crate::azure_ai_apis::ai_search(
+                    &index_name,
+                    &semantic.name,
+                    &semantic.select_fields,
+                    query_message,
+                    &app_state,
+                )
+                .await?;
 
-        let indexes = app_state.azure_ai_search_indexes.clone().unwrap_or_default();
-        let semantic_configuration = app_state.azure_ai_search_semantics.clone().unwrap_or_default();
+                debug!("Result from AI Search: {:#?}", result);
 
-        for (index, index_name) in indexes.iter().enumerate() {
-            let index_name = index_name.to_string();
-            let semantic_configuration = semantic_configuration[index].to_string();
+                if let Some(content) = result.search_answers {
+                    let combine_data = content
+                        .iter()
+                        .map(|c| format!("Answer: {}\n", c.clone().text.unwrap_or("".to_string()),))
+                        .collect::<Vec<String>>()
+                        .join("\n");
+                    final_prompt.push_str(&combine_data);
+                }
+                if let Some(value) = result.value {
+                    let combine_data = value
+                        .iter()
+                        .map(|c| {
+                            if let Some(cap) = &c.search_captions {
+                                cap.iter()
+                                    .map(|c| {
+                                        if !c.clone().text.unwrap_or_default().is_empty()
+                                            && !c.clone().highlights.unwrap_or_default().is_empty()
+                                        {
+                                            format!(
+                                                "Summary: {}\nRelevant Section: {}\n",
+                                                c.clone().text.unwrap_or_default(),
+                                                c.clone().highlights.unwrap_or_default()
+                                            )
+                                        } else {
+                                            "".to_string()
+                                        }
+                                    })
+                                    .skip_while(|p| p.is_empty())
+                                    .collect::<Vec<String>>()
+                                    .join("\n")
+                            } else {
+                                "".to_string()
+                            }
+                        })
+                        .skip_while(|p| p.is_empty())
+                        .collect::<Vec<String>>()
+                        .join("\n");
+
+                    final_prompt.push_str(&combine_data);
+                }
+            }
             //call ai search with index and semantic configuration
-            let result = crate::azure_ai_apis::ai_search(
-                &index_name,
-                &semantic_configuration,
-                query_message,
-                &app_state,
-            )
-            .await?;
-
-            debug!("Result from AI Search: {:#?}", result);
-
-            if let Some(content) = result.search_answers {
-                let combine_data = content
-                    .iter()
-                    .map(|c| {
-                        format!(
-                            "Answer: {}\n",
-                            c.clone().text.unwrap_or("".to_string()),
-                        )
-                    })
-                    .collect::<Vec<String>>()
-                    .join("\n");
-                final_prompt.push_str(&combine_data);
-            }
-            if let Some(value) = result.value {
-                let combine_data = value
-                    .iter()
-                    .map(|c|{
-                        if let Some(cap) = &c.search_captions {
-                            cap.iter().map(|c|{
-                                if !c.clone().text.unwrap_or_default().is_empty() &&
-                                    !c.clone().highlights.unwrap_or_default().is_empty(){
-                                    format!("Summary: {}\nRelevant Section: {}\n",
-                                            c.clone().text.unwrap_or_default(),
-                                            c.clone().highlights.unwrap_or_default())
-                                }else{
-                                    "".to_string()
-                                }
-                            }).skip_while(|p|p.is_empty()).collect::<Vec<String>>().join("\n")
-                        }else{
-                            "".to_string()
-                        }
-                    }).skip_while(|p|p.is_empty()).collect::<Vec<String>>().join("\n");
-
-                final_prompt.push_str(&combine_data);
-            }
         }
 
         // load all data from csv

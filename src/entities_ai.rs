@@ -132,3 +132,18 @@ pub struct Usage {
     pub completion_tokens: Option<u32>,
     pub total_tokens: Option<u32>,
 }
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct AISearchSemantics {
+    #[serde(rename = "select_fields")]
+    pub select_fields: String,
+    #[serde(rename = "semantic_name")]
+    pub name: String,
+}
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct AISearchIndex {
+    #[serde(rename = "index_name")]
+    pub index_name: String,
+    #[serde(rename = "semantics")]
+    pub semantics: Option<Vec<AISearchSemantics>>,
+}
