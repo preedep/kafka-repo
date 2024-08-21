@@ -23,7 +23,7 @@ impl JwtMiddleware {
 
 impl<S, B> Transform<S, ServiceRequest> for JwtMiddleware
 where
-    S: Service<ServiceRequest, Response=ServiceResponse<B>, Error=Error> + 'static,
+    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
     S::Future: 'static,
     B: 'static,
 {
@@ -48,7 +48,7 @@ pub struct JwtMiddlewareMiddleware<S> {
 
 impl<S, B> Service<ServiceRequest> for JwtMiddlewareMiddleware<S>
 where
-    S: Service<ServiceRequest, Response=ServiceResponse<B>, Error=Error> + 'static,
+    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
     S::Future: 'static,
     B: 'static,
 {
@@ -100,6 +100,6 @@ where
                 svc.call(req).await
             };
         }
-            .boxed_local()
+        .boxed_local()
     }
 }

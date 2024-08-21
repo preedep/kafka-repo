@@ -4,6 +4,7 @@ use actix_web::web::Json;
 use actix_web::{web, HttpResponse, Responder};
 use jsonwebtoken::EncodingKey;
 use log::debug;
+use regex::Regex;
 //use log::kv::ToKey;
 
 use crate::data_service::{post_login, search};
@@ -48,10 +49,10 @@ pub async fn login(
                     &claims,
                     &EncodingKey::from_secret(data.jwt_secret.as_ref()),
                 )
-                    .map_err(|e| {
-                        debug!("Failed to encode jwt token: {}", e);
-                        APIError::new("Failed to encode jwt token")
-                    })?;
+                .map_err(|e| {
+                    debug!("Failed to encode jwt token: {}", e);
+                    APIError::new("Failed to encode jwt token")
+                })?;
 
                 let response = JwtResponse {
                     token: jwt_token,
@@ -137,7 +138,33 @@ fn build_prompt(query: &str, context: &str) -> String {
         query, context
     )
 }
+fn split_questions_and_non_questions(input: &str) -> (Vec<String>, Vec<String>) {
+    // Split the input string into two parts: Questions and Non-Questions
+    let parts: Vec<&str> = input.split("**Non-Questions:**").collect();
 
+    let mut questions = Vec::new();
+    let mut non_questions = Vec::new();
+
+    if parts.len() == 2 {
+        // Split the questions part by "**Questions:**" to remove the label
+        if let Some(question_part) = parts[0].split("**Questions:**").nth(1) {
+            questions = question_part
+                .lines() // Split by lines instead of '\n' to handle all line endings
+                .filter(|line| !line.trim().is_empty()) // Filter out empty lines
+                .map(|line| line.trim_start_matches("1.").trim().to_string())
+                .collect();
+        }
+
+        // Process the non-questions part
+        non_questions = parts[1]
+            .lines() // Split by lines instead of '\n' to handle all line endings
+            .filter(|line| !line.trim().is_empty()) // Filter out empty lines
+            .map(|line| line.trim_start_matches("1.").trim().to_string())
+            .collect();
+    }
+
+    (questions, non_questions)
+}
 /// Perform AI search using Azure AI and Open AI Completion.
 ///
 /// # Arguments
@@ -156,71 +183,109 @@ pub async fn post_ai_search(
     let mut final_prompt = String::new();
 
     if let Some(query_message) = &search_request.ai_search_query {
-        // AI search must specific with query message first
-        let indexes = app_state
-            .azure_ai_search_indexes
-            .clone()
-            .unwrap_or_default();
-        for (_index, ai_search_index) in indexes.iter().enumerate() {
-            let index_name = ai_search_index.index_name.clone();
-            for semantic in ai_search_index.clone().semantics.unwrap() {
-                let result = crate::azure_ai_apis::ai_search(
-                    &index_name,
-                    &semantic.name,
-                    &semantic.select_fields,
-                    query_message,
-                    &app_state,
-                )
-                    .await?;
+        //split questions by open ai
+        let mut first_prompt =
+            "Please split the following text into questions and non-questions:\n\n".to_string();
+        first_prompt.push_str(query_message);
+        first_prompt.push_str("\n\n List the questions under a \"Questions\" section and the non-questions under a \"Non-Questions\" section. Format each question and non-questions as a numbered list and header must use **Questions:** and **Non-Questions:** :");
 
-                debug!("Result from AI Search: {:#?}", result);
+        let result = crate::azure_ai_apis::open_ai_completion(&first_prompt, &app_state).await?;
+        debug!(
+            "Result from Open AI Completion for split question and non question: {:#?}",
+            result
+        );
+        if result.choices.is_none() {
+            return Err(APIError::new("Action is empty"));
+        }
+        for choice in result.choices.unwrap() {
+            let text = choice.message.unwrap().content.unwrap_or("".to_string());
+            let (questions, non_questions) = split_questions_and_non_questions(&text);
+            debug!("Questions: {:#?}", questions);
+            for question in questions {
+                // AI search must specific with query message first
+                // search each question with AI search
+                final_prompt.push_str("Question: ");
+                final_prompt.push_str(&question);
+                final_prompt.push_str("\n");
+                let indexes = app_state
+                    .azure_ai_search_indexes
+                    .clone()
+                    .unwrap_or_default();
+                for (_index, ai_search_index) in indexes.iter().enumerate() {
+                    let index_name = ai_search_index.index_name.clone();
+                    for semantic in ai_search_index.clone().semantics.unwrap() {
+                        let result = crate::azure_ai_apis::ai_search(
+                            &index_name,
+                            &semantic.name,
+                            &semantic.select_fields,
+                            &question,
+                            &app_state,
+                        )
+                        .await?;
+                        debug!("Result from AI Search: {:#?}", result);
+                        if let Some(content) = result.search_answers {
+                            let combine_data = content
+                                .iter()
+                                .map(|c| {
+                                    format!(
+                                        "Answer: {}\n",
+                                        c.clone().text.unwrap_or("".to_string()),
+                                    )
+                                })
+                                .collect::<Vec<String>>()
+                                .join("\n");
+                            final_prompt.push_str(&combine_data);
+                        }
+                        if let Some(value) = result.value {
+                            let combine_data = value
+                                .iter()
+                                .map(|c| {
+                                    if let Some(cap) = &c.search_captions {
+                                        cap.iter()
+                                            .map(|c| {
+                                                if !c.clone().text.unwrap_or_default().is_empty()
+                                                    && !c
+                                                        .clone()
+                                                        .highlights
+                                                        .unwrap_or_default()
+                                                        .is_empty()
+                                                {
+                                                    format!(
+                                                        "Summary: {}\nRelevant Section: {}\n",
+                                                        c.clone().text.unwrap_or_default(),
+                                                        c.clone().highlights.unwrap_or_default()
+                                                    )
+                                                } else {
+                                                    "".to_string()
+                                                }
+                                            })
+                                            .skip_while(|p| p.is_empty())
+                                            .collect::<Vec<String>>()
+                                            .join("\n")
+                                    } else {
+                                        "".to_string()
+                                    }
+                                })
+                                .skip_while(|p| p.is_empty())
+                                .collect::<Vec<String>>()
+                                .join("\n");
 
-                if let Some(content) = result.search_answers {
-                    let combine_data = content
-                        .iter()
-                        .map(|c| format!("Answer: {}\n", c.clone().text.unwrap_or("".to_string()), ))
-                        .collect::<Vec<String>>()
-                        .join("\n");
-                    final_prompt.push_str(&combine_data);
-                }
-                if let Some(value) = result.value {
-                    let combine_data = value
-                        .iter()
-                        .map(|c| {
-                            if let Some(cap) = &c.search_captions {
-                                cap.iter()
-                                    .map(|c| {
-                                        if !c.clone().text.unwrap_or_default().is_empty()
-                                            && !c.clone().highlights.unwrap_or_default().is_empty()
-                                        {
-                                            format!(
-                                                "Summary: {}\nRelevant Section: {}\n",
-                                                c.clone().text.unwrap_or_default(),
-                                                c.clone().highlights.unwrap_or_default()
-                                            )
-                                        } else {
-                                            "".to_string()
-                                        }
-                                    })
-                                    .skip_while(|p| p.is_empty())
-                                    .collect::<Vec<String>>()
-                                    .join("\n")
-                            } else {
-                                "".to_string()
-                            }
-                        })
-                        .skip_while(|p| p.is_empty())
-                        .collect::<Vec<String>>()
-                        .join("\n");
-
-                    final_prompt.push_str(&combine_data);
+                            final_prompt.push_str(&combine_data);
+                        }
+                    }
                 }
             }
-            //call ai search with index and semantic configuration
+            debug!("Non-Questions: {:#?}", non_questions);
+            final_prompt.push_str("Non-Questions:\n");
+            for non_question in non_questions {
+                final_prompt.push_str(&non_question);
+                final_prompt.push_str("\n");
+            }
+            final_prompt.push_str("\n\n");
         }
-
         // load all data from csv
         debug!("Load all csv data");
+
         if let (Some(ds_inventory), Some(ds_consumer)) =
             (&app_state.kafka_inventory, &app_state.kafka_consumer)
         {
@@ -240,7 +305,6 @@ pub async fn post_ai_search(
         }
 
         let final_prompt = build_prompt(query_message, &final_prompt);
-
         debug!("Final Prompt: \n{}", final_prompt);
         let result = crate::azure_ai_apis::open_ai_completion(&final_prompt, &app_state).await?;
         debug!("Result from Open AI Completion: {:#?}", result);

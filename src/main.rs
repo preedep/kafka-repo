@@ -103,7 +103,8 @@ async fn main() -> std::io::Result<()> {
     debug!("Index: {}", json_string);
     */
     debug!("AI Search Indexes: {}", ai_search_indexes);
-    let azure_index = serde_json::from_str::<Vec<AISearchIndex>>(&ai_search_indexes).expect("Failed to parse index");
+    let azure_index = serde_json::from_str::<Vec<AISearchIndex>>(&ai_search_indexes)
+        .expect("Failed to parse index");
     let mut data_state = data_state::AppState {
         kafka_inventory: None,
         kafka_consumer: None,
@@ -116,7 +117,6 @@ async fn main() -> std::io::Result<()> {
         azure_ai_search_indexes: Some(azure_index),
         azure_ai_search_use_semantics: use_semantics,
         // Open AI
-
         azure_open_ai_url: Some(open_ai_url),
         azure_open_ai_key: Some(open_api_key),
     };
@@ -127,7 +127,7 @@ async fn main() -> std::io::Result<()> {
         &azure_blob_container_name,
         &kafka_inventory_file,
     )
-        .await;
+    .await;
 
     // Fetch the dataset from Azure Blob Storage
     let ds_consumer = fetch_dataset_az_blob(
@@ -135,7 +135,7 @@ async fn main() -> std::io::Result<()> {
         &azure_blob_container_name,
         &kafka_consumer_file,
     )
-        .await;
+    .await;
 
     // Fetch the dataset from Azure Blob Storage
     let ds_user_authentication = fetch_dataset_az_blob(
@@ -143,7 +143,7 @@ async fn main() -> std::io::Result<()> {
         &azure_blob_container_name,
         &user_authentication_file,
     )
-        .await;
+    .await;
 
     // Check if the dataset was fetched successfully
     match ds_inventory {
@@ -311,7 +311,7 @@ async fn main() -> std::io::Result<()> {
                     .use_etag(true),
             )
     })
-        .bind(("0.0.0.0", 8888))?
-        .run()
-        .await
+    .bind(("0.0.0.0", 8888))?
+    .run()
+    .await
 }
