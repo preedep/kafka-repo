@@ -113,7 +113,7 @@ pub async fn post_search_kafka(
     }
     Err(APIError::new("Failed to search kafka"))
 }
-
+/*
 fn truncate_text(text: &str, max_length: usize) -> String {
     if text.chars().count() > max_length {
         format!("{}...", text.chars().take(max_length).collect::<String>())
@@ -131,11 +131,12 @@ where
         .map(|chunk| chunk.to_vec())
         .collect()
 }
-
+*/
+/// Build the prompt for the AI search based on the query and context.
 fn build_prompt(query: &str, context: &str) -> String {
     format!(
-        "Answer the following query based on the provided context.\n\nQuery: {}\nContext: {}\n\nAnswer:",
-        query, context
+        "Based on the following context, please answer the questions provided:\n\nContext:\n{}\n\nQuestions:\n{}\n",
+        context, query
     )
 }
 fn split_questions_and_non_questions(input: &str) -> (Vec<String>, Vec<String>) {
@@ -200,7 +201,7 @@ pub async fn post_ai_search(
         for choice in result.choices.unwrap() {
             let text = choice.message.unwrap().content.unwrap_or("".to_string());
             let (questions, non_questions) = split_questions_and_non_questions(&text);
-            debug!("Questions: {:#?}", questions);
+            //debug!("Questions: {:#?}", questions);
             for question in questions {
                 // AI search must specific with query message first
                 // search each question with AI search
@@ -275,11 +276,13 @@ pub async fn post_ai_search(
                     }
                 }
             }
-            debug!("Non-Questions: {:#?}", non_questions);
-            final_prompt.push_str("Non-Questions:\n");
-            for non_question in non_questions {
-                final_prompt.push_str(&non_question);
-                final_prompt.push_str("\n");
+            if !non_questions.is_empty() {
+                //debug!("Non-Questions: {:#?}", non_questions);
+                final_prompt.push_str("Non-Questions:\n");
+                for non_question in non_questions {
+                    final_prompt.push_str(&non_question);
+                    final_prompt.push_str("\n");
+                }
             }
             final_prompt.push_str("\n\n");
         }
