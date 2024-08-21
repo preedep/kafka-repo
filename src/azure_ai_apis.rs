@@ -18,6 +18,7 @@ use crate::entities_ai::{
 pub async fn ai_search(
     index_name: &String,
     semantics_configuration: &String,
+    select_fields: &String,
     query_message: &String,
     app_state: &AppState,
 ) -> Result<AISearchResult, APIError> {
@@ -28,7 +29,7 @@ pub async fn ai_search(
         "{}/indexes('{}')/docs/search?api-version=2024-05-01-preview",
         api_endpoint, index_name
     );
-    let select_fields = app_state.azure_ai_search_select_fields.clone().unwrap_or("*".to_string());
+    //let select_fields = app_state.azure_ai_search_select_fields.clone().unwrap_or("*".to_string());
     let response = client
         .post(url)
         .header("Content-Type", "application/json")

@@ -17,6 +17,7 @@ use tokio::sync::{Mutex, Notify};
 
 use crate::data_service::read_csv;
 use crate::data_utils::fetch_dataset_az_blob;
+use crate::entities_ai::{AISearchIndex, AISearchSemantics};
 
 mod apis;
 mod azure_ai_apis;
@@ -63,10 +64,14 @@ async fn main() -> std::io::Result<()> {
         std::env::var("AI_SEARCH_SERVICE_URL").expect("AI_SEARCH_URL must be set");
     let ai_search_api_key = std::env::var("AI_SEARCH_KEY").expect("AI_SEARCH_KEY must be set");
 
-     let ai_search_indexes = std::env::var("AI_SEARCH_SERVICE_INDEXES").expect("AI_SEARCH_SERVICE_INDEXES must be set");
-     let ai_search_use_semantics = std::env::var("AI_SEARCH_WITH_SEMANTIC").unwrap_or("false".to_string());
-     let ai_search_semantics = std::env::var("AI_SEARCH_SEMANTIC_NAMES").expect("AI_SEARCH_SEMANTIC_NAMES must be set");
-     let ai_search_select_fields = std::env::var("AI_SEARCH_SELECT_FIELDS").unwrap_or("".to_string());
+    let ai_search_indexes =
+        std::env::var("AI_SEARCH_SERVICE_INDEXES").expect("AI_SEARCH_SERVICE_INDEXES must be set");
+
+    let use_semantics = std::env::var("AI_SEARCH_WITH_SEMANTIC")
+        .expect("AI_SEARCH_WITH_SEMANTIC must be set")
+        .parse::<bool>()
+        .expect("AI_SEARCH_WITH_SEMANTIC must be a boolean");
+
     // Open AI
     let open_ai_url = std::env::var("OPEN_AI_SERVICE_URL").expect("OPENAI_URL must be set");
     let open_api_key = std::env::var("OPEN_AI_KEY").expect("OPENAI_KEY must be set");
@@ -83,6 +88,23 @@ async fn main() -> std::io::Result<()> {
 
     // Create the application state
     // This will be shared across all the threads
+    /*
+    let index = vec![AISearchIndex {
+        index_name: "azureblob-kafka-invenindex".to_string(),
+        semantics: Some(vec![
+            AISearchSemantics {
+                name: "ekafka-semantic-dev003".to_string(),
+                select_fields: "App_owner,Topic_name,Consumer_group_id,Consumer_app,Note".to_string(),
+            }
+        ]),
+    }];
+    // Serialize the struct to a JSON string
+    let json_string = serde_json::to_string(&index).unwrap_or("".to_string());
+    debug!("Index: {}", json_string);
+    */
+    debug!("AI Search Indexes: {}", ai_search_indexes);
+    let azure_index = serde_json::from_str::<Vec<AISearchIndex>>(&ai_search_indexes)
+        .expect("Failed to parse index");
     let mut data_state = data_state::AppState {
         kafka_inventory: None,
         kafka_consumer: None,
@@ -91,10 +113,9 @@ async fn main() -> std::io::Result<()> {
         // Azure AI Search
         azure_ai_search_url: Some(ai_search_api_url),
         azure_ai_search_key: Some(ai_search_api_key),
-        azure_ai_search_indexes: Some(ai_search_indexes.split(",").map(|s| s.trim().to_string()).collect()),
-        azure_ai_search_use_semantics: ai_search_use_semantics.parse().unwrap_or(false),
-        azure_ai_search_semantics: Some(ai_search_semantics.split(",").map(|s| s.trim().to_string()).collect()),
-        azure_ai_search_select_fields: Some(ai_search_select_fields),
+        //azure_ai_search_indexes: Some(ai_search_indexes.split(",").map(|s| s.trim().to_string()).collect()),
+        azure_ai_search_indexes: Some(azure_index),
+        azure_ai_search_use_semantics: use_semantics,
         // Open AI
         azure_open_ai_url: Some(open_ai_url),
         azure_open_ai_key: Some(open_api_key),

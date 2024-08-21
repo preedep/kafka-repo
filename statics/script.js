@@ -2,6 +2,7 @@ import { initializeMermaid, renderMermaid } from './mermaid-config.js';
 import {  renderTable} from './table.js';
 import { filterFunction, handleKeyDown , selectItem} from './searchable-dropdown.js';
 import { checkTokenValidity } from './token-handler.js';
+import { renderMarked } from './marked-config.js';
 
 function load_filter_table() {
     const input = document.getElementById('table-result-search-input');
@@ -101,14 +102,11 @@ function button_download_csv_handler(){
 function load_dropdown_owner_of_topics() {
     // API endpoint
     const apiEndpoint = '/api/v1/apps';
-
-
         fetchDataWithAccessToken(apiEndpoint,'GET',null)
         .then(data => {
             const dropdown = document.getElementById('dropdown-owner-topic');
             bind_data_for_option(data, dropdown);
             console.log(data);
-
         })
         .catch(error => {
             console.error('Error fetching data:', error)
@@ -120,13 +118,11 @@ function load_dropdown_owner_of_topics() {
 function load_dropdown_topics(app_owner_name) {
     // API endpoint
     const apiEndpoint = `/api/v1/apps/${app_owner_name}/topics`;
-
     fetchDataWithAccessToken(apiEndpoint,'GET',null)
         .then(data => {
             const dropdown = document.getElementById('dropdown-topic-name');
             dropdown.innerHTML = '<option value="0">Select an Topic Name</option>';
             bind_data_for_option(data, dropdown);
-
             // Searchable dropdown
             const searchable_dropdown = document.getElementById('dropdown');
             searchable_dropdown.innerHTML = ''
@@ -363,7 +359,12 @@ function button_ai_search_handler(){
                 let paragraphs = lines.map(line => `<p>${line}</p>`);
                 // Step 3: Join the array into a single string
                 let htmlText = paragraphs.join('');
-                document.getElementById('ai-search-result-container').innerHTML = htmlText;
+
+                // Use the marked library to render Markdown content to HTML
+                //const renderedContent = window.marked(htmlText);
+
+                //document.getElementById('ai-search-result-container').innerHTML = renderedContent;
+                renderMarked(htmlText);
 
             })
             .catch((error) => {
@@ -477,7 +478,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!checkTokenValidity()) {
         window.location.href = 'login.html'; // Redirect to login if token is invalid or expired
     }
+    console.log("script.js loaded");
 
+    // Initialize Mermaid
     console.log("initializeMermaid");
     initializeMermaid();
 
