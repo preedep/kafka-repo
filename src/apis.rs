@@ -252,7 +252,7 @@ pub async fn post_ai_search(
                                                         .is_empty()
                                                 {
                                                     format!(
-                                                        "Summary: {}\nRelevant Section: {}\n",
+                                                        "Summary Of Question: {}\nRelevant Highlights Section: {}\n",
                                                         c.clone().text.unwrap_or_default(),
                                                         c.clone().highlights.unwrap_or_default()
                                                     )
@@ -288,7 +288,6 @@ pub async fn post_ai_search(
         }
         // load all data from csv
         debug!("Load all csv data");
-
         if let (Some(ds_inventory), Some(ds_consumer)) =
             (&app_state.kafka_inventory, &app_state.kafka_consumer)
         {
@@ -297,7 +296,7 @@ pub async fn post_ai_search(
                 .iter()
                 .map(|d| {
                     format!(
-                        "App Owner: {}\nE-Kafka Topic Name: {}\nConsumer Group Id: {}\nConsumer or Consume App: {}\n",
+                        "App Owner or Producer: {}\nE-Kafka Topic Name: {}\nConsumer Group Id: {}\nConsumer or Consume App: {}\n",
                         d.app_owner, d.topic_name, d.consumer_group_id, d.consumer_app
                     )
                 })
@@ -308,7 +307,7 @@ pub async fn post_ai_search(
         }
 
         let final_prompt = build_prompt(query_message, &final_prompt);
-        debug!("Final Prompt: \n{}", final_prompt);
+        //debug!("Final Prompt: \n{}", final_prompt);
         let result = crate::azure_ai_apis::open_ai_completion(&final_prompt, &app_state).await?;
         debug!("Result from Open AI Completion: {:#?}", result);
         if result.choices.is_none() {
