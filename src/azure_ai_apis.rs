@@ -78,7 +78,7 @@ pub async fn open_ai_completion(
     //let query_message = query_message.split("\n").collect::<Vec<&str>>();
     let json_req = OpenAICompleteRequest {
         messages: vec![OpenAICompleteRequestMessage::new("user", query_message)],
-        max_tokens: 200,
+        max_tokens: 500,
         temperature: 0.0,
         top_p: 1.0,
         stop: None, // Define stop sequence if needed
