@@ -257,7 +257,7 @@ pub async fn post_ai_search(
 
 pub async fn post_topic_kafka_relation_render(
     data: web::Data<Arc<AppState>>,
-    search_request: Json<entities::SearchKafkaRequest>,
+    search_request: Json<SearchKafkaRequest>,
 ) -> Result<impl Responder, APIError> {
     debug!("Searching kafka with request: {:?}", search_request);
     if let (Some(ds_inventory), Some(ds_consumer)) = (&data.kafka_inventory, &data.kafka_consumer) {
