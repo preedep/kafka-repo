@@ -69,6 +69,20 @@ pub struct AISearchResultValue {
     pub description: Option<String>,
     #[serde(rename = "Note")]
     pub note: Option<String>,
+    #[serde(rename = "full_application_name")]
+    pub full_application_name: Option<String>,
+    #[serde(rename = "application_id")]
+    pub application_id: Option<String>,
+    #[serde(rename = "business_application_name")]
+    pub business_application_name: Option<String>,
+    #[serde(rename = "application_level")]
+    pub application_level: Option<String>,
+    #[serde(rename = "company_or_subsidiary_name")]
+    pub company_or_subsidiary_name: Option<String>,
+    #[serde(rename = "service")]
+    pub service: Option<String>,
+    #[serde(rename = "app_category")]
+    pub app_category: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -131,4 +145,19 @@ pub struct Usage {
     pub prompt_tokens: Option<u32>,
     pub completion_tokens: Option<u32>,
     pub total_tokens: Option<u32>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct AISearchSemantics {
+    #[serde(rename = "select_fields")]
+    pub select_fields: String,
+    #[serde(rename = "semantic_name")]
+    pub name: String,
+}
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct AISearchIndex {
+    #[serde(rename = "index_name")]
+    pub index_name: String,
+    #[serde(rename = "semantics")]
+    pub semantics: Option<Vec<AISearchSemantics>>,
 }

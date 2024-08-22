@@ -71,6 +71,8 @@ jsonwebtoken = "9.3"
 futures-util = "0.3"
 derive_more = "0.99"
 
+regex = "1.10"
+
 [profile.release]
 opt-level = "s"  # Optimize for size with some performance improvements
 lto = "thin"     # Thin LTO for further size and performance improvements
