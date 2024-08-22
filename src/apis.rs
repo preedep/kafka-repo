@@ -198,53 +198,6 @@ pub async fn post_ai_search(
         if result.choices.is_none() {
             return Err(APIError::new("Action is empty"));
         }
-        //filter for app information
-        let mut array_of_filters = Vec::new();
-        if let Some(app_owner) = &search_request.app_owner {
-            array_of_filters.push(format!("(full_application: {} or business_application_name: {})", app_owner,app_owner));
-        }
-        if let Some(consumer_app) = &search_request.consumer_app {
-            array_of_filters.push(format!("(full_application: {} or business_application_name: {})", consumer_app,consumer_app));
-        }
-        let question_app_info = array_of_filters.clone()
-            .into_iter()
-            .map(|c| c.to_string())
-            .collect::<Vec<String>>().join(" or ");
-        let result_app_info = crate::azure_ai_apis::ai_search(
-            &"azureblob-app-info-invenindex-json".to_string(),
-            &"app-info-semantics-dev003".to_string(),
-            &"full_application_name,application_id,business_application_name,application_level,service,app_category".to_string(),
-            &question_app_info,
-            &app_state,
-        )
-            .await?;
-        debug!("question_app_info: {:#?}", question_app_info);
-        debug!("Result from AI Search for app information: {:#?}", result_app_info);
-
-        if let Some(values) = result_app_info.value {
-            let combine_data = values
-                .iter()
-                .map(|c| {
-                    format!(
-                        r#"Application Information: \n
-                           App Owner or Producer: {}\n
-                           Application ID: {}\n
-                           Business Application Name: {}\n
-                           Application Level: {}\n
-                           Service: {}\n
-                           App Category: {}\n"#,
-                        c.clone().full_application_name.unwrap_or("".to_string()),
-                        c.clone().application_id.unwrap_or("".to_string()),
-                        c.clone().business_application_name.unwrap_or("".to_string()),
-                        c.clone().application_level.unwrap_or("".to_string()),
-                        c.clone().service.unwrap_or("".to_string()),
-                        c.clone().app_category.unwrap_or("".to_string())
-                    )
-                })
-                .collect::<Vec<String>>()
-                .join("\n");
-            final_prompt.push_str(&combine_data);
-        }
 
         //loop for all choices
         for choice in result.choices.unwrap() {
@@ -279,11 +232,12 @@ pub async fn post_ai_search(
                         }
                         let new_question = question.clone();
                         array_of_filters.push(new_question);
-                        let question = array_of_filters.clone()
+                        let question = array_of_filters
+                            .clone()
                             .into_iter()
                             .map(|c| c.to_string())
-                            .collect::<Vec<String>>().join(" and ");
-
+                            .collect::<Vec<String>>()
+                            .join(" and ");
 
                         debug!("Question for ai search combine columns : {:#?}", question);
 
@@ -343,6 +297,66 @@ pub async fn post_ai_search(
                                 .collect::<Vec<String>>()
                                 .join("\n");
 
+                            let mut array_of_filters = Vec::new();
+                            for value_item in value {
+                                if let Some(consumer_app) = value_item.consumer_app {
+                                    array_of_filters.push(format!(
+                                        "(full_application: {} or business_application_name: {})",
+                                        consumer_app, consumer_app
+                                    ));
+                                }
+                                if let Some(app_owner) = value_item.app_owner {
+                                    array_of_filters.push(format!(
+                                        "(full_application: {} or business_application_name: {})",
+                                        app_owner, app_owner
+                                    ));
+                                }
+                            }
+                            if array_of_filters.len() > 0 {
+                                let question_app_info = array_of_filters
+                                    .clone()
+                                    .into_iter()
+                                    .map(|c| c.to_string())
+                                    .collect::<Vec<String>>()
+                                    .join(" or ");
+                                let result_app_info = crate::azure_ai_apis::ai_search(
+                                    &"azureblob-app-info-invenindex-json".to_string(),
+                                    &"app-info-semantics-dev003".to_string(),
+                                    &"full_application_name,application_id,business_application_name,application_level,service,app_category".to_string(),
+                                    &question_app_info,
+                                    &app_state,
+                                )
+                                    .await?;
+                                debug!("question_app_info: {:#?}", question_app_info);
+                                debug!(
+                                    "Result from AI Search for app information: {:#?}",
+                                    result_app_info
+                                );
+
+                                if let Some(values) = result_app_info.value {
+                                    let combine_data = values
+                                        .iter()
+                                        .map(|c| {
+                                            format!(
+                                                r#"Application Information of Application Name or App Name: {}\n
+                                                    Application ID: {}\n
+                                                    Business Application Name: {}\n
+                                                    Application Level: {}\n
+                                                    Service: {}\n
+                                                    App Category: {}\n"#,
+                                                c.clone().full_application_name.unwrap_or("".to_string()),
+                                                c.clone().application_id.unwrap_or("".to_string()),
+                                                c.clone().business_application_name.unwrap_or("".to_string()),
+                                                c.clone().application_level.unwrap_or("".to_string()),
+                                                c.clone().service.unwrap_or("".to_string()),
+                                                c.clone().app_category.unwrap_or("".to_string())
+                                            )
+                                        })
+                                        .collect::<Vec<String>>()
+                                        .join("\n");
+                                    final_prompt.push_str(&combine_data);
+                                }
+                            }
                             final_prompt.push_str(&combine_data);
                         }
                     }
