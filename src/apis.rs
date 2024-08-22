@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::sync::Arc;
 
 use actix_web::web::Json;
@@ -202,7 +203,9 @@ pub async fn post_ai_search(
         //loop for all choices
         for choice in result.choices.unwrap() {
             let text = choice.message.unwrap().content.unwrap_or("".to_string());
-            let (questions, non_questions) = split_questions_and_non_questions(&text);
+            let (mut questions, non_questions) = split_questions_and_non_questions(&text);
+
+            questions.append(&mut non_questions.clone());
             //debug!("Questions: {:#?}", questions);
             for question in questions {
                 // AI search must specific with query message first
@@ -214,6 +217,7 @@ pub async fn post_ai_search(
                     .azure_ai_search_indexes
                     .clone()
                     .unwrap_or_default();
+
                 for (_index, ai_search_index) in indexes.iter().enumerate() {
                     let index_name = ai_search_index.index_name.clone();
                     for semantic in ai_search_index.clone().semantics.unwrap() {
@@ -260,7 +264,7 @@ pub async fn post_ai_search(
                                     )
                                 })
                                 .collect::<Vec<String>>()
-                                .join("\n");
+                                .join("\n\n");
                             final_prompt.push_str(&combine_data);
                         }
                         if let Some(value) = result.value {
@@ -277,10 +281,15 @@ pub async fn post_ai_search(
                                                         .unwrap_or_default()
                                                         .is_empty()
                                                 {
+                                                    /*
                                                     format!(
-                                                        "Summary Of Question: {}\nRelevant Highlights Section: {}\n",
+                                                        "Summary: {}\nRelevant Highlights Section: {}\n",
                                                         c.clone().text.unwrap_or_default(),
                                                         c.clone().highlights.unwrap_or_default()
+                                                    )*/
+                                                    format!(
+                                                        "Summary: {}\n",
+                                                        c.clone().text.unwrap_or_default()
                                                     )
                                                 } else {
                                                     "".to_string()
@@ -297,28 +306,28 @@ pub async fn post_ai_search(
                                 .collect::<Vec<String>>()
                                 .join("\n");
 
-                            let mut array_of_filters = Vec::new();
+
+                            let mut map_app = HashMap::new();
                             for value_item in value {
                                 if let Some(consumer_app) = value_item.consumer_app {
-                                    array_of_filters.push(format!(
-                                        "(full_application: {} or business_application_name: {})",
-                                        consumer_app, consumer_app
-                                    ));
+                                   if !map_app.contains_key(&consumer_app) {
+                                        map_app.insert(consumer_app.clone(), consumer_app.clone());
+                                    }
                                 }
                                 if let Some(app_owner) = value_item.app_owner {
-                                    array_of_filters.push(format!(
-                                        "(full_application: {} or business_application_name: {})",
-                                        app_owner, app_owner
-                                    ));
+                                   if !map_app.contains_key(&app_owner) {
+                                        map_app.insert(app_owner.clone(), app_owner.clone());
+                                    }
                                 }
                             }
-                            if array_of_filters.len() > 0 {
-                                let question_app_info = array_of_filters
-                                    .clone()
-                                    .into_iter()
-                                    .map(|c| c.to_string())
-                                    .collect::<Vec<String>>()
-                                    .join(" or ");
+
+                            if map_app.len() > 0 {
+                                let apps = map_app.keys().map(|c| c.to_string()).collect::<Vec<String>>().join(" or ");
+
+                                let question_app_info = format!("(full_application_name: ({}) or business_application_name: ({}) )", apps, apps);
+
+                                debug!("Question for ai search app info : {:#?}", question_app_info);
+
                                 let result_app_info = crate::azure_ai_apis::ai_search(
                                     &"azureblob-app-info-invenindex-json".to_string(),
                                     &"app-info-semantics-dev003".to_string(),
@@ -338,12 +347,7 @@ pub async fn post_ai_search(
                                         .iter()
                                         .map(|c| {
                                             format!(
-                                                r#"Application Information of Application Name or App Name: {}\n
-                                                    Application ID: {}\n
-                                                    Business Application Name: {}\n
-                                                    Application Level: {}\n
-                                                    Service: {}\n
-                                                    App Category: {}\n"#,
+                                                "Application Information of Application Name or App Name: {}\nApplication ID: {}\nBusiness Application Name: {}\nApplication Level: {}\nService: {}\nApp Category: {}\n",
                                                 c.clone().full_application_name.unwrap_or("".to_string()),
                                                 c.clone().application_id.unwrap_or("".to_string()),
                                                 c.clone().business_application_name.unwrap_or("".to_string()),
@@ -362,6 +366,7 @@ pub async fn post_ai_search(
                     }
                 }
             }
+            /*
             if !non_questions.is_empty() {
                 //debug!("Non-Questions: {:#?}", non_questions);
                 final_prompt.push_str("Non-Questions:\n");
@@ -369,7 +374,7 @@ pub async fn post_ai_search(
                     final_prompt.push_str(&non_question);
                     final_prompt.push_str("\n");
                 }
-            }
+            }*/
             final_prompt.push_str("\n\n");
         }
         // load all data from csv
@@ -395,7 +400,7 @@ pub async fn post_ai_search(
         */
 
         let final_prompt = build_prompt(query_message, &final_prompt);
-        //debug!("Final Prompt: \n{}", final_prompt);
+        debug!("Final Prompt: \n{}", final_prompt);
         let result = crate::azure_ai_apis::open_ai_completion(&final_prompt, &app_state).await?;
         debug!("Result from Open AI Completion: {:#?}", result);
         if result.choices.is_none() {
