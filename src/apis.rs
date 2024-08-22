@@ -215,6 +215,24 @@ pub async fn post_ai_search(
                 for (_index, ai_search_index) in indexes.iter().enumerate() {
                     let index_name = ai_search_index.index_name.clone();
                     for semantic in ai_search_index.clone().semantics.unwrap() {
+                        /*
+                        Filter again
+                        */
+                        let mut array_of_filters = Vec::new();
+                        if let Some(app_owner) = &search_request.app_owner {
+                            array_of_filters.push(format!("App_owner: {}", app_owner));
+                        }
+                        if let Some(topic_name) = &search_request.topic_name {
+                            array_of_filters.push(format!("Topic_name: {}", topic_name));
+                        }
+                        if let Some(consumer_app) = &search_request.consumer_app {
+                            array_of_filters.push(format!("Consumer_app: {}", consumer_app));
+                        }
+                        let new_question = question.clone();
+                        array_of_filters.push(new_question);
+                        let question = array_of_filters.into_iter().map(|c| c.to_string()).collect::<Vec<String>>().join(" and ");
+
+                        debug!("Question for ai search combine columns : {:#?}", question);
                         let result = crate::azure_ai_apis::ai_search(
                             &index_name,
                             &semantic.name,
@@ -287,6 +305,7 @@ pub async fn post_ai_search(
             final_prompt.push_str("\n\n");
         }
         // load all data from csv
+        /*
         debug!("Load all csv data");
         if let (Some(ds_inventory), Some(ds_consumer)) =
             (&app_state.kafka_inventory, &app_state.kafka_consumer)
@@ -305,6 +324,7 @@ pub async fn post_ai_search(
 
             final_prompt.push_str(&csv_data);
         }
+        */
 
         let final_prompt = build_prompt(query_message, &final_prompt);
         //debug!("Final Prompt: \n{}", final_prompt);
