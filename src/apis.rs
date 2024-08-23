@@ -269,7 +269,9 @@ pub async fn post_ai_search(
                         }
                         if let Some(value) = result.value {
                             //sort by score
-                            let n_top = sort_ai_search_result_by_score_get_n_top(value,3);
+                            let n_top = sort_ai_search_result_by_score_get_n_top(
+                                value,
+                                10);
                             //generate combined prompt
                             let combine_data = n_top
                                 .iter()
@@ -348,7 +350,9 @@ pub async fn post_ai_search(
                                 if let Some(values) = result_app_info.value {
                                     //sort by score
                                     //let mut values = values.clone();
-                                    let n_top = sort_ai_search_result_by_score_get_n_top(values,3);
+                                    let n_top = sort_ai_search_result_by_score_get_n_top(
+                                        values,
+                                        10);
 
                                     let combine_data = n_top
                                         .iter()
