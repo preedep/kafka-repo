@@ -1,3 +1,4 @@
+
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -5,15 +6,14 @@ use actix_web::web::Json;
 use actix_web::{web, HttpResponse, Responder};
 use jsonwebtoken::EncodingKey;
 use log::debug;
-use regex::Regex;
-//use log::kv::ToKey;
 
-use crate::data_service::{post_login, search};
+
+use crate::data_service::{post_login};
 use crate::data_state::AppState;
 use crate::entities::{
     APIError, APIResponse, Claims, JwtResponse, SearchKafkaRequest, SearchKafkaResponse, UserLogin,
 };
-use crate::entities_ai::{AISearchResult, OpenAICompletionResult};
+use crate::entities_ai::{ AISearchResultValue, OpenAICompletionResult};
 use crate::export::export_mm_file;
 use crate::{data_service, entities};
 
@@ -268,7 +268,10 @@ pub async fn post_ai_search(
                             final_prompt.push_str(&combine_data);
                         }
                         if let Some(value) = result.value {
-                            let combine_data = value
+                            //sort by score
+                            let n_top = sort_ai_search_result_by_score_get_n_top(value,3);
+                            //generate combined prompt
+                            let combine_data = n_top
                                 .iter()
                                 .map(|c| {
                                     if let Some(cap) = &c.search_captions {
@@ -308,13 +311,13 @@ pub async fn post_ai_search(
 
 
                             let mut map_app = HashMap::new();
-                            for value_item in value {
-                                if let Some(consumer_app) = value_item.consumer_app {
+                            for value_item in n_top {
+                                if let Some(consumer_app) = value_item.clone().consumer_app {
                                    if !map_app.contains_key(&consumer_app) {
                                         map_app.insert(consumer_app.clone(), consumer_app.clone());
                                     }
                                 }
-                                if let Some(app_owner) = value_item.app_owner {
+                                if let Some(app_owner) = value_item.clone().app_owner {
                                    if !map_app.contains_key(&app_owner) {
                                         map_app.insert(app_owner.clone(), app_owner.clone());
                                     }
@@ -343,7 +346,11 @@ pub async fn post_ai_search(
                                 );
 
                                 if let Some(values) = result_app_info.value {
-                                    let combine_data = values
+                                    //sort by score
+                                    //let mut values = values.clone();
+                                    let n_top = sort_ai_search_result_by_score_get_n_top(values,3);
+
+                                    let combine_data = n_top
                                         .iter()
                                         .map(|c| {
                                             format!(
@@ -414,6 +421,14 @@ pub async fn post_ai_search(
     }
 }
 
+fn sort_ai_search_result_by_score_get_n_top(mut value: Vec<AISearchResultValue>, n:usize) -> Vec<AISearchResultValue> {
+    value.sort_by(|a, b| {
+        b.search_score.unwrap_or(0.0)
+            .partial_cmp(&a.search_score.unwrap_or(0.0)).unwrap()
+    });
+    // get top n after sorted by score
+    value[0..std::cmp::min(n, value.len())].to_vec()
+}
 pub async fn post_topic_kafka_relation_render(
     data: web::Data<Arc<AppState>>,
     search_request: Json<SearchKafkaRequest>,
