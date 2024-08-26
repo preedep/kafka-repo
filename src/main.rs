@@ -3,7 +3,7 @@ use std::sync::Arc;
 use actix_cors::Cors;
 use actix_files as fs;
 use actix_rate_limiter::backend::memory::MemoryBackendProvider;
-use actix_rate_limiter::limit::{Limit, LimitBuilder};
+use actix_rate_limiter::limit::{ LimitBuilder};
 use actix_rate_limiter::limiter::RateLimiterBuilder;
 use actix_rate_limiter::middleware::RateLimiterMiddlewareFactory;
 use actix_rate_limiter::route::RouteBuilder;
@@ -13,11 +13,11 @@ use actix_web::middleware::{DefaultHeaders, Logger};
 use actix_web::web::Data;
 use actix_web::{middleware, web, App};
 use log::{debug, error, info};
-use tokio::sync::{Mutex, Notify};
+use tokio::sync::{Mutex};
 
 use crate::data_service::read_csv;
 use crate::data_utils::fetch_dataset_az_blob;
-use crate::entities_ai::{AISearchIndex, AISearchSemantics};
+use crate::entities_ai::{AISearchIndex};
 
 mod apis;
 mod azure_ai_apis;
