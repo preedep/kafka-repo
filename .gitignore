@@ -6,4 +6,4 @@ Cargo.lock
 /flowchart.mmd
 /flowchart.mmd.svg
 dataset/*.csv
-/dataset/mq_data.json
+/dataset/*.json
