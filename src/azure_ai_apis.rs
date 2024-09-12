@@ -124,11 +124,7 @@ async fn process_with_llm(
             "knowledge" => knowledge,
             "history" => Vec::<Message>::new()
         })
-        .await;
+        .await.map_err(|e| Box::new(e))?;
 
-    if let Ok(result) = res {
-        Ok(result)
-    } else {
-        Err(Box::new(res.err().unwrap()))
-    }
+   Ok(res)
 }
