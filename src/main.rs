@@ -21,6 +21,7 @@ use crate::data_utils::fetch_dataset_az_blob;
 use crate::entities_ai::AISearchIndex;
 
 use std::fs as file_system;
+use langchain_rust::llm::{AzureConfig, OpenAI};
 
 mod apis;
 mod azure_ai_apis;
@@ -66,7 +67,7 @@ fn is_allowed_origin(origin: &str) -> bool {
     allowed_origins.contains(&origin)
 }
 
-pub fn load_mq_knowledge(file_path: &str) -> String {
+fn load_mq_knowledge(file_path: &str) -> String {
     let file_content = file_system::read_to_string(file_path).expect("Failed to read JSON file");
     let parsed_json: MQDataDescription =
         serde_json::from_str(&file_content).expect("Failed to parse JSON");
@@ -100,6 +101,19 @@ pub fn load_mq_knowledge(file_path: &str) -> String {
     }
     knowledge.push_str("\n");
     knowledge
+}
+
+fn create_openai(open_ai_url: &str,open_ai_key: &str) -> AzureConfig {
+
+    debug!("open_ai_url: {}", open_ai_url);
+
+    let azure_config = AzureConfig::default()
+        .with_api_base(open_ai_url)
+        .with_api_key(open_ai_key)
+        .with_api_version("2023-03-15-preview")
+        .with_deployment_id("gpt-4");
+
+   azure_config
 }
 
 #[actix_web::main]
@@ -168,10 +182,11 @@ async fn main() -> std::io::Result<()> {
         azure_ai_search_indexes: Some(azure_index),
         azure_ai_search_use_semantics: use_semantics,
         // Open AI
-        azure_open_ai_url: Some(open_ai_url),
-        azure_open_ai_key: Some(open_api_key),
+        //azure_open_ai_url: Some(open_ai_url.clone()),
+        //azure_open_ai_key: Some(open_api_key.clone()),
         // static knowledge
         knowledge: Some(knowledge),
+        open_ai_config: create_openai(&open_ai_url,&open_api_key),
     };
 
     // Fetch the dataset from Azure Blob Storage

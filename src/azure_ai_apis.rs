@@ -73,29 +73,16 @@ pub async fn open_ai_completion(
     knowledge: &String,
     app_state: &AppState,
 ) -> Result<String, APIError> {
-    let open_ai = create_openai(
-                                app_state.azure_open_ai_url.as_ref().unwrap(),
-                                app_state.azure_open_ai_key.as_ref().unwrap()
-    );
-
+    let az_config = app_state.open_ai_config.clone();
+    let open_ai = OpenAI::new(az_config);
     let res = process_with_llm(
                                prompt_message,
                                knowledge,
-                               &open_ai).await.map_err(|e|
+                                &open_ai).await.map_err(|e|
         APIError::new(&format!("Failed to process with LLM: {}", e)))?;
     Ok(res)
 }
 
-fn create_openai(open_ai_url: &str, open_ai_key: &str) -> OpenAI<AzureConfig> {
-    debug!("Creating OpenAI client with URL: {} and key: {}", open_ai_url, open_ai_key);
-    let azure_config = AzureConfig::default()
-        .with_api_base(open_ai_url)
-        .with_api_key(open_ai_key)
-        .with_api_version("2023-03-15-preview")
-        .with_deployment_id("gpt-4");
-
-    OpenAI::new(azure_config)
-}
 
 // Function to handle the LLM chain execution and processing (Refactor LLM logic)
 async fn process_with_llm(
@@ -103,6 +90,7 @@ async fn process_with_llm(
     knowledge: &str,
     open_ai: &OpenAI<AzureConfig>,
 ) -> Result<String, Box<dyn std::error::Error>> {
+
     let prompt = message_formatter![
         fmt_message!(Message::new_system_message(
             "You are a world-class technical documentation writer. Use the following knowledge to answer the user's query."
