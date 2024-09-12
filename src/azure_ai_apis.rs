@@ -1,3 +1,8 @@
+use langchain_rust::chain::{Chain, LLMChainBuilder};
+use langchain_rust::llm::{AzureConfig, OpenAI};
+use langchain_rust::prompt::HumanMessagePromptTemplate;
+use langchain_rust::schemas::Message;
+use langchain_rust::{fmt_message, fmt_placeholder, fmt_template, message_formatter, prompt_args, template_fstring};
 use log::debug;
 
 
@@ -64,41 +69,66 @@ pub async fn ai_search(
  * \return A result containing the OpenAI completion result or an API error.
  */
 pub async fn open_ai_completion(
-    query_message: &String,
+    prompt_message: &String,
+    knowledge: &String,
     app_state: &AppState,
-) -> Result<OpenAICompletionResult, APIError> {
-    let api_endpoint = app_state.clone().azure_open_ai_url.unwrap();
-    let open_ai_key = app_state.clone().azure_open_ai_key.unwrap();
-    let client = reqwest::Client::new();
-    let url = format!(
-        "{}/openai/deployments/gpt-4/chat/completions?api-version=2023-03-15-preview",
-        api_endpoint
+) -> Result<String, APIError> {
+    let open_ai = create_openai(
+                                app_state.azure_open_ai_url.as_ref().unwrap(),
+                                app_state.azure_open_ai_key.as_ref().unwrap()
     );
 
-    //let query_message = query_message.split("\n").collect::<Vec<&str>>();
-    let json_req = OpenAICompleteRequest {
-        messages: vec![OpenAICompleteRequestMessage::new("user", query_message)],
-        max_tokens: 800,
-        temperature: 0.0,
-        top_p: 1.0,
-        stop: None, // Define stop sequence if needed
-    };
+    let res = process_with_llm(
+                               prompt_message,
+                               knowledge,
+                               &open_ai).await.map_err(|e|
+        APIError::new(&format!("Failed to process with LLM: {}", e)))?;
+    Ok(res)
+}
 
-    let response = client
-        .post(url)
-        .header("Content-Type", "application/json")
-        .header("api-key", open_ai_key)
-        .json(&json_req)
-        .send()
-        .await
-        .map_err(|e| APIError::new(&format!("Failed to send request to OpenAI: {}", e)))?;
+fn create_openai(open_ai_url: &str, open_ai_key: &str) -> OpenAI<AzureConfig> {
+    debug!("Creating OpenAI client with URL: {} and key: {}", open_ai_url, open_ai_key);
+    let azure_config = AzureConfig::default()
+        .with_api_base(open_ai_url)
+        .with_api_key(open_ai_key)
+        .with_api_version("2023-03-15-preview")
+        .with_deployment_id("gpt-4");
 
-    let r = response
-        .json::<OpenAICompletionResult>()
-        .await
-        .map_err(|e| APIError::new(&format!("Failed to parse response from OpenAI: {}", e)))?;
+    OpenAI::new(azure_config)
+}
 
-    debug!("OpenAI Response: {:#?}", r);
+// Function to handle the LLM chain execution and processing (Refactor LLM logic)
+async fn process_with_llm(
+    input: &str,
+    knowledge: &str,
+    open_ai: &OpenAI<AzureConfig>,
+) -> Result<String, Box<dyn std::error::Error>> {
+    let prompt = message_formatter![
+        fmt_message!(Message::new_system_message(
+            "You are a world-class technical documentation writer. Use the following knowledge to answer the user's query."
+        )),
+        fmt_placeholder!("history"),
+        fmt_message!(Message::new_system_message(format!("Knowledge:\n{}", knowledge))),
+        fmt_template!(HumanMessagePromptTemplate::new(template_fstring!("{input}", "input")))
+    ];
 
-    Ok(r)
+    let chain = LLMChainBuilder::new()
+        .prompt(prompt)
+        .llm(open_ai.clone())
+        .build()?;
+
+
+    let res = chain
+        .invoke(prompt_args! {
+            "input" => input,
+            "knowledge" => knowledge,
+            "history" => Vec::<Message>::new()
+        })
+        .await;
+
+    if let Ok(result) = res {
+        Ok(result)
+    } else {
+        Err(Box::new(res.err().unwrap()))
+    }
 }

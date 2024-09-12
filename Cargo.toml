@@ -69,9 +69,11 @@ futures = "0.3"
 chrono = { version = "0.4" , features = ["serde"] }
 jsonwebtoken = "9.3"
 futures-util = "0.3"
-derive_more = "0.99"
+derive_more = { version = "1.0" ,features = ["full"]}
 
 regex = "1.10"
+
+langchain-rust = { version = "4.4" , features = ["surrealdb"] }
 
 [profile.release]
 opt-level = "s"  # Optimize for size with some performance improvements

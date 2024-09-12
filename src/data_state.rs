@@ -16,4 +16,6 @@ pub struct AppState {
     // Open AI
     pub azure_open_ai_url: Option<String>,
     pub azure_open_ai_key: Option<String>,
+    // static knowledge
+    pub knowledge: Option<String>,
 }
