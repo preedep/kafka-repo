@@ -1,7 +1,6 @@
-use langchain_rust::llm::{AzureConfig, OpenAI};
 use crate::entities_ai::AISearchIndex;
+use langchain_rust::llm::AzureConfig;
 use polars::prelude::*;
-use serde::{Deserialize, Serialize};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -20,5 +19,5 @@ pub struct AppState {
     // static knowledge
     pub knowledge: Option<String>,
     // Azure Open AI Configuration
-    pub open_ai_config: AzureConfig
+    pub open_ai_config: AzureConfig,
 }

@@ -20,8 +20,8 @@ use crate::data_service::read_csv;
 use crate::data_utils::fetch_dataset_az_blob;
 use crate::entities_ai::AISearchIndex;
 
-use std::fs as file_system;
 use langchain_rust::llm::{AzureConfig, OpenAI};
+use std::fs as file_system;
 
 mod apis;
 mod azure_ai_apis;
@@ -32,7 +32,6 @@ mod entities;
 mod entities_ai;
 mod export;
 mod jwt_middleware;
-
 
 #[derive(Debug, Serialize, Deserialize)]
 struct MQTopicDescription {
@@ -103,8 +102,7 @@ fn load_mq_knowledge(file_path: &str) -> String {
     knowledge
 }
 
-fn create_openai(open_ai_url: &str,open_ai_key: &str) -> AzureConfig {
-
+fn create_openai(open_ai_url: &str, open_ai_key: &str) -> AzureConfig {
     debug!("open_ai_url: {}", open_ai_url);
 
     let azure_config = AzureConfig::default()
@@ -113,7 +111,7 @@ fn create_openai(open_ai_url: &str,open_ai_key: &str) -> AzureConfig {
         .with_api_version("2023-03-15-preview")
         .with_deployment_id("gpt-4");
 
-   azure_config
+    azure_config
 }
 
 #[actix_web::main]
@@ -164,7 +162,6 @@ async fn main() -> std::io::Result<()> {
     debug!("AI Search URL : {}", ai_search_api_url);
     debug!("Open AI Search URL : {}", open_ai_url);
 
-
     let knowledge = load_mq_knowledge("dataset/mq_data.json");
 
     debug!("AI Search Indexes: {}", ai_search_indexes);
@@ -186,7 +183,7 @@ async fn main() -> std::io::Result<()> {
         //azure_open_ai_key: Some(open_api_key.clone()),
         // static knowledge
         knowledge: Some(knowledge),
-        open_ai_config: create_openai(&open_ai_url,&open_api_key),
+        open_ai_config: create_openai(&open_ai_url, &open_api_key),
     };
 
     // Fetch the dataset from Azure Blob Storage

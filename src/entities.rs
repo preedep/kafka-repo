@@ -6,7 +6,6 @@ use actix_web::{error, HttpRequest, HttpResponse, Responder, ResponseError};
 use log::error;
 use serde::{Deserialize, Serialize};
 
-
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserLogin {
     #[serde(rename = "username")]
@@ -29,7 +28,6 @@ pub enum AuthError {
     #[display("Unauthorized")]
     Unauthorized,
 }
-
 
 impl ResponseError for AuthError {
     fn error_response(&self) -> HttpResponse {

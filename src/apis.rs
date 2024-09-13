@@ -6,7 +6,6 @@ use actix_web::{web, HttpResponse, Responder};
 use jsonwebtoken::EncodingKey;
 use log::debug;
 
-
 use crate::data_service::post_login;
 use crate::data_state::AppState;
 use crate::entities::{
@@ -189,10 +188,10 @@ pub async fn post_ai_search(
 
         //let final_prompt = build_prompt(query_message, &final_prompt);
         //debug!("Final Prompt: \n{}", final_prompt);
-        let result = crate::azure_ai_apis::open_ai_completion(&query_message,
-                                                                     knowledge,
-                                                                     &app_state).await?;
+        let result =
+            crate::azure_ai_apis::open_ai_completion(&query_message, knowledge, &app_state).await?;
         debug!("Result from Open AI Completion: {:#?}", result);
+
         Ok(APIResponse { data: result })
     } else {
         Err(APIError::new(
@@ -201,10 +200,15 @@ pub async fn post_ai_search(
     }
 }
 
-fn sort_ai_search_result_by_score_get_n_top(mut value: Vec<AISearchResultValue>, n:usize) -> Vec<AISearchResultValue> {
+fn sort_ai_search_result_by_score_get_n_top(
+    mut value: Vec<AISearchResultValue>,
+    n: usize,
+) -> Vec<AISearchResultValue> {
     value.sort_by(|a, b| {
-        b.search_score.unwrap_or(0.0)
-            .partial_cmp(&a.search_score.unwrap_or(0.0)).unwrap()
+        b.search_score
+            .unwrap_or(0.0)
+            .partial_cmp(&a.search_score.unwrap_or(0.0))
+            .unwrap()
     });
     // get top n after sorted by score
     value[0..std::cmp::min(n, value.len())].to_vec()

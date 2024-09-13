@@ -1,10 +1,14 @@
+use langchain_rust::chain::options::ChainCallOptions;
 use langchain_rust::chain::{Chain, LLMChainBuilder};
+use langchain_rust::language_models::options::CallOptions;
 use langchain_rust::llm::{AzureConfig, OpenAI};
 use langchain_rust::prompt::HumanMessagePromptTemplate;
 use langchain_rust::schemas::Message;
-use langchain_rust::{fmt_message, fmt_placeholder, fmt_template, message_formatter, prompt_args, template_fstring};
+use langchain_rust::{
+    fmt_message, fmt_placeholder, fmt_template, message_formatter, prompt_args, template_fstring,
+};
+use langchain_rust::language_models::llm::LLM;
 use log::debug;
-
 
 use crate::data_state::AppState;
 use crate::entities::APIError;
@@ -74,15 +78,20 @@ pub async fn open_ai_completion(
     app_state: &AppState,
 ) -> Result<String, APIError> {
     let az_config = app_state.open_ai_config.clone();
-    let open_ai = OpenAI::new(az_config);
-    let res = process_with_llm(
-                               prompt_message,
-                               knowledge,
-                                &open_ai).await.map_err(|e|
-        APIError::new(&format!("Failed to process with LLM: {}", e)))?;
+
+    let option = CallOptions::new().with_max_tokens(800)
+        .with_temperature(0.7)
+        .with_top_p(1.0);
+
+    let open_ai = OpenAI::new(az_config).with_model("gpt-4").with_options(option);
+
+    let res = process_with_llm(prompt_message, knowledge, &open_ai)
+        .await
+        .map_err(|e| APIError::new(&format!("Failed to process with LLM: {}", e)))?;
+
+    //let res = open_ai.invoke(prompt_message).await.map_err(|e| APIError::new(&format!("Failed to process with LLM: {}", e)))?;
     Ok(res)
 }
-
 
 // Function to handle the LLM chain execution and processing (Refactor LLM logic)
 async fn process_with_llm(
@@ -95,7 +104,6 @@ async fn process_with_llm(
         fmt_message!(Message::new_system_message(
             "You are a world-class technical documentation writer. Use the following knowledge to answer the user's query."
         )),
-        fmt_placeholder!("history"),
         fmt_message!(Message::new_system_message(format!("Knowledge:\n{}", knowledge))),
         fmt_template!(HumanMessagePromptTemplate::new(template_fstring!("{input}", "input")))
     ];
@@ -105,14 +113,12 @@ async fn process_with_llm(
         .llm(open_ai.clone())
         .build()?;
 
-
     let res = chain
         .invoke(prompt_args! {
             "input" => input,
-            "knowledge" => knowledge,
-            "history" => Vec::<Message>::new()
         })
-        .await.map_err(|e| Box::new(e))?;
+        .await
+        .map_err(|e| Box::new(e))?;
 
-   Ok(res)
+    Ok(res)
 }

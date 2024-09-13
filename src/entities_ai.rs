@@ -46,7 +46,7 @@ pub struct AISearchAnswerValue {
     #[serde(rename = "score")]
     pub score: Option<f64>,
 }
-#[derive(Debug, Serialize, Deserialize, Clone,PartialOrd, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialOrd, PartialEq)]
 pub struct AISearchResultValue {
     #[serde(rename = "@search.score")]
     pub search_score: Option<f64>,
