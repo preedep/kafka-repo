@@ -73,8 +73,9 @@ derive_more = { version = "1.0" ,features = ["full"]}
 
 regex = "1.10"
 
-async-openai = {path = "../async-openai/async-openai"}
-
+#async-openai = {path = "../async-openai/async-openai"}
+#async-openai = { version = "0.24" , features = ["rustls"] }
+async-openai = {git = "https://github.com/64bit/async-openai.git" , features = ["rustls"] , branch = "main" }
 [profile.release]
 opt-level = "s"  # Optimize for size with some performance improvements
 lto = "thin"     # Thin LTO for further size and performance improvements

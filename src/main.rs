@@ -20,9 +20,8 @@ use crate::data_service::read_csv;
 use crate::data_utils::fetch_dataset_az_blob;
 use crate::entities_ai::AISearchIndex;
 
-
-use std::fs as file_system;
 use async_openai::config::AzureConfig;
+use std::fs as file_system;
 
 mod apis;
 mod azure_ai_apis;

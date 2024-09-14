@@ -1,5 +1,9 @@
 use async_openai::config::AzureConfig;
-use async_openai::types::{ChatCompletionRequestSystemMessageArgs, ChatCompletionRequestUserMessageArgs, CreateChatCompletionRequestArgs};
+use async_openai::types::{
+    ChatCompletionRequestAssistantMessage, ChatCompletionRequestAssistantMessageArgs,
+    ChatCompletionRequestSystemMessageArgs, ChatCompletionRequestUserMessageArgs,
+    CreateChatCompletionRequestArgs,
+};
 use log::debug;
 
 use crate::data_state::AppState;
@@ -71,10 +75,11 @@ pub async fn open_ai_completion(
 ) -> Result<String, APIError> {
     let az_config = app_state.open_ai_config.clone();
 
-    let res = process_with_llm(prompt_message, knowledge, &az_config).await.map_err(|e| {
-            APIError::new(&format!("Failed to process with LLM: {}", e))
-        })?;
+    let res = process_with_llm(prompt_message, knowledge, &az_config)
+        .await
+        .map_err(|e| APIError::new(&format!("Failed to process with LLM: {}", e)))?;
 
+    debug!("OpenAI Completion Result: {:#?}", res);
     Ok(res)
 }
 
@@ -82,38 +87,56 @@ pub async fn open_ai_completion(
 async fn process_with_llm(
     input: &str,
     knowledge: &str,
-    az_config: &AzureConfig
+    az_config: &AzureConfig,
 ) -> Result<String, APIError> {
-
     debug!("Azure config : {:?}", az_config);
     let client = async_openai::Client::with_config(az_config.to_owned());
 
-    let ai_assistant_message = ChatCompletionRequestSystemMessageArgs::default()
+    let ai_assistant_message = ChatCompletionRequestAssistantMessageArgs::default()
         .content( "You are a world-class technical documentation writer. Use the following knowledge to answer the user's query.")
-        .build().map_err(|e| APIError::new(&format!("Failed to build system message: {}", e)))?;
+        .build()
+        .map_err(|e| APIError::new(&format!("Failed to build system message: {}", e)))?;
 
     let knowledge_message = ChatCompletionRequestSystemMessageArgs::default()
         .content(knowledge)
-        .build().map_err(|e| APIError::new(&format!("Failed to build knowledge message: {}", e)))?;
+        .build()
+        .map_err(|e| APIError::new(&format!("Failed to build knowledge message: {}", e)))?;
 
     let human_message = ChatCompletionRequestUserMessageArgs::default()
         .content(input)
-        .build().map_err(|e| APIError::new(&format!("Failed to build human message: {}", e)))?;
+        .build()
+        .map_err(|e| APIError::new(&format!("Failed to build human message: {}", e)))?;
 
     let request = CreateChatCompletionRequestArgs::default()
         .model("gpt-4")
         .max_tokens(1000u32)
         .temperature(0.7)
         .top_p(1.0)
-        .messages(vec![ai_assistant_message.into(),
-                       knowledge_message.into(),
-                       human_message.into()]
-        ).build().map_err(|e| APIError::new(&format!("Failed to build completion request: {}", e)))?;
+        .messages(vec![
+            ai_assistant_message.into(),
+            knowledge_message.into(),
+            human_message.into(),
+        ])
+        .build()
+        .map_err(|e| APIError::new(&format!("Failed to build completion request: {}", e)))?;
 
     debug!("Request: {:?}", request);
 
-    let res = client.chat().create(request).await.map_err(|e| APIError::new(&format!("Failed to create chat completion: {}", e)))?;
+    let res = client
+        .chat()
+        .create(request)
+        .await
+        .map_err(|e| APIError::new(&format!("Failed to create chat completion: {}", e)))?;
     debug!("Response: {:?}", res);
-    let res = String::new();
-    Ok(res)
+    let mut text_result = String::new();
+    if res.choices.is_empty() {
+        text_result.push_str("No response from OpenAI");
+        return Ok(text_result);
+    }
+    for choice in res.choices {
+       if let Some(content) = choice.message.content {
+            text_result.push_str(&content);
+       }
+    }
+    Ok(text_result)
 }

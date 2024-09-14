@@ -344,7 +344,10 @@ function button_ai_search_handler(){
                 document.getElementById('ai-search-result-loading').style.display = 'none';
                 // Show the search results
                 let ai_result = data.data;
+                renderMarked(ai_result);
+
                 /*let all_content = '';
+
 
                 for (let i = 0; i < ai_result.choices.length;i++){
                     let choice = ai_result.choices[i];
@@ -365,9 +368,9 @@ function button_ai_search_handler(){
                 //const renderedContent = window.marked(htmlText);
 
                 //document.getElementById('ai-search-result-container').innerHTML = renderedContent;
-
                  */
-                renderMarked(ai_result);
+                //document.getElementById('ai-search-result-container').innerText = ai_result;
+
 
             })
             .catch((error) => {
