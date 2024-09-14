@@ -1,13 +1,5 @@
-use langchain_rust::chain::options::ChainCallOptions;
-use langchain_rust::chain::{Chain, LLMChainBuilder};
-use langchain_rust::language_models::options::CallOptions;
-use langchain_rust::llm::{AzureConfig, OpenAI};
-use langchain_rust::prompt::HumanMessagePromptTemplate;
-use langchain_rust::schemas::Message;
-use langchain_rust::{
-    fmt_message, fmt_placeholder, fmt_template, message_formatter, prompt_args, template_fstring,
-};
-use langchain_rust::language_models::llm::LLM;
+use async_openai::config::AzureConfig;
+use async_openai::types::{ChatCompletionRequestSystemMessageArgs, ChatCompletionRequestUserMessageArgs, CreateChatCompletionRequestArgs};
 use log::debug;
 
 use crate::data_state::AppState;
@@ -79,17 +71,10 @@ pub async fn open_ai_completion(
 ) -> Result<String, APIError> {
     let az_config = app_state.open_ai_config.clone();
 
-    let option = CallOptions::new().with_max_tokens(800)
-        .with_temperature(0.7)
-        .with_top_p(1.0);
+    let res = process_with_llm(prompt_message, knowledge, &az_config).await.map_err(|e| {
+            APIError::new(&format!("Failed to process with LLM: {}", e))
+        })?;
 
-    let open_ai = OpenAI::new(az_config).with_model("gpt-4").with_options(option);
-
-    let res = process_with_llm(prompt_message, knowledge, &open_ai)
-        .await
-        .map_err(|e| APIError::new(&format!("Failed to process with LLM: {}", e)))?;
-
-    //let res = open_ai.invoke(prompt_message).await.map_err(|e| APIError::new(&format!("Failed to process with LLM: {}", e)))?;
     Ok(res)
 }
 
@@ -97,28 +82,38 @@ pub async fn open_ai_completion(
 async fn process_with_llm(
     input: &str,
     knowledge: &str,
-    open_ai: &OpenAI<AzureConfig>,
-) -> Result<String, Box<dyn std::error::Error>> {
+    az_config: &AzureConfig
+) -> Result<String, APIError> {
 
-    let prompt = message_formatter![
-        fmt_message!(Message::new_system_message(
-            "You are a world-class technical documentation writer. Use the following knowledge to answer the user's query."
-        )),
-        fmt_message!(Message::new_system_message(format!("Knowledge:\n{}", knowledge))),
-        fmt_template!(HumanMessagePromptTemplate::new(template_fstring!("{input}", "input")))
-    ];
+    debug!("Azure config : {:?}", az_config);
+    let client = async_openai::Client::with_config(az_config.to_owned());
 
-    let chain = LLMChainBuilder::new()
-        .prompt(prompt)
-        .llm(open_ai.clone())
-        .build()?;
+    let ai_assistant_message = ChatCompletionRequestSystemMessageArgs::default()
+        .content( "You are a world-class technical documentation writer. Use the following knowledge to answer the user's query.")
+        .build().map_err(|e| APIError::new(&format!("Failed to build system message: {}", e)))?;
 
-    let res = chain
-        .invoke(prompt_args! {
-            "input" => input,
-        })
-        .await
-        .map_err(|e| Box::new(e))?;
+    let knowledge_message = ChatCompletionRequestSystemMessageArgs::default()
+        .content(knowledge)
+        .build().map_err(|e| APIError::new(&format!("Failed to build knowledge message: {}", e)))?;
 
+    let human_message = ChatCompletionRequestUserMessageArgs::default()
+        .content(input)
+        .build().map_err(|e| APIError::new(&format!("Failed to build human message: {}", e)))?;
+
+    let request = CreateChatCompletionRequestArgs::default()
+        .model("gpt-4")
+        .max_tokens(1000u32)
+        .temperature(0.7)
+        .top_p(1.0)
+        .messages(vec![ai_assistant_message.into(),
+                       knowledge_message.into(),
+                       human_message.into()]
+        ).build().map_err(|e| APIError::new(&format!("Failed to build completion request: {}", e)))?;
+
+    debug!("Request: {:?}", request);
+
+    let res = client.chat().create(request).await.map_err(|e| APIError::new(&format!("Failed to create chat completion: {}", e)))?;
+    debug!("Response: {:?}", res);
+    let res = String::new();
     Ok(res)
 }

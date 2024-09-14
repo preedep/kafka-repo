@@ -1,5 +1,5 @@
+use async_openai::config::AzureConfig;
 use crate::entities_ai::AISearchIndex;
-use langchain_rust::llm::AzureConfig;
 use polars::prelude::*;
 
 #[derive(Clone)]

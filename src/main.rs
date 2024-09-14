@@ -20,8 +20,9 @@ use crate::data_service::read_csv;
 use crate::data_utils::fetch_dataset_az_blob;
 use crate::entities_ai::AISearchIndex;
 
-use langchain_rust::llm::{AzureConfig, OpenAI};
+
 use std::fs as file_system;
+use async_openai::config::AzureConfig;
 
 mod apis;
 mod azure_ai_apis;
@@ -178,11 +179,10 @@ async fn main() -> std::io::Result<()> {
         //azure_ai_search_indexes: Some(ai_search_indexes.split(",").map(|s| s.trim().to_string()).collect()),
         azure_ai_search_indexes: Some(azure_index),
         azure_ai_search_use_semantics: use_semantics,
-        // Open AI
-        //azure_open_ai_url: Some(open_ai_url.clone()),
-        //azure_open_ai_key: Some(open_api_key.clone()),
+
         // static knowledge
         knowledge: Some(knowledge),
+        // Open AI
         open_ai_config: create_openai(&open_ai_url, &open_api_key),
     };
 
