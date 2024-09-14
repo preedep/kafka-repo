@@ -1,5 +1,10 @@
+use async_openai::config::AzureConfig;
+use async_openai::types::{
+    ChatCompletionRequestAssistantMessage, ChatCompletionRequestAssistantMessageArgs,
+    ChatCompletionRequestSystemMessageArgs, ChatCompletionRequestUserMessageArgs,
+    CreateChatCompletionRequestArgs,
+};
 use log::debug;
-use serde_json::Value;
 
 use crate::data_state::AppState;
 use crate::entities::APIError;
@@ -64,41 +69,74 @@ pub async fn ai_search(
  * \return A result containing the OpenAI completion result or an API error.
  */
 pub async fn open_ai_completion(
-    query_message: &String,
+    prompt_message: &String,
+    knowledge: &String,
     app_state: &AppState,
-) -> Result<OpenAICompletionResult, APIError> {
-    let api_endpoint = app_state.clone().azure_open_ai_url.unwrap();
-    let open_ai_key = app_state.clone().azure_open_ai_key.unwrap();
-    let client = reqwest::Client::new();
-    let url = format!(
-        "{}/openai/deployments/gpt-4/chat/completions?api-version=2023-03-15-preview",
-        api_endpoint
-    );
+) -> Result<String, APIError> {
+    let az_config = app_state.open_ai_config.clone();
 
-    //let query_message = query_message.split("\n").collect::<Vec<&str>>();
-    let json_req = OpenAICompleteRequest {
-        messages: vec![OpenAICompleteRequestMessage::new("user", query_message)],
-        max_tokens: 800,
-        temperature: 0.0,
-        top_p: 1.0,
-        stop: None, // Define stop sequence if needed
-    };
-
-    let response = client
-        .post(url)
-        .header("Content-Type", "application/json")
-        .header("api-key", open_ai_key)
-        .json(&json_req)
-        .send()
+    let res = process_with_llm(prompt_message, knowledge, &az_config)
         .await
-        .map_err(|e| APIError::new(&format!("Failed to send request to OpenAI: {}", e)))?;
+        .map_err(|e| APIError::new(&format!("Failed to process with LLM: {}", e)))?;
 
-    let r = response
-        .json::<OpenAICompletionResult>()
+    debug!("OpenAI Completion Result: {:#?}", res);
+    Ok(res)
+}
+
+// Function to handle the LLM chain execution and processing (Refactor LLM logic)
+async fn process_with_llm(
+    input: &str,
+    knowledge: &str,
+    az_config: &AzureConfig,
+) -> Result<String, APIError> {
+    debug!("Azure config : {:?}", az_config);
+    let client = async_openai::Client::with_config(az_config.to_owned());
+
+    let ai_assistant_message = ChatCompletionRequestAssistantMessageArgs::default()
+        .content( "You are a world-class technical documentation writer. Use the following knowledge to answer the user's query.")
+        .build()
+        .map_err(|e| APIError::new(&format!("Failed to build system message: {}", e)))?;
+
+    let knowledge_message = ChatCompletionRequestSystemMessageArgs::default()
+        .content(knowledge)
+        .build()
+        .map_err(|e| APIError::new(&format!("Failed to build knowledge message: {}", e)))?;
+
+    let human_message = ChatCompletionRequestUserMessageArgs::default()
+        .content(input)
+        .build()
+        .map_err(|e| APIError::new(&format!("Failed to build human message: {}", e)))?;
+
+    let request = CreateChatCompletionRequestArgs::default()
+        .model("gpt-4")
+        .max_tokens(1000u32)
+        .temperature(0.7)
+        .top_p(1.0)
+        .messages(vec![
+            ai_assistant_message.into(),
+            knowledge_message.into(),
+            human_message.into(),
+        ])
+        .build()
+        .map_err(|e| APIError::new(&format!("Failed to build completion request: {}", e)))?;
+
+    debug!("Request: {:?}", request);
+
+    let res = client
+        .chat()
+        .create(request)
         .await
-        .map_err(|e| APIError::new(&format!("Failed to parse response from OpenAI: {}", e)))?;
-
-    debug!("OpenAI Response: {:#?}", r);
-
-    Ok(r)
+        .map_err(|e| APIError::new(&format!("Failed to create chat completion: {}", e)))?;
+    debug!("Response: {:?}", res);
+    let mut text_result = String::new();
+    if res.choices.is_empty() {
+        text_result.push_str("No response from OpenAI");
+        return Ok(text_result);
+    }
+    for choice in res.choices {
+       if let Some(content) = choice.message.content {
+            text_result.push_str(&content);
+       }
+    }
+    Ok(text_result)
 }

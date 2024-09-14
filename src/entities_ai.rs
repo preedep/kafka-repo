@@ -10,7 +10,7 @@ pub struct AISearchResult {
     pub search_next_parameters: Option<AISearchNextPageParameters>,
     pub value: Option<Vec<AISearchResultValue>>,
 }
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialOrd, PartialEq)]
 pub struct AISearchResultCaption {
     #[serde(rename = "text")]
     pub text: Option<String>,
@@ -46,7 +46,7 @@ pub struct AISearchAnswerValue {
     #[serde(rename = "score")]
     pub score: Option<f64>,
 }
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialOrd, PartialEq)]
 pub struct AISearchResultValue {
     #[serde(rename = "@search.score")]
     pub search_score: Option<f64>,

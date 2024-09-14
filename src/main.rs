@@ -3,7 +3,7 @@ use std::sync::Arc;
 use actix_cors::Cors;
 use actix_files as fs;
 use actix_rate_limiter::backend::memory::MemoryBackendProvider;
-use actix_rate_limiter::limit::{Limit, LimitBuilder};
+use actix_rate_limiter::limit::LimitBuilder;
 use actix_rate_limiter::limiter::RateLimiterBuilder;
 use actix_rate_limiter::middleware::RateLimiterMiddlewareFactory;
 use actix_rate_limiter::route::RouteBuilder;
@@ -13,11 +13,15 @@ use actix_web::middleware::{DefaultHeaders, Logger};
 use actix_web::web::Data;
 use actix_web::{middleware, web, App};
 use log::{debug, error, info};
-use tokio::sync::{Mutex, Notify};
+use serde::{Deserialize, Serialize};
+use tokio::sync::Mutex;
 
 use crate::data_service::read_csv;
 use crate::data_utils::fetch_dataset_az_blob;
-use crate::entities_ai::{AISearchIndex, AISearchSemantics};
+use crate::entities_ai::AISearchIndex;
+
+use async_openai::config::AzureConfig;
+use std::fs as file_system;
 
 mod apis;
 mod azure_ai_apis;
@@ -29,6 +33,29 @@ mod entities_ai;
 mod export;
 mod jwt_middleware;
 
+#[derive(Debug, Serialize, Deserialize)]
+struct MQTopicDescription {
+    #[serde(rename = "business_module")]
+    business_module: String,
+    #[serde(rename = "topic_name")]
+    topic_name: String,
+    #[serde(rename = "publisher")]
+    publisher: String,
+    #[serde(rename = "remark")]
+    remark: String,
+}
+#[derive(Debug, Serialize, Deserialize)]
+struct MQDataDescription {
+    #[serde(rename = "mq_data_background")]
+    mq_descriptions: String,
+    #[serde(rename = "mq_data_current_state")]
+    mq_data_current_state: String,
+    #[serde(rename = "mq_technology")]
+    mq_technology: String,
+    #[serde(rename = "mq_pub_sub_topics")]
+    mq_pub_sub_topics: Vec<MQTopicDescription>,
+}
+
 fn is_allowed_origin(origin: &str) -> bool {
     // List of allowed origins
     let allowed_origins = vec![
@@ -38,6 +65,55 @@ fn is_allowed_origin(origin: &str) -> bool {
 
     allowed_origins.contains(&origin)
 }
+
+fn load_mq_knowledge(file_path: &str) -> String {
+    let file_content = file_system::read_to_string(file_path).expect("Failed to read JSON file");
+    let parsed_json: MQDataDescription =
+        serde_json::from_str(&file_content).expect("Failed to parse JSON");
+
+    debug!("Parsed JSON: {:?}", parsed_json);
+
+    let mut knowledge = String::new();
+    knowledge.push_str("Here is the knowledge about Message sync MQ Pub/Sub :\n");
+    knowledge.push_str(&parsed_json.mq_descriptions);
+    knowledge.push_str("\n");
+    knowledge.push_str("Here is the knowledge about Message sync MQ Pub/Sub Current State :\n");
+    knowledge.push_str(&parsed_json.mq_data_current_state);
+    knowledge.push_str("\n");
+    knowledge.push_str("Here is the knowledge about Message sync MQ Pub/Sub Technology :\n");
+    knowledge.push_str(&parsed_json.mq_technology);
+    knowledge.push_str("\n");
+    knowledge.push_str("Here is the knowledge about Message sync MQ Pub/Sub Topics :\n");
+    for topic in parsed_json.mq_pub_sub_topics {
+        knowledge.push_str("Business Module: ");
+        knowledge.push_str(&topic.business_module);
+        knowledge.push_str("\n");
+        knowledge.push_str("Topic Name or Topic String: ");
+        knowledge.push_str(&topic.topic_name);
+        knowledge.push_str("\n");
+        knowledge.push_str("Publisher: ");
+        knowledge.push_str(&topic.publisher);
+        knowledge.push_str("\n");
+        knowledge.push_str("Remark: ");
+        knowledge.push_str(&topic.remark);
+        knowledge.push_str("\n");
+    }
+    knowledge.push_str("\n");
+    knowledge
+}
+
+fn create_openai(open_ai_url: &str, open_ai_key: &str) -> AzureConfig {
+    debug!("open_ai_url: {}", open_ai_url);
+
+    let azure_config = AzureConfig::default()
+        .with_api_base(open_ai_url)
+        .with_api_key(open_ai_key)
+        .with_api_version("2023-03-15-preview")
+        .with_deployment_id("gpt-4");
+
+    azure_config
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     pretty_env_logger::init();
@@ -86,22 +162,8 @@ async fn main() -> std::io::Result<()> {
     debug!("AI Search URL : {}", ai_search_api_url);
     debug!("Open AI Search URL : {}", open_ai_url);
 
-    // Create the application state
-    // This will be shared across all the threads
-    /*
-    let index = vec![AISearchIndex {
-        index_name: "azureblob-kafka-invenindex".to_string(),
-        semantics: Some(vec![
-            AISearchSemantics {
-                name: "ekafka-semantic-dev003".to_string(),
-                select_fields: "App_owner,Topic_name,Consumer_group_id,Consumer_app,Note".to_string(),
-            }
-        ]),
-    }];
-    // Serialize the struct to a JSON string
-    let json_string = serde_json::to_string(&index).unwrap_or("".to_string());
-    debug!("Index: {}", json_string);
-    */
+    let knowledge = load_mq_knowledge("dataset/mq_data.json");
+
     debug!("AI Search Indexes: {}", ai_search_indexes);
     let azure_index = serde_json::from_str::<Vec<AISearchIndex>>(&ai_search_indexes)
         .expect("Failed to parse index");
@@ -116,9 +178,11 @@ async fn main() -> std::io::Result<()> {
         //azure_ai_search_indexes: Some(ai_search_indexes.split(",").map(|s| s.trim().to_string()).collect()),
         azure_ai_search_indexes: Some(azure_index),
         azure_ai_search_use_semantics: use_semantics,
+
+        // static knowledge
+        knowledge: Some(knowledge),
         // Open AI
-        azure_open_ai_url: Some(open_ai_url),
-        azure_open_ai_key: Some(open_api_key),
+        open_ai_config: create_openai(&open_ai_url, &open_api_key),
     };
 
     // Fetch the dataset from Azure Blob Storage
