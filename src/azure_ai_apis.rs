@@ -134,9 +134,9 @@ async fn process_with_llm(
         return Ok(text_result);
     }
     for choice in res.choices {
-       if let Some(content) = choice.message.content {
+        if let Some(content) = choice.message.content {
             text_result.push_str(&content);
-       }
+        }
     }
     Ok(text_result)
 }

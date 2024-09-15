@@ -189,7 +189,7 @@ pub async fn post_ai_search(
             question.push_str("( ");
             question.push_str(&query_message);
             question.push_str(") ");
-        }else{
+        } else {
             question.push_str("( ");
             question.push_str(&query_message);
             question.push_str(") ");
@@ -211,18 +211,25 @@ pub async fn post_ai_search(
                             &fields,
                             &question,
                             &app_state,
-                        ).await.map_err(|e| {
+                        )
+                        .await
+                        .map_err(|e| {
                             error!("Failed to search AI: {}", e);
                             APIError::new("Failed to search AI")
                         })?;
                         //append knowledge from AI search
                         debug!("Result from AI Search: {:#?}", result);
                         if let Some(values) = result.value {
-
                             for value in values {
                                 let empty = String::new();
                                 let description = value.description.as_ref().unwrap_or(&empty);
-                                knowledge.push_str(format!("Here is Description or Detail of e-kafka  : {}\n", description).as_str());
+                                knowledge.push_str(
+                                    format!(
+                                        "Here is Description or Detail of e-kafka  : {}\n",
+                                        description
+                                    )
+                                    .as_str(),
+                                );
                                 /*
                                 let app_owner = value.app_owner.as_ref().unwrap_or(&empty);
                                 let topic_name = value.topic_name.as_ref().unwrap_or(&empty);
@@ -246,7 +253,8 @@ pub async fn post_ai_search(
         debug!("Knowledge: {:#?}", knowledge);
 
         let result =
-            crate::azure_ai_apis::open_ai_completion(&query_message, &knowledge, &app_state).await?;
+            crate::azure_ai_apis::open_ai_completion(&query_message, &knowledge, &app_state)
+                .await?;
         debug!("Result from Open AI Completion: {:#?}", result);
 
         Ok(APIResponse { data: result })

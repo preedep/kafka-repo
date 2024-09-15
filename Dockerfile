@@ -44,7 +44,7 @@ COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/kafka-repo kaf
 
 COPY .env .env
 COPY ./statics ./statics
-COPY ./dataset/mq_data.json ./dataset/mq_data.json
+COPY dataset/internal_data.json ./dataset/internal_data.json
 
 # Change ownership of the application binary
 RUN chown appuser:appgroup kafka-repo

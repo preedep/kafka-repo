@@ -54,6 +54,8 @@ struct MQDataDescription {
     mq_technology: String,
     #[serde(rename = "mq_pub_sub_topics")]
     mq_pub_sub_topics: Vec<MQTopicDescription>,
+    #[serde(rename = "internal_definition")]
+    internal_definition: Vec<String>,
 }
 
 fn is_allowed_origin(origin: &str) -> bool {
@@ -74,6 +76,11 @@ fn load_mq_knowledge(file_path: &str) -> String {
     debug!("Parsed JSON: {:?}", parsed_json);
 
     let mut knowledge = String::new();
+    knowledge.push_str("Here is the knowledge about Internal Definition :\n");
+    for definition in parsed_json.internal_definition {
+        knowledge.push_str(&definition);
+        knowledge.push_str("\n");
+    }
     knowledge.push_str("Here is the knowledge about Message sync MQ Pub/Sub :\n");
     knowledge.push_str(&parsed_json.mq_descriptions);
     knowledge.push_str("\n");
@@ -162,7 +169,7 @@ async fn main() -> std::io::Result<()> {
     debug!("AI Search URL : {}", ai_search_api_url);
     debug!("Open AI Search URL : {}", open_ai_url);
 
-    let knowledge = load_mq_knowledge("dataset/mq_data.json");
+    let knowledge = load_mq_knowledge("dataset/internal_data.json");
 
     debug!("AI Search Indexes: {}", ai_search_indexes);
     let azure_index = serde_json::from_str::<Vec<AISearchIndex>>(&ai_search_indexes)
